@@ -179,17 +179,14 @@ def preprocess(name, tex):
             else: labels[lab] = ("x", lab)
         i += 1
     def ref_repl(m):
-        full, cmd, lab = m.group(0), m.group(1), m.group(2)
+        lead, cmd, lab = m.group(1) or "", m.group(2), m.group(3)
         kind, t = labels.get(lab, ("x", lab))
-        # 若调用前已有人工"图/表"前缀, 只输出编号, 避免"图 图 10.1"
-        prefix = full[:full.rindex("\\")]
-        pre_tail = prefix[-3:] if prefix else ""
         pref = ""
-        if kind == "fig" and not re.search(r"图\s*$", prefix): pref = "图 "
-        elif kind == "tab" and not re.search(r"表\s*$", prefix): pref = "表 "
-        elif kind == "sec": pref = ""
-        return pref + t
-    tex = re.sub(r"\\(auto|eq|pag|c)?ref\{([^}]+)\}", lambda m: ref_repl(m), tex)
+        if kind == "fig" and not re.search(r"图\s*$", lead): pref = "图 "
+        elif kind == "tab" and not re.search(r"表\s*$", lead): pref = "表 "
+        return lead + pref + t
+    # 捕获紧邻前置的"图/表"字样(含中间空白), 避免"图 图 10.1"
+    tex = re.sub(r"(图\s*|表\s*)?\\(auto|eq|pag|c)?ref\{([^}]+)\}", lambda m: ref_repl(m), tex)
 
     # 4. chapterbibliography 环境 -> 普通 enumerate
     tex = re.sub(r"\\begin\{chapterbibliography\}\{[^}]*\}",
