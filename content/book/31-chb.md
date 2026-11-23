@@ -33,7 +33,7 @@ Carl Pearson 和 Boris Ginsburg 特别贡献
 
 ``` math
 f:\mathbb{R}^n\rightarrow\{1,2,\ldots,k\}.
-  \label{eq:appb-1}
+
 ```
 
 例如，输入可以是二维向量（\(n=2\)），第一个元素是一个人的收入水平，第二个元素是同一个人的年龄。分类器 \(f\) 可以把具有这种向量的人映射到四个类别之一（\(k=4\)）：拥有研究生学位（1）、拥有学士学位（2）、高中毕业（3）或以上皆非（4）。
@@ -42,7 +42,7 @@ f:\mathbb{R}^n\rightarrow\{1,2,\ldots,k\}.
 
 ``` math
 y=f(x,\theta).
-  \label{eq:appb-2}
+
 ```
 
 参数 \(\theta\) 通常称为**模型（model）**，它封装了从数据中学习得到的 \(f\) 的数学表达式系数。下面用具体例子说明 \(\theta\) 的含义。
@@ -51,7 +51,7 @@ y=f(x,\theta).
 
 ``` math
 y=\operatorname{sign}(W\cdot x+b),
-  \label{eq:appb-3}
+
 ```
 
 其中，\(W\) 是输入向量 \(x\) 的系数向量，\(b\) 是偏置常数，\(W\) 和 \(x\) 长度相同。sign 函数的输入为正时返回 1，为 0 时返回 0，为负时返回 \(-1\)。也就是说，sign 函数作为分类器会激活并最终确定把输入值映射到 \(-1,0,1\) 三个类别，因此常称为**激活函数（activation function）**。激活函数给感知机原本为线性的函数引入了非线性。
@@ -73,7 +73,7 @@ y=\operatorname{sign}(W\cdot x+b),
 
 ``` math
 y=\operatorname{sign}(2\times5+3\times(-1)-6)=\operatorname{sign}(1)=1.
-  \label{eq:appb-4}
+
 ```
 
 所以，\((5,-1)\) 被分到类别 1，即属于图中的深色点。
@@ -120,7 +120,7 @@ H3 训练模型 {#sec-x-2}
 
 ``` math
 \operatorname{sign}(w_1+5w_2+b)=1.
-  \label{eq:appb-5}
+
 ```
 
 由于存在 sign 函数，这不是线性方程。即使有三个这样的方程，也不会得到唯一一组同时满足它们的 \(w_1,w_2,b\)，而可能有无穷多个解，数学上称为欠定问题。事实上，给定数据集时，完全可能找不到能满足全部方程的 \(w_1,w_2,b\)，例如二维空间中的数据点无法用一条直线分类时，图 .2 就是例子。因此，需要使用大量带标签输入数据迭代寻找参数，使分类器处理数据集时的错误数处于可接受范围。
@@ -135,7 +135,7 @@ H5 误差函数。 {#sec-x-3}
 
 ``` math
 E=\frac{(y-t)^2}{2}.
-  \label{eq:appb-6}
+
 ```
 
 只要 \(y,t\) 之间存在差异，无论差异为正还是为负，这一误差函数的值始终为正。因此，对许多输入数据点的误差求和时，正负差异都会对总误差作出贡献，而不会相互抵消。也可以把误差定义为差异的绝对值，还有许多其他选择。后文将看到，系数 \(1/2\) 简化了求解模型参数时的计算。
@@ -161,7 +161,7 @@ H5 链式法则。 {#sec-x-7}
 ``` math
 \frac{\partial E}{\partial w_1}=\frac{\partial E}{\partial y}
     \frac{\partial y}{\partial w_1}.
-  \label{eq:appb-7}
+
 ```
 
 \(\partial E/\partial y\) 很直接：
@@ -169,7 +169,7 @@ H5 链式法则。 {#sec-x-7}
 ``` math
 \frac{\partial E}{\partial y}=\frac{\partial}{\partial y}
     \frac{(y-t)^2}{2}=y-t.
-  \label{eq:appb-8}
+
 ```
 
 求 \(\partial y/\partial w_1\) 时却会遇到困难：sign 函数在 0 处不连续，因此不可微。机器学习领域通常用更平滑的版本替代 sign，使它在 0 附近可微，而在远离 0 时取值接近 sign。一种简单的平滑版本是 sigmoid 函数 \(s=(1-e^{-x})/(1+e^{-x})\)。当 \(x\) 为绝对值很大的负数时，表达式由 \(e^{-x}\) 项主导，函数值约为 \(-1\)；当 \(x\) 为绝对值很大的正数时，\(e^{-x}\) 项趋近于 0，函数值约为 1；当 \(x\) 接近 0 时，函数值从接近 \(-1\) 迅速增大到接近 1。因此，它近似 sign 的行为，同时对所有 \(x\) 连续可微。
@@ -180,31 +180,31 @@ H5 链式法则。 {#sec-x-7}
 \frac{\partial\operatorname{sigmoid}(k)}{\partial k}
   =\left(\frac{1-e^{-k}}{1+e^{-k}}\right)'=
   \frac{2e^{-k}}{(1+e^{-k})^2}.
-  \label{eq:appb-9}
+
 ```
 
 把各项合在一起，得到
 
 ``` math
 \frac{\partial E}{\partial w_1}=(y-t)\frac{2e^{-k}}{(1+e^{-k})^2}x_1,
-  \label{eq:appb-10}
+
 ```
 
 ``` math
 \frac{\partial E}{\partial w_2}=(y-t)\frac{2e^{-k}}{(1+e^{-k})^2}x_2,
-  \label{eq:appb-11}
+
 ```
 
 ``` math
 \frac{\partial E}{\partial b}=(y-t)\frac{2e^{-k}}{(1+e^{-k})^2},
-  \label{eq:appb-12}
+
 ```
 
 其中
 
 ``` math
 k=w_1x_1+w_2x_2+b.
-  \label{eq:appb-13}
+
 ```
 
 三个偏导数值完全由输入数据 \((x_1,x_2,t)\) 和模型参数 \((w_1,w_2,b)\) 的当前值决定。本例中 \(x_1=5,x_2=2\)，把这两个值和当前 \(w_1,w_2,b\) 代入，就能计算 \(k\) 和全部偏导数。
@@ -217,24 +217,24 @@ H5 学习率。 {#sec-x-8}
 
 ``` math
 w_1\leftarrow w_1-\epsilon\frac{\partial E}{\partial w_1},
-  \label{eq:appb-14}
+
 ```
 
 ``` math
 w_2\leftarrow w_2-\epsilon\frac{\partial E}{\partial w_2},
-  \label{eq:appb-15}
+
 ```
 
 ``` math
 b\leftarrow b-\epsilon\frac{\partial E}{\partial b}.
-  \label{eq:appb-16}
+
 ```
 
 为简洁起见，下面用通用符号 \(\theta\) 表示模型参数，把上述三个表达式统一写为
 
 ``` math
 \theta\leftarrow\theta-\epsilon\frac{\partial E}{\partial\theta}.
-  \label{eq:appb-17}
+
 ```
 
 每次使用这一通式时，都可以用任意具体参数替换 \(\theta\)，把表达式应用于该参数。
@@ -257,12 +257,12 @@ H5 训练多层分类器。 {#sec-x-11}
 
 ``` math
 \frac{\partial E}{\partial x_1}=(y-t)\frac{2e^{-k}}{(1+e^{-k})^2}w_1,
-  \label{eq:appb-18}
+
 ```
 
 ``` math
 \frac{\partial E}{\partial x_2}=(y-t)\frac{2e^{-k}}{(1+e^{-k})^2}w_2,
-  \label{eq:appb-19}
+
 ```
 
 其中 \(k=w_1x_1+w_2x_2+b\)。在图 .2(b) 的感知机示例中，最终层（第 2 层）的 \(x_1\) 是第 1 层上方感知机的输出 \(y_1\)，\(x_2\) 是第 1 层下方感知机的输出 \(y_2\)。现在可以继续为前一层的两个感知机计算 \(\partial E/\partial\theta\)，并调整它们的参数；若还有更多层，就重复这一过程。
@@ -307,7 +307,7 @@ H5 前馈网络。 {#sec-x-12}
  &\quad +(1,2,0,1)\cdot(0,1,1,0)\\
  &=1+2+2+2+0+2+0+3+0+2+0+0=14.
 \end{aligned}
-\label{eq:appb-20}
+
 ```
 
 也可以把 3 幅二维输入图看成一幅三维输入特征图，把 3 组二维滤波器看成一组三维滤波器。图 .5 中，与左侧输出相连的 3 组二维滤波器形成第一组三维滤波器，与右侧输出相连的 3 组形成第二组。一般而言，卷积层有 \(n\) 幅输入特征图和 \(m\) 幅输出特征图时，使用 \(n\times m\) 组不同的二维滤波器；也可以把它们看作 \(m\) 组三维滤波器。图 .4 虽然没有画出滤波器细节，但 LeNet-5 使用的全部二维滤波器都是 \(5\times5\) 卷积滤波器。
@@ -376,7 +376,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 \frac{\partial E}{\partial x}=w^T\frac{\partial E}{\partial y},
   \qquad
   \frac{\partial E}{\partial w}=\frac{\partial E}{\partial y}x^T.
-  \label{eq:appb-21}
+
 ```
 
 <figure id="fig:b-8">
@@ -394,7 +394,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 \frac{\partial E}{\partial x}(c,h,w)=
   \sum_{m=0}^{M-1}\sum_{p=0}^{K-1}\sum_{q=0}^{K-1}
   \frac{\partial E}{\partial y}(m,h-p,w-q)\,W(m,c,p,q),
-  \label{eq:appb-22}
+
 ```
 
 其中，输出下标超出范围的项不参与求和。
@@ -431,7 +431,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 <figcaption>卷积层反向路径中 <span class="math inline">∂<em>E</em>/∂<em>x</em></span> 的计算。依据原书图 B.10 重排并作勘误。</figcaption>
 </figure>
 
-**译者注：**底本图 B.10 先用一组 `c/h/w` 循环初始化 `dE_dX`，随后又在累加循环中重复声明并遍历 `h/w/c`，使每个输入梯度被重复计算，并造成变量遮蔽；其中还把输出列下标写成 `w-p`（应为 `w-q`），把权重下标写成含未定义变量 `k` 的 `k-p,k-q`，且使用未定义的 `W_OUT`。本译稿按照公式 eq:appb-22 和图 .9，把初始化与累加合并到每个唯一的 `(c,h,w)` 元素内，并修正相应下标和变量名。
+**译者注：**底本图 B.10 先用一组 `c/h/w` 循环初始化 `dE_dX`，随后又在累加循环中重复声明并遍历 `h/w/c`，使每个输入梯度被重复计算，并造成变量遮蔽；其中还把输出列下标写成 `w-p`（应为 `w-q`），把权重下标写成含未定义变量 `k` 的 `k-p,k-q`，且使用未定义的 `W_OUT`。本译稿按照公式 (B.22) 和图 .9，把初始化与累加合并到每个唯一的 `(c,h,w)` 元素内，并修正相应下标和变量名。
 
 卷积层计算 \(\partial E/\partial W\) 的顺序代码与 \(\partial E/\partial x\) 类似，见图 .11。每组 \(W(m,c)\) 会影响输出 \(Y(m)\) 的全部元素，所以要对相应输出特征图中的所有像素累加每组 \(W(m,c)\) 的梯度：
 
@@ -439,7 +439,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 \frac{\partial E}{\partial W}(m,c,p,q)=
   \sum_{h=0}^{H_{\mathrm{out}}-1}\sum_{w=0}^{W_{\mathrm{out}}-1}
   X(c,h+p,w+q)\frac{\partial E}{\partial Y}(m,h,w).
-  \label{eq:appb-23}
+
 ```
 
 <figure id="fig:b-11">

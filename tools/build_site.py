@@ -94,6 +94,50 @@ def split_blocks(md):
         blocks.append(("para", "\n".join(buf))); i = j if j > i else i + 1
     return blocks
 
+
+def compact(t):
+    return re.sub(r"[^0-9a-z]", "", t.lower())
+
+
+PAGE_NOISE = re.compile(
+    r"\s\d{2,4}\s{1,2}(?:\x0c\s*\d+\s{0,2})?(?:CHAPTER|APPENDIX)\s+\d+[A-Z]?\s[\S ]{0,80}?\s(?=[a-z])"
+    r"|\s\d{3}\s\s+\d{3}\s+(?:CHAPTER|APPENDIX)\s+\d+\s+[\s\S]{0,60}?\s(?=[a-z])")
+
+def depage(t):
+    """去掉段内夹入的页码+页眉(两栏/跨页断词场景)。"""
+    prev = None
+    while prev != t:
+        prev = t
+        t = PAGE_NOISE.sub(" ", t)
+        t = re.sub(r"\s\d{3}\s\s+(?=\S)", " ", t)  # 残留孤立三页码
+    return t
+
+def clean_en_paras(paras, titles_compact, sec_no):
+    """去噪: 小节标题页行(编号+标题前缀)/CONTENTS/OUTLINE; 参考文献条目分流。"""
+    body, refs, drop = [], [], []
+    for p in paras:
+        t = depage(p.strip())
+        if not t: continue
+        if re.match(r"^(CONTENTS|OUTLINE)\b", t): continue
+        m2 = re.search(r"\s+CONTENTS\s+[\dA-Z]", t)
+        if m2:
+            t = t[:m2.start()].strip()
+            if len(t) < 40: continue
+        if re.search(r"https://doi\.org|B978-0-\d+-\d+-\d-\.", t) and len(t) < 300: continue
+        m = re.match(r"^((?:\d+(?:\.\d+)*|Appendix\s+[A-C]|Chapter\s+\d+)\s+)([^.]{0,80})", t)
+        if m:
+            cand = compact(m.group(2)[:40])
+            hit = any(cand and (cand.startswith(tc[:12]) or tc.startswith(cand[:12])) for tc in titles_compact)
+            if hit:
+                rest = t[m.end():].strip()
+                if len(rest) < 60: continue
+                t = rest
+        if re.match(r"^\[\d+\]", t):
+            refs.append(t); continue
+        body.append(t)
+    return body, refs
+
+
 def build_chapter(name, title_zh, idx):
     cnum = chap_num(name)
     src = open(os.path.join(DOCSDIR, f"{name}.md"), encoding="utf-8").read()
@@ -101,6 +145,10 @@ def build_chapter(name, title_zh, idx):
     endata = en_sections(cnum)
     # 英文 TOC 序列(仅二级, 按序)
     en_secs_toc = [s for s in endata["sections"] if s["level"] == 2]
+    titles_c = [compact(x["title"]) for x in en_secs_toc] + [compact(ENAMES.get(cnum,""))]
+    # 清洗各节段落
+    for es in endata["sections"]:
+        es["paras"], es["_refs"] = clean_en_paras(es["paras"], titles_c, es["num"])
     # 中文 H2 → 锚点(按顺序对齐; "本章参考文献"特判)
     h2_map = {}   # 中文 H2 文本 → (anchor, en_sec|None)
     refs_anchor = "sec-refs"
@@ -174,8 +222,10 @@ def build_chapter(name, title_zh, idx):
             if a == refs_anchor:
                 en_final.append("")
                 en_final.append(f"## References {{#{refs_anchor}}}")
-                # 英文 References 段落: 原文中位于本章末节之后
-                for p in ref_paras(cnum):
+                got = [p for es in endata["sections"] for p in es.get("_refs", [])]
+                if not got:
+                    got = ref_paras(cnum)
+                for p in got:
                     en_final.append("")
                     en_final.append(md_escape_para(p))
                 continue
@@ -233,6 +283,7 @@ if __name__ == "__main__":
     os.makedirs(STATIC_FIGS, exist_ok=True)
     for f in os.listdir(os.path.join(ROOT, "docs", "assets", "figs")):
         shutil.copy(os.path.join(ROOT, "docs", "assets", "figs", f), os.path.join(STATIC_FIGS, f))
+    # 预扫描: 各章第一段签名(用于跨章误归属去重) — 简单起见在生成后做文件级清洗
     slugs = []
     for i, (name, title) in enumerate(CHAPTERS):
         try:

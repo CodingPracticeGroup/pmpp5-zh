@@ -122,6 +122,65 @@ def merge_wraps(tex):
         out.append(pending)
     return "\n".join(out)
 
+
+# ---------- 跨章标签全局映射 ----------
+_GLOB = None
+def chapter_kind(name):
+    if name.startswith("appendix-a"): return "A"
+    if name.startswith("appendix-b"): return "B"
+    if name.startswith("appendix-c"): return "C"
+    return re.sub(r"^0+", "", name.split("-")[0])
+
+def scan_labels(name, tex):
+    """返回本章全部 label → (kind, num)。计数规则与 preprocess 一致。"""
+    labels = {}
+    ckind = chapter_kind(name)
+    is_app = ckind in "ABC"
+    def chnum(n): return f"附录 {ckind}" if is_app else f"第 {ckind} 章"
+    sec = 0
+    fig = tab = eqn = 0
+    def fmt(k, n):
+        return f"{ckind}.{n}" if is_app else f"{ckind}.{n}"
+    for line in tex.split("\n"):
+        s = line.strip()
+        m = re.match(r"\\section\*?\{", s)
+        if m:
+            sec += 1
+        elif s.startswith(r"\begin{figure}") or s.startswith(r"\begin{figure*}"):
+            fig += 1
+        elif s.startswith(r"\begin{table}") or s.startswith(r"\begin{table*}"):
+            tab += 1
+        elif s.startswith(r"\begin{equation}") or s.startswith(r"\begin{align}"):
+            eqn += 1
+        for lab in re.findall(r"\\label\{([^}]+)\}", s):
+            if lab.startswith("fig:"): labels[lab] = ("fig", fmt("f", fig))
+            elif lab.startswith("tab:"): labels[lab] = ("tab", fmt("t", tab))
+            elif lab.startswith("sec:") or lab.startswith("subsec:"): labels[lab] = ("sec", fmt("s", sec))
+            elif lab.startswith("chap:"): labels[lab] = ("chap", ckind)
+            elif lab.startswith("eq:"): labels[lab] = ("eq", fmt("e", eqn))
+    return labels
+
+def global_labels():
+    global _GLOB
+    if _GLOB is not None: return _GLOB
+    import json
+    cache = "/tmp/pmpp_global_labels.json"
+    if os.path.exists(cache):
+        _GLOB = json.load(open(cache)); return _GLOB
+    allmap = {}
+    for name, title in CHAPTERS:
+        path = os.path.join(TEXDIR, f"{name}.tex") if 'TEXDIR' in dir() else os.path.join("chapters", f"{name}.tex")
+        if not os.path.exists(path):
+            path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "chapters", f"{name}.tex")
+        try:
+            tex = open(path, encoding="utf-8").read()
+        except FileNotFoundError:
+            continue
+        allmap.update(scan_labels(name, tex))
+    json.dump(allmap, open(cache, "w"))
+    _GLOB = allmap
+    return _GLOB
+
 def preprocess(name, tex):
     tex = merge_wraps(tex)
     chap_num = name[:2]
@@ -180,13 +239,25 @@ def preprocess(name, tex):
         i += 1
     def ref_repl(m):
         lead, cmd, lab = m.group(1) or "", m.group(2), m.group(3)
-        kind, t = labels.get(lab, ("x", lab))
+        kind, t = labels.get(lab) or ("x", lab)
+        if kind == "x":
+            kind, t = global_labels().get(lab, ("x", lab))
+        if kind == "chap":
+            ckind = t
+            word = f"附录 {ckind}" if ckind in "ABC" else f"第 {ckind} 章"
+            if re.search(r"第\s*$", lead): word = ckind if ckind in "ABC" else ckind
+            elif re.search(r"(附录|第)\s*$", lead): word = ckind
+            return lead + word
+        if kind == "eq":
+            if re.search(r"(公式|式)\s*$", lead): return lead + f"({t})"
+            return lead + f"公式 ({t})"
+        if kind == "sec":
+            return lead + f"第 {t} 节" if not re.search(r"第\s*$", lead) else lead + t
         pref = ""
         if kind == "fig" and not re.search(r"图\s*$", lead): pref = "图 "
         elif kind == "tab" and not re.search(r"表\s*$", lead): pref = "表 "
         return lead + pref + t
-    # 捕获紧邻前置的"图/表"字样(含中间空白), 避免"图 图 10.1"
-    tex = re.sub(r"(图\s*|表\s*)?\\(auto|eq|pag|c)?ref\{([^}]+)\}", lambda m: ref_repl(m), tex)
+    tex = re.sub(r"((?:图|表|公式|式|第|附录)\s*)?\\(auto|eq|pag|c)?ref\{([^}]+)\}", lambda m: ref_repl(m), tex)
 
     # 4. chapterbibliography 环境 -> 普通 enumerate
     tex = re.sub(r"\\begin\{chapterbibliography\}\{[^}]*\}",
@@ -211,6 +282,8 @@ def pandoc(tex, srcname):
 
 # ---------- 后处理 ----------
 def post(name, md):
+    # 清除数学块内残留的 \label 行(展示噪音)
+    md = re.sub(r"^\s*\\label\{[^}]*\}\s*$", "", md, flags=re.M)
     # pandoc gfm 将数学输出为 $`...`$ / $$`...`$$ → 转回 \(\) 与 \[\] 供 arithmatex generic
     md = re.sub(r"\$\$(.+?)\$\$", lambda m: r"\[" + m.group(1).strip() + r"\]", md, flags=re.S)
     md = re.sub(r"\$`(.+?)`\$", lambda m: r"\(" + m.group(1) + r"\)", md, flags=re.S)

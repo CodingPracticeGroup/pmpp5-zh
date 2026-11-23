@@ -108,9 +108,14 @@ def main():
     if chap.isdigit():
         n = int(chap) + 1
         if n <= 24: end_key = f"{n}.1"
+        elif n == 25: end_key = "A.1"   # 第24章止于附录A
     elif chap in ("A", "B"):
         end_key = chr(ord(chap) + 1) + ".1"
     ch_end = len(lines)
+    if chap == "C":
+        for i in range(pos + 20, len(lines)):
+            if lines[i].strip() in ("INDEX", "Index"):
+                ch_end = i; break
     if end_key:
         cands = [t for n, t in toc if n == end_key]
         if cands:
@@ -145,11 +150,18 @@ def main():
     for i, l in enumerate(lines):
         t = l.strip()
         if not t:
-            if cur: blocks.append((cur_start, cur)); cur, cur_start = [], None
+            if cur: blocks.append((cur_start, cur_end, cur)); cur, cur_start = [], None
+            continue
+        # 页码行 / "页码+页眉" 行: 不并入文本也不断段
+        if re.fullmatch(r"\d{1,4}", t) or re.fullmatch(r"\x0c?\s*\d{1,4}\s*", t):
+            continue
+        if re.match(r"^\d{2,4}\s+(CHAPTER|APPENDIX)\s+\d", t) and len(t) < 120:
+            continue
+        if re.match(r"^(CHAPTER|APPENDIX)\s+\d+[A-Z]?\s+\S", t) and len(t) < 120 and "..." not in t:
             continue
         if not cur: cur_start = i
-        cur.append(t)
-    if cur: blocks.append((cur_start, cur))
+        cur.append(t); cur_end = i
+    if cur: blocks.append((cur_start, cur_end, cur))
 
     # 过滤块
     def is_noise(txt):
@@ -161,37 +173,45 @@ def main():
         if re.match(r"^part\s+[ivx]+\b", norm_title(txt)): return True
         return False
 
-    paras = []  # (start_line, text)
-    for start_l, ls in blocks:
+    paras = []  # (start_line, end_line, text)
+    for start_l, end_l, ls in blocks:
         joined = " ".join(ls)
         if is_noise(joined):
             # 章题行保留行号用于 preface 起点, 不输出
             continue
-        paras.append((start_l, joined))
+        paras.append((start_l, end_l, joined))
 
     # 跨页缝合
     TERM = re.compile(r"[.!?:;\u201d\u2019\u2019\]\"’)\]]\s*$")
+    FUNC = set("the a an and or but if then of in to at by for with on as is are was were be been it its this that these those from so than when while which who how not no such can may".split())
     merged = []
-    for ln, p in paras:
-        if merged and not TERM.search(merged[-1][1]) and len(merged[-1][1]) > 40 \
-           and ln - merged[-1][0] <= 6:
-            merged[-1] = (merged[-1][0], merged[-1][1] + " " + p)
+    for ln, endln, p in paras:
+        if merged and not TERM.search(merged[-1][2]) and len(merged[-1][2]) > 40 \
+           and ln - merged[-1][1] <= 8:
+            prev = merged[-1][2]
+            # 跨页断词: 前段以字母结尾且下段首词非常见词 → 直接拼接(还原被页码打断的单词)
+            pm = re.search(r"([A-Za-z])$", prev)
+            fm = re.match(r"([a-z]+)", p.strip())
+            if pm and fm and fm.group(1) not in FUNC:
+                joined = prev + fm.group(1)
+                merged[-1] = (merged[-1][0], endln, joined + p.strip()[len(fm.group(1)):])
+            else:
+                merged[-1] = (merged[-1][0], endln, prev + " " + p)
         else:
-            merged.append((ln, p))
+            merged.append((ln, endln, p))
 
     # FIGURE/TABLE 题注: 独立 "FIGURE 17.4" 行 + 下一段说明合并
     out = []
     fig_pat = re.compile(r"^(FIGURE|TABLE)\s+([0-9]+[A-Za-z]?\.[0-9]+[A-Za-z]?)\s*$")
-    for ln, p in merged:
+    for ln, endln, p in merged:
         m = fig_pat.match(p.strip())
         if m:
-            out.append((ln, f"**{m.group(1)} {m.group(2)}.**"))
+            out.append((ln, endln, f"**{m.group(1)} {m.group(2)}.**"))
             continue
-        # 若上一段是纯 FIGURE 标记且本段短且无完整句号结尾多层 → 并为题注(题注一般1-3句)
-        if out and re.fullmatch(r"\*\*(FIGURE|TABLE) [0-9A-Za-z.]+\.\*\*", out[-1][1]):
-            out[-1] = (out[-1][0], out[-1][1] + " " + p)
+        if out and re.fullmatch(r"\*\*(FIGURE|TABLE) [0-9A-Za-z.]+\.\*\*", out[-1][2]):
+            out[-1] = (out[-1][0], endln, out[-1][2] + " " + p)
             continue
-        out.append((ln, p))
+        out.append((ln, endln, p))
     paras = out
 
     # ---------- 切段归属 ----------
@@ -199,11 +219,11 @@ def main():
     result = {"preface": [], "sections": []}
     by_line = sorted(positioned, key=lambda s: s["line"])
     first_line = by_line[0]["line"] if by_line else pos
-    result["preface"] = [p for ln, p in paras if ch_start <= ln < first_line]
+    result["preface"] = [p for ln, _e, p in paras if ch_start <= ln < first_line]
     for idx, s in enumerate(by_line):
         a = s["line"]
         b = by_line[idx + 1]["line"] if idx + 1 < len(by_line) else ch_end
-        s["paras"] = [p for ln, p in paras if a <= ln < b]
+        s["paras"] = [p for ln, _e, p in paras if a <= ln < b]
     result["sections"] = positioned  # 按 TOC 顺序输出
     json.dump(result, open(f"/tmp/en_{chap}.json", "w"), ensure_ascii=False)
     tot = sum(len(s["paras"]) for s in positioned)
