@@ -1,0 +1,65 @@
+baseURL: https://codingpracticegroup.github.io/pmpp5-zh/
+title: 大规模并行处理器编程（第5版）中文学习译稿
+enableGitInfo: false
+enableRobotsTXT: true
+timeFormat: '2006-01-02'
+defaultContentLanguage: zh
+defaultContentLanguageInTree: false
+languages:
+  zh:
+    label: 简体中文
+    locale: zh-CN
+    contentDir: content
+    weight: 1
+  en:
+    label: English
+    locale: en-US
+    contentDir: content
+    title: Programming Massively Parallel Processors (5th Edition)
+    weight: 2
+params:
+  description: 《大规模并行处理器编程（第5版）》个人学习译稿 · PMPP 5e Chinese learning translation
+  author: PMPP5-zh 译者社区
+  github_repo: https://github.com/CodingPracticeGroup/pmpp5-zh
+  copyright:
+    authors: '[CodingPracticeGroup](https://github.com/CodingPracticeGroup)'
+    from_year: 2026
+  ui:
+    dark_mode: true
+    compare: true
+    section_index: cards
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+    parser:
+      attribute:
+        block: true
+      wrapStandAloneImageWithinParagraph: false
+    extensions:
+      passthrough:
+        enable: true
+        delimiters:
+          block:
+          - - \[
+            - \]
+          - - $$
+            - $$
+          inline:
+          - - \(
+            - \)
+  highlight:
+    noClasses: false
+menus:
+  main:
+  - identifier: book
+    name: 全书目录
+    url: /book/
+    weight: 1
+  - identifier: about
+    name: 关于本站
+    url: /about/
+    weight: 2
+module:
+  imports:
+  - path: github.com/pgsty/oink

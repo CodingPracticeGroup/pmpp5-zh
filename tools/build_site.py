@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+"""合并中文译稿(pandoc 产物)与英文提取块 → Hugo content/book/*.md (zh + .en.md)。
+
+锚点规则: 中文 H2 ↔ 英文 TOC 节 {#sec-N-M}; 中文"本章参考文献" {#sec-refs};
+中文特有子标题 {#sec-x-K}(英文侧无对应标题时不输出标题, Sync Scroll 自动平滑)。
+"""
+import re, json, os, shutil, sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DOCSDIR = os.path.join(ROOT, "docs", "chapters")
+OUT = os.path.join(ROOT, "content", "book")
+STATIC_FIGS = os.path.join(ROOT, "static", "figs")
+BASE = "/pmpp5-zh"
+
+import importlib.util
+spec = importlib.util.spec_from_file_location("bd", os.path.join(ROOT, "tools", "build_docs.py"))
+bd = importlib.util.module_from_spec(spec); spec.loader.exec_module(bd)
+CHAPTERS = bd.CHAPTERS
+
+TOC = json.load(open("/tmp/pmpp_toc.json"))
+ENAMES = json.load(open("/tmp/pmpp_en_chapter_names.json"))
+
+def chap_num(name):
+    appmap = {"appendix-a-numerical-considerations": "A",
+              "appendix-b-deep-learning-basics": "B",
+              "appendix-c-cuda-memories-address-spaces-and-pointers": "C"}
+    return appmap.get(name) or re.sub(r"^0+", "", name.split("-")[0])
+
+def sec_anchor(num):
+    return "sec-" + num.replace(".", "-")
+
+def en_sections(cnum):
+    d = json.load(open(f"/tmp/en_{cnum}.json"))
+    return d
+
+def md_escape_para(t):
+    # 行首字符防误解析
+    t = re.sub(r"^([#\-\*>+]|(\d+)([.)]))\s", lambda m: "\\" + m.group(0)[:-1] + " ", t, count=1)
+    t = t.replace("*", "\\*")
+    return t
+
+def is_img_line(l):
+    """独立图片行: ![alt](path) 整行。"""
+    if not l.startswith("!["): return False
+    r = l.rstrip()
+    if not r.endswith(")"): return False
+    i = r.find("](")
+    return i > 1
+
+def split_blocks(md):
+    """返回 [(kind, payload)]; kind ∈ h1..h4, block, para, fence, html, img, quote, raw"""
+    lines = md.split("\n")
+    blocks, i = [], 0
+    while i < len(lines):
+        l = lines[i]
+        if l.startswith("```"):
+            j = i
+            while j + 1 < len(lines) and not lines[j + 1].startswith("```"): j += 1
+            end = min(j + 2, len(lines))  # 含闭合行
+            blocks.append(("fence", "\n".join(lines[i:end]))); i = end; continue
+        if l.startswith("<"):
+            # 任意 HTML 块(表格/figure 等): 连续以 < 开头的行(允许行间空行)
+            j = i
+            while j < len(lines):
+                t = lines[j].strip()
+                if not t:
+                    # 空行: 若后续仍是 < 行则继续
+                    k = j
+                    while k < len(lines) and not lines[k].strip(): k += 1
+                    if k < len(lines) and lines[k].startswith("<"):
+                        j = k; continue
+                    break
+                if not lines[j].startswith("<"): break
+                j += 1
+            blocks.append(("html", "\n".join(lines[i:j]))); i = j; continue
+        m = re.match(r"^(#{1,6})\s+(.*)$", l)
+        if m:
+            blocks.append((f"h{len(m.group(1))}", m.group(2))); i += 1; continue
+        if l.startswith(">"):
+            j = i
+            while j + 1 < len(lines) and lines[j + 1].startswith(">"): j += 1
+            blocks.append(("quote", "\n".join(lines[i:j + 1]))); i = j + 1; continue
+        if is_img_line(l):
+            blocks.append(("img", l)); i += 1; continue
+        if not l.strip():
+            i += 1; continue
+        # 段落/列表块: 到空行
+        j = i
+        buf = []
+        while j < len(lines) and lines[j].strip() and not lines[j].startswith("#") \
+              and not lines[j].startswith("```") and not lines[j].startswith("<") \
+              and not lines[j].startswith(">") and not is_img_line(lines[j]):
+            buf.append(lines[j]); j += 1
+        blocks.append(("para", "\n".join(buf))); i = j if j > i else i + 1
+    return blocks
+
+def build_chapter(name, title_zh, idx):
+    cnum = chap_num(name)
+    src = open(os.path.join(DOCSDIR, f"{name}.md"), encoding="utf-8").read()
+    blocks = split_blocks(src)
+    endata = en_sections(cnum)
+    # 英文 TOC 序列(仅二级, 按序)
+    en_secs_toc = [s for s in endata["sections"] if s["level"] == 2]
+    # 中文 H2 → 锚点(按顺序对齐; "本章参考文献"特判)
+    h2_map = {}   # 中文 H2 文本 → (anchor, en_sec|None)
+    refs_anchor = "sec-refs"
+    en_iter = iter(en_secs_toc)
+    xk = 0
+    h3_map = {}   # 中文 H3 文本 → anchor(仅站内锚点)
+    zh_out = []
+    en_out = []
+    # 英文头部
+    en_title = ENAMES.get(cnum, title_zh)
+    chap_word = "附录" if cnum in "ABC" and not cnum.isdigit() else ""
+    if cnum.isdigit():
+        en_h1 = f"# Chapter {cnum} {en_title} {{#c{cnum}}}"
+        zh_h1_anchor = "{#c" + cnum + "}"
+    else:
+        en_h1 = f"# Appendix {cnum} {en_title} {{#c{cnum}}}"
+        zh_h1_anchor = "{#c" + cnum + "}"
+    weight = int(cnum) if cnum.isdigit() else 30 + "ABC".index(cnum)
+    fm_zh = ["---", f'title: "{title_zh}"', f"weight: {weight}",
+             f'description: "{title_zh} — 《大规模并行处理器编程(第5版)》学习译稿"', "---"]
+    fm_en = ["---", f'title: "Chapter {cnum} {en_title}"' if cnum.isdigit() else f'title: "Appendix {cnum} {en_title}"',
+             f"weight: {weight}",
+             f'description: "Programming Massively Parallel Processors 5e — English original"', "---"]
+    en_out.append(en_h1)
+    for p in endata["preface"]:
+        en_out.append("")
+        en_out.append(md_escape_para(p))
+    # 遍历中文块
+    used_en = set()
+    en_by_anchor = {}
+    pending_en = None  # 当前英文 section dict
+    cur_zh_h2 = None
+    for kind, payload in blocks:
+        if kind == "h1":
+            zh_out.append(f"# {payload} {zh_h1_anchor}")
+            continue
+        if kind == "h2":
+            if "本章参考文献" in payload:
+                h2_map[payload] = (refs_anchor, None)
+                zh_out.append(f"## {payload} {{#{refs_anchor}}}")
+                continue
+            es = next(en_iter, None)
+            if es is not None:
+                a = sec_anchor(es["num"])
+                h2_map[payload] = (a, es)
+                en_by_anchor[a] = es
+                zh_out.append(f"## {payload} {{#{a}}}")
+            else:
+                xk += 1
+                a = f"sec-x-{xk}"
+                h2_map[payload] = (a, None)
+                zh_out.append(f"## {payload} {{#{a}}}")
+            continue
+        if kind in ("h3", "h4", "h5", "h6"):
+            xk += 1
+            a = f"sec-x-{xk}"
+            zh_out.append(f"{kind.upper()} {payload} {{#{a}}}")
+            continue
+        if kind == "img":
+            payload = re.sub(r"\]\(\.\./assets/figs/", f"]({BASE}/figs/", payload)
+            zh_out.append(payload)
+            continue
+        zh_out.append(payload)
+    # 中文 refs 标题已写入; 英文按锚点顺序生成
+    en_final = list(en_out)
+    for kind, payload in blocks:
+        if kind == "h1":
+            continue
+        if kind == "h2":
+            a, es = h2_map[payload]
+            if a == refs_anchor:
+                en_final.append("")
+                en_final.append(f"## References {{#{refs_anchor}}}")
+                # 英文 References 段落: 原文中位于本章末节之后
+                for p in ref_paras(cnum):
+                    en_final.append("")
+                    en_final.append(md_escape_para(p))
+                continue
+            if es is not None:
+                en_final.append("")
+                en_final.append(f"## {md_heading(es['title'])} {{#{a}}}")
+                for p in es["paras"]:
+                    en_final.append("")
+                    en_final.append(md_escape_para(p))
+            else:
+                en_final.append("")
+                en_final.append(f"## {md_heading(payload)} {{#{a}}}")
+            continue
+    zh_md = "\n".join(fm_zh) + "\n" + "\n\n".join(x.strip("\n") for x in zh_out if x.strip()) + "\n"
+    en_md = "\n".join(fm_en) + "\n" + "\n\n".join(x.strip("\n") for x in en_final if x.strip()) + "\n"
+    os.makedirs(OUT, exist_ok=True)
+    slug = f"{weight:02d}-ch{cnum.lower()}"
+    open(os.path.join(OUT, f"{slug}.md"), "w", encoding="utf-8").write(zh_md)
+    open(os.path.join(OUT, f"{slug}.en.md"), "w", encoding="utf-8").write(en_md)
+    return slug, len(en_final)
+
+def md_heading(t):
+    return re.sub(r"\s*\{#[^}]*\}\s*", "", t).strip()
+
+_ref_cache = {}
+def ref_paras(cnum):
+    """提取本章英文 References 段: 位于最后一个节之后到下一章前的 [n] 开头段。"""
+    if cnum in _ref_cache: return _ref_cache[cnum]
+    raw = open("/tmp/pmpp_en.txt", encoding="utf-8").read().replace("\u00ad\n", "").replace("\u00ad", "")
+    lines = raw.split("\n")
+    endata = json.load(open(f"/tmp/en_{cnum}.json"))
+    lines_pos = [s["line"] for s in endata["sections"] if s.get("line")]
+    if not lines_pos:
+        _ref_cache[cnum] = []; return []
+    # 用 en json 未存行号? sections 有 line 字段(写入了)
+    start = max(lines_pos)
+    out = []
+    started = False
+    for i in range(start, min(len(lines), start + 4000)):
+        t = lines[i].strip()
+        if re.match(r"^References\s*(\.|$)", t):
+            started = True; continue
+        if not started:
+            continue
+        if re.match(r"^\[\d+\]", t):
+            out.append(t)
+        elif out and t and not re.match(r"^\s*$", t) and len(t) > 30 and not re.match(r"^(Copyright|Programming Massively|https://doi|\d{1,4}$|CHAPTER|APPENDIX|CONTENTS)", t):
+            out[-1] = out[-1] + " " + t
+        elif re.match(r"^(CHAPTER|APPENDIX)\b", t) or t == "CONTENTS":
+            break
+    _ref_cache[cnum] = out
+    return out
+
+if __name__ == "__main__":
+    os.makedirs(STATIC_FIGS, exist_ok=True)
+    for f in os.listdir(os.path.join(ROOT, "docs", "assets", "figs")):
+        shutil.copy(os.path.join(ROOT, "docs", "assets", "figs", f), os.path.join(STATIC_FIGS, f))
+    slugs = []
+    for i, (name, title) in enumerate(CHAPTERS):
+        try:
+            slug, n = build_chapter(name, title, i)
+            slugs.append(slug)
+            print("OK", slug)
+        except Exception as e:
+            print("FAIL", name, e)
+    print("total:", len(slugs))
