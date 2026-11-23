@@ -172,7 +172,7 @@ IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（bi
 上述格式既不能表示 \(-1\)，也不能表示 9。还可以在数轴上标出全部可表示数，如图 .3 所示，3 位无符号整数格式的所有可表示数都用圆点标出。
 
 <figure id="fig:a-3">
-<p>![本章图示 1](../assets/figs/appendix-a-numerical-considerations-1.png)</p>
+<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-1.png" alt="本章图示 1" loading="lazy" />
 <figcaption>3 位无符号整数格式的可表示数在数轴上的位置。依据原书图 A.3 重绘。</figcaption>
 </figure>
 
@@ -186,7 +186,7 @@ IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（bi
 从图 .5 所示的数轴上观察这些可表示数，还能获得更多认识。图中只画出正的可表示数；负数关于 0 与相应的正数对称。
 
 <figure id="fig:a-5">
-<p>![本章图示 2](../assets/figs/appendix-a-numerical-considerations-2.png)</p>
+<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-2.png" alt="本章图示 2" loading="lazy" />
 <figcaption>无零表示中的正可表示数。依据原书图 A.5 重绘。</figcaption>
 </figure>
 
@@ -203,7 +203,7 @@ IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（bi
 把 0 纳入规格化浮点数系统的一种方法是**突发下溢（abrupt underflow）**约定，见图 .4 第二组数据列。只要 \(E=0\)，就把数解释为 0。在 5 位格式中，这种方法移除了 0 附近（\(-1.0\) 到 \(+1.0\) 之间）的 8 个可表示数，即 4 个正数和 4 个负数，并把它们全部变为 0。由于实现简单，20 世纪 80 年代的一些小型机采用了突发下溢。直至今天，某些要求高速运行的算术单元仍使用这一约定。它虽然使 0 成为可表示数，却在 0 附近形成更大的可表示数空隙，如图 .6 所示。与图 .5 相比，0.5 到 1.0 之间的空隙显著扩大了 2 倍。正如前文所述，许多数值算法的正确性依赖对接近 0 的小数进行准确表示，这一空隙会给它们造成问题。
 
 <figure id="fig:a-6">
-<p>![本章图示 3](../assets/figs/appendix-a-numerical-considerations-3.png)</p>
+<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-3.png" alt="本章图示 3" loading="lazy" />
 <figcaption>突发下溢格式的正可表示数。依据原书图 A.6 重绘。</figcaption>
 </figure>
 
@@ -216,7 +216,7 @@ IEEE 标准实际采用的方法称为**反规格化（denormalization）**。�
 **译者注：**底本上述段落写作“如图 A.6 所示，只要 \(E=0\)”，但图 A.6 只是突发下溢格式的数轴；展示 \(E=0\) 三种解释的是图 A.4。本译稿按实际图意修正引用。
 
 <figure id="fig:a-7">
-<p>![本章图示 4](../assets/figs/appendix-a-numerical-considerations-4.png)</p>
+<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-4.png" alt="本章图示 4" loading="lazy" />
 <figcaption>反规格化格式的正可表示数。依据原书图 A.7 重绘。</figcaption>
 </figure>
 

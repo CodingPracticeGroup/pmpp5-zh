@@ -240,6 +240,24 @@ def build_chapter(name, title_zh, idx):
                 en_final.append(f"## {md_heading(payload)} {{#{a}}}")
             continue
     zh_md = "\n".join(fm_zh) + "\n" + "\n\n".join(x.strip("\n") for x in zh_out if x.strip()) + "\n"
+    # pandoc 把图片包在 <p> 里导致 markdown 不解析: 解包并改写为站点绝对路径
+    zh_md = re.sub(r"<p>!\[([^\]]*)\]\((?:\.\./)+assets/figs/([^)]+)\)</p>",
+                   lambda m: f"![{m.group(1)}]({BASE}/figs/{m.group(2)})", zh_md)
+    # 个别 figure 块的图片引用在 pandoc 转换中丢失(源 tikz 存在且已渲染): 定点补回
+    FIX_FIGS = {  # figure id → 渲染好的 png 文件名
+        "fig:18-15": "18-graph-traversal-8.png",
+        "fig:23-15": "23-multi-gpu-programming-6.png",
+        "fig:23-20": "23-multi-gpu-programming-7.png",
+    }
+    for fid, png in FIX_FIGS.items():
+        tag = f'<figure id="{fid}">'
+        if tag in zh_md and f"{BASE}/figs/{png}" not in zh_md:
+            zh_md = zh_md.replace(tag, tag + f"\n<img src=\"{BASE}/figs/{png}\" alt=\"本章图示\" loading=\"lazy\" />", 1)
+        elif tag in zh_md:
+            pass
+    # HTML figure 块内 markdown 不被 goldmark 解析 → 一律输出 <img>
+    zh_md = re.sub(r"!\[([^\]]*)\]\(" + re.escape(BASE) + r"/figs/([^)]+)\)",
+                   lambda m: f'<img src="{BASE}/figs/{m.group(2)}" alt="{m.group(1)}" loading="lazy" />', zh_md)
     en_md = "\n".join(fm_en) + "\n" + "\n\n".join(x.strip("\n") for x in en_final if x.strip()) + "\n"
     os.makedirs(OUT, exist_ok=True)
     slug = f"{weight:02d}-ch{cnum.lower()}"

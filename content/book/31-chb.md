@@ -61,7 +61,7 @@ y=\operatorname{sign}(W\cdot x+b),
 \(W\) 的元素先与 \(x\) 的相应元素相乘，成对乘积再在点积中相加，因此它们是最终和中各 \(x\) 元素的加权系数，通常称为模型的**权重（weight）**。由于 \(f\) 是输入激活函数 sign 的 \(x\) 的线性函数，感知机是一种线性分类器。
 
 <figure id="fig:b-1">
-<p>![本章图示 1](../assets/figs/appendix-b-deep-learning-basics-1.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-1.png" alt="本章图示 1" loading="lazy" />
 <figcaption>输入为二维向量的感知机线性分类器示例。依据原书图 B.1 重绘。</figcaption>
 </figure>
 
@@ -85,7 +85,7 @@ H3 多层分类器 {#sec-x-1}
 考虑图 .2 中的分类器。假设所有输入坐标都在 \([0,1]\) 范围内。分类器应把 \(x_1\) 和 \(x_2\) 都大于 0.5 的所有点，即落在定义域右上象限的点，分为类别 1，其余点分为类别 0 或 \(-1\)。图 .2(a) 所示的一条直线可以近似实现这一分类器。例如，直线 \(2x_1+2x_2-3=0\) 能正确分类大多数点；但某些 \(x_1,x_2\) 都大于 0.5、二者之和却小于 1.5 的浅色点，例如 \((0.55,0.65)\)，会被错误地分到类别 \(-1\)（深色区域）。任何直线都必然切掉右上象限的一部分，或纳入定义域其余部分的一部分，所以不存在能正确分类所有可能输入的单条直线。
 
 <figure id="fig:b-2">
-<p>![本章图示 2](../assets/figs/appendix-b-deep-learning-basics-2.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-2.png" alt="本章图示 2" loading="lazy" />
 <figcaption>多层感知机示例：（a）单条直线只能近似划分输入；（b）两层感知机精确实现所需分类。依据原书图 B.2 重绘。</figcaption>
 </figure>
 
@@ -100,7 +100,7 @@ H3 多层分类器 {#sec-x-1}
 两层感知机仍有显著局限。例如，假设要建立感知机，对图 .3(a) 所示输入点分类。浅色输入点在第二层可能形成 \((-1,-1)\) 或 \((1,1)\)，无法用一条直线正确分类第二层中的点。图 .3(b) 在第二层增加一个感知机，从而增加另一条直线；其函数可以是 \(z_2=\operatorname{sign}(-2y_1-2y_2-3)\) 或它的小幅变体。读者可以验证，图 .3(b) 中所有深色点都会映射到 \(z_1\)–\(z_2\) 空间的 \((-1,-1)\)，而 \(y_1\)–\(y_2\) 空间中的 \((1,1)\) 和 \((-1,-1)\) 分别映射到 \(z_1\)–\(z_2\) 空间的 \((1,-1)\) 和 \((-1,1)\)。现在可以画直线 \(z_1+z_2+1=0\) 或它的小幅变体，正确分类这些点，如图 .3(c) 所示。显然，如果需要把输入定义域分成更多区域，可能需要更多层。
 
 <figure id="fig:b-3">
-<p>![本章图示 3](../assets/figs/appendix-b-deep-learning-basics-3.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-3.png" alt="本章图示 3" loading="lazy" />
 <figcaption>需要两层以上感知机的分类模式。依据原书图 B.3 重绘。</figcaption>
 </figure>
 
@@ -286,7 +286,7 @@ H5 前馈网络。 {#sec-x-12}
 本节介绍 CNN 推理和训练的顺序实现，为后续 CUDA 实现作准备。这里采用 20 世纪 80 年代末为数字识别设计的 LeNet-5 网络\[3\]。如图 .4 所示， LeNet-5 由三类层组成：卷积层、下采样层和全连接层。这三类层至今仍是神经网络的关键组件。下面考察每类层的逻辑设计和顺序实现。网络输入是一幅灰度图像，其中手写数字表示成 \(32\times32\) 像素的二维数组。最后一层计算输出，即原图属于网络所识别 10 个类别（数字）中各类别的概率。
 
 <figure id="fig:b-4">
-<p>![本章图示 4](../assets/figs/appendix-b-deep-learning-basics-4.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-4.png" alt="本章图示 4" loading="lazy" />
 <figcaption>用于手写数字识别的卷积神经网络 LeNet-5。输入字母 A 应被分类为 10 个类别（数字）皆非。依据原书图 B.4 重绘。</figcaption>
 </figure>
 
@@ -295,7 +295,7 @@ H5 前馈网络。 {#sec-x-12}
 图 .5 给出一个小型卷积层示例，其中有 3 幅输入特征图、2 幅输出特征图和 6 组滤波器。层中不同的输入/输出特征图对使用不同滤波器组，所以需要 \(3\times2=6\) 组。图 .4 的 LeNet C3 层有 6 幅输入特征图和 16 幅输出特征图，总共使用 \(6\times16=96\) 组滤波器。
 
 <figure id="fig:b-5">
-<p>![本章图示 5](../assets/figs/appendix-b-deep-learning-basics-5.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-5.png" alt="本章图示 5" loading="lazy" />
 <figcaption>卷积层的前向传播路径。依据原书图 B.5 重绘。</figcaption>
 </figure>
 
@@ -380,7 +380,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 ```
 
 <figure id="fig:b-8">
-<p>![本章图示 6](../assets/figs/appendix-b-deep-learning-basics-6.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-6.png" alt="本章图示 6" loading="lazy" />
 <figcaption>CNN 一层中（a）<span class="math inline">∂<em>E</em>/∂<em>w</em></span> 和（b）<span class="math inline">∂<em>E</em>/∂<em>x</em></span> 的反向传播。依据原书图 B.8 重绘。</figcaption>
 </figure>
 
@@ -402,7 +402,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 **译者注：**底本公式 B.22 把权重下标写作 \(W(m,c,k-p,k-q)\)，但 \(k\) 在该式中未定义，而且与图 B.9 给出的对应关系矛盾：\(x_{h,w}\) 对 \(y_{h-2,w-2}\) 的贡献乘 \(W_{2,2}\)，对 \(y_{h,w}\) 的贡献乘 \(W_{0,0}\)。按图 B.6 的前向索引 \(y_{a,b}\mathrel{+}=x_{a+p,b+q}W_{p,q}\) 反推，反向式应使用 \(W(p,q)\)。本译稿据此作最小修正；图 B.10 同步采用这一自洽索引。
 
 <figure id="fig:b-9">
-<p>![本章图示 7](../assets/figs/appendix-b-deep-learning-basics-7.png)</p>
+<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-7.png" alt="本章图示 7" loading="lazy" />
 <figcaption>卷积层反向传播的索引关系：输入 <span class="math inline"><em>x</em><sub><em>h</em>, <em>w</em></sub></span> 在前向传播中影响的 9 个输出梯度，在反向传播中通过相应权重汇入 <span class="math inline">∂<em>E</em>/∂<em>x</em><sub><em>h</em>, <em>w</em></sub></span>。依据原书图 B.9 重绘。</figcaption>
 </figure>
 
