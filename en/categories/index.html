@@ -1,0 +1,631 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head>
+    <meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/categories/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="alternate" type="application/rss&#43;xml" href="https://codingpracticegroup.github.io/pmpp5-zh/en/categories/index.xml">
+<meta name="robots" content="index, follow">
+
+<title>Categories | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="《大规模并行处理器编程（第5版）》个人学习译稿 · PMPP 5e Chinese learning translation">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/categories/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/categories/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/categories/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/categories/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Categories">
+	<meta property="og:description" content="《大规模并行处理器编程（第5版）》个人学习译稿 · PMPP 5e Chinese learning translation">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="website">
+
+	<meta itemprop="name" content="Categories">
+	<meta itemprop="description" content="《大规模并行处理器编程（第5版）》个人学习译稿 · PMPP 5e Chinese learning translation">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Categories">
+	<meta name="twitter:description" content="《大规模并行处理器编程（第5版）》个人学习译稿 · PMPP 5e Chinese learning translation">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script>
+  </head>
+  <body class="td-taxonomy td-blog td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/categories/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/categories/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal td-shell-layout--no-toc"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none">
+          <div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhen-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/" title="Programming Massively Parallel Processors (5th Edition)"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhen"><span>Programming Massively Parallel Processors (5th Edition)</span></a>
+      
+    </div><div id="m-pmpp5-zhen-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-has-child"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="false" aria-controls="m-pmpp5-zhenbook-children"
+        aria-label="Expand section: Books"
+        data-td-label-expand="Expand section: Books"
+        data-td-label-collapse="Collapse section: Books"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+
+        </aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-content td-shell-blog-index">
+  <header class="td-taxonomy-head">
+  <div class="td-taxonomy-head__row">
+    <span class="td-taxonomy-head__icon" aria-hidden="true"><i class="fa-solid fa-folder-open"></i></span>
+    <h1 class="td-taxonomy-head__title">Categories</h1>
+  </div>
+</header>
+  
+</div>
+
+
+          </article>
+        </main>
+        
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/categories/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/categories/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/categories/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":false,"description":"View edit history","disabledReason":"View edit history: unavailable","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":""},{"available":false,"description":"Edit this page","disabledReason":"Edit this page: unavailable","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":""},{"available":false,"description":"Create child page","disabledReason":"Create child page: unavailable","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":""},{"available":false,"description":"Create docs issue","disabledReason":"Create docs issue: unavailable","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":""},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/categories/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/categories/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script>
+  </body>
+</html>

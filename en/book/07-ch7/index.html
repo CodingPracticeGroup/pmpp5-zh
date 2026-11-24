@@ -1,0 +1,808 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/07-ch7/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/06-ch6/">
+<link rel="next" href="/pmpp5-zh/en/book/08-ch8/"><meta name="robots" content="index, follow">
+
+<title>Chapter 7 Convolution | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/07-ch7/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/07-ch7/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/07-ch7/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/07-ch7/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 7 Convolution">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 7 Convolution">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="8777">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 7 Convolution">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/07-ch7/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/07-ch7/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/07-ch7/" aria-current="page" title="Chapter 7 Convolution"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 7 Convolution</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/07-ch7.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/07-ch7.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;7&#43;Convolution" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 7 Convolution</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c7">Chapter 7 Convolution<a class="td-heading-self-link" href="#c7" aria-label="Link to this heading"></a>
+</h1>
+<p>In the next several chapters, we discuss a set of important patterns of parallel computation. These patterns are the basis of a wide range of parallel algorithms that appear in many parallel applications. We start with convolution, which is a popular array operation that is used in various forms in signal processing, digital recording, image processing, video processing, and computer vision. In these application areas, convolution is often performed as a filter that transforms signals and pixels into more desirable values. Our image blur kernel is such a filter that smooths out the signal values so that one can see the big-picture trend. For another example, Gaussian filters are convolution filters that can be used to sharpen boundaries and edges of objects in images.</p>
+<p>Convolution typically performs a significant number of arithmetic operations to generate each output element. For large data sets, such as high-definition images and videos where there are many output elements (pixels), the amount of computation can be huge. On one hand, the output data elements of the convolution computation can be calculated independently of each other, a desirable trait for parallel computing. On the other hand, there is a substantial amount of input data sharing when processing different output data elements with somewhat challenging boundary conditions. These properties make convolution an important use case for sophisticated tiling methods and input data staging methods, which are the focus of this chapter.</p>
+<h2 id="sec-7-1">7.1 Background<a class="td-heading-self-link" href="#sec-7-1" aria-label="Link to this heading"></a>
+</h2>
+<p>Convolution is an array operation where each output element is a weighted sum of the corresponding input element and a collection of input elements that are centered Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00017-2">https://doi.org/10.1016/B978-0-44-343900-1.00017-2</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-1.png" alt="Figure 7.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.1.</strong> A 1D convolution example, inside elements.</p>
+<p>around it. The weights used in the weighted sum calculation are defined by a filter array, commonly referred to as the convolution kernel. Since there is an unfortunate name conflict between the CUDA kernel functions and convolution kernels, we will simply refer to these filter arrays as convolution filters to avoid confusion. Convolution can be performed on input data of different dimensionality: 1D (e.g., audio), 2D (e.g., photo), 3D (e.g., video), etc. In audio digital signal processing, the input 1D array elements are sampled signal volume over time. That is, the input data element xi is the i th sample of the audio signal volume. A convolution on 1D data, referred to as 1D convolution, is mathematically defined as a function that takes an input data array of n elements [x0 , x1 , &hellip;, xn−1 ] and a filter array of 2r + 1 elements [f0 , f1 , &hellip;, f2r ] and returns an output data array y such that: yi = r ∑ fj +r × xi+j (j =−r)</p>
+<p>Since the size of the filter is an odd number (2r + 1), the weighted sum calculation is symmetric around the element being calculated. That is, the weighted sum involves r input elements on each side of the position being calculated, which is the reason why r is referred to as the radius of the filter. Fig. 7.1 shows a 1D convolution example where a 5-element (r = 2) convolution filter f is applied to a 7-element input array x. We will follow the C++ language convention where x and y elements are indexed from 0 to 6 and f elements are indexed from 0 to 4. Since the filter radius is two, each output element is calculated as the weighted sum of the corresponding input element, two elements on the left, and two elements on the right. For example, the value of y[2] is generated as the weighted sum of x[0] (i.e., x[2 + (−2)]) through x[4] (i.e., x[2 + 2]). In this example, we arbitrarily assume that the values of the x elements are [8, 2, 5, 4, 1, 7, 3]. The f elements define the weights, whose values are [1, 3, 5, 3, 1] in this example. Each f element is multiplied to the corresponding x element values before the products are summed together. As shown in Fig. 7.1, the calculation for y[2] is as follows: y[2] = f [0] ∗ x[0] + f [1] ∗ x[1] + f [2] ∗ x[2] + f [3] ∗ x[3] + f [4] ∗ x[4]</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-2.png" alt="Figure 7.2" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.2.</strong> 1D convolution, calculation of y[3].</p>
+<p>=1∗8+3∗2+5∗5+3∗4+1∗1 = 52 In Fig. 7.1, the calculation for y[i] can be viewed as an inner product between the sub-array of x that starts at x[i − 2] and the f array1 Fig. 7.2 shows the calculation for y[3]. The calculation is shifted by one x element from that of Fig. 7.1. That is, the value of y[3] is the weighted sum of x[1] (i.e., x[3 + (−2)]), through x[5] (i.e., x[3 + 2]). We can think of the calculation for x[3] as the following inner product: y[3] = f [0] ∗ x[1] + f [1] ∗ x[2] + f [2] ∗ x[3] + f [3] ∗ x[4] + f [4] ∗ x[5] =1∗2+3∗5+5∗4+3∗1+1∗7 = 47 Because convolution is defined in terms of neighboring elements, boundary conditions naturally arise when computing output elements that are close to the ends of an array. As shown in Fig. 7.3, when we calculate y[1], there is only one x element to the left of x[1]. That is, there are not enough x elements to calculate y[1] according to our definition of convolution. A typical approach to handling such boundary condition is to define a default value to these missing x elements. For most applications, the default value is 0, which is what we use in Fig. 7.3. For example, in audio signal processing, we can assume that the signal volume is 0 before the recording starts and after it ends. In this case, the calculation of y[1] is as follows. y[1] = f [0] ∗ 0 + f [1] ∗ x[0] + f [2] ∗ x[1] + f [3] ∗ x[2] + f [4] ∗ x[3] =1∗0+3∗8+5∗2+3∗5+1∗4 = 53 1 Since each output element of convolution can be viewed as an inner product between a sub-array of x and the f array, the reader may wonder if one can formulate convolution in terms of matrix multiplication. There is indeed such a formulation, which will be discussed in Chapter 19 (Convolutional Neural Networks).</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-3.png" alt="Figure 7.3" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.3.</strong> 1D convolution boundary condition.</p>
+<p>The x element that does not exist in this calculation is illustrated as a dashed box in Fig. 7.3. It should be clear that the calculation of y[0] would involve two missing x elements and both would be assumed to be 0 for this example. We leave the calculation of y[0] as an exercise. These missing elements are typically referred to as ``ghost cells&rsquo;&rsquo; in the literature. There are also other types of ghost cells due to the use of tiling in parallel computation. These ghost cells can have significant impact on the effectiveness and/or efficiency of tiling. We will come back to this point soon. Not all applications assume that the ghost cells contain 0. For example, some applications might assume that each ghost cell contains the same value as the closest valid data element on the edge. Others might assume that the ghost cell values can be derived by concatenating a copy of the input array with the input array, creating a circular view of the input array. For image processing and computer vision, input data is typically represented as two-dimensional arrays, with pixels in an x-y space. Image convolutions are therefore 2D convolutions, as illustrated in Fig. 7.4. In a 2D convolution, the filter f is also a 2D array. Its x- and y-dimensions determine the range of neighbors to be included in the weighted sum calculation. Let us assume that the dimension of the filter is 2rx + 1 in the x-dimension and 2ry + 1 in the y-dimension. The calculation of each P element can be expressed as: Py,x = (ry ) ∑ (rx ) ∑ fj +ry ,k+rx × Ny+j,x+k (j =−ry ) (k=−rx )</p>
+<p>In Fig. 7.4, we use a 5 × 5 filter for simplicity, i.e., ry = 2 and rx = 2. In general, the filter does not have to be but is typically a square array. To generate an output element, we take the sub-array whose center is at the corresponding location in the input array N. We then perform pairwise multiplication between elements of the filter array and those of the image array. For our example, the result is shown as the 5 × 5 product array below N and P in Fig. 7.4. The value of the output element is the sum of all elements of the product array.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-4.png" alt="Figure 7.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.4.</strong> A 2D convolution example.</p>
+<p>The example in Fig. 7.4 shows the calculation of P2,2 . For brevity, we use Ny,x to denote N [y][x] in addressing a C++ array. Since N and P are most likely dynamically allocated arrays, we will be using linearized indices in our actual code examples. The calculation is as follows: P2,2 = N0,0 ∗ M0,0 + N0,1 ∗ M0,1 + N0,2 ∗ M0,2 + N0,3 ∗ M0,3 + N0,4 ∗ M0,4 + N1,0 ∗ M1,0 + N1,1 ∗ M1,1 + N1,2 ∗ M1,2 + N1,3 ∗ M1,3 + N1,4 ∗ M1,4 + N2,0 ∗ M2,0 + N2,1 ∗ M1,1 + N2,2 ∗ M2,2 + N2,3 ∗ M2,3 + N2,4 ∗ M2,4 + N3,0 ∗ M3,0 + N3,1 ∗ M3,1 + N3,2 ∗ M3,2 + N3,3 ∗ M3,3 + N3,4 ∗ M3,4 + N4,0 ∗ M4,0 + N4,1 ∗ M4,1 + N4,2 ∗ M4,2 + N4,3 ∗ M4,3 + N4,4 ∗ M4,4 =1∗1+2∗2+3∗3+4∗2+5∗1 +2∗2+3∗3+4∗4+5∗3+6∗2 +3∗3+4∗4+5∗5+6∗4+7∗3 +4∗2+5∗3+6∗4+7∗3+8∗2 +5∗1+6∗2+7∗3+8∗2+5∗1 =1+4+9+8+5 + 4 + 9 + 16 + 15 + 12 + 9 + 16 + 25 + 24 + 21 + 8 + 15 + 24 + 21 + 16 FIGURE 7.5 A 2D convolution boundary condition.</p>
+<p>+ 5 + 12 + 21 + 16 + 5 = 321</p>
+<p>Like 1D convolution, 2D convolution must also deal with boundary conditions. With boundaries in both the x and y dimensions, there are more complex boundary conditions: the calculation of an output element may involve boundary conditions along a horizontal boundary, a vertical boundary, or both. Fig. 7.5 illustrates the calculation of a P element that involves both boundaries. From Fig. 7.5, the calculation of P1,0 involves two missing columns and one missing row in the sub-array of N. Like in 1D convolution, different applications assume different default values for these missing N elements. In our example, we assume that the default value is 0. These boundary conditions also affect the efficiency of tiling. We will come back to this point soon.</p>
+<h2 id="sec-7-2">7.2 Parallel convolution &ndash; a basic kernel<a class="td-heading-self-link" href="#sec-7-2" aria-label="Link to this heading"></a>
+</h2>
+<p>The fact that the calculation of all output elements can be done in parallel in convolution makes convolution an ideal use case for data parallel computing. Based on our experience in matrix multiplication, we can quickly write a simple parallel convolution kernel. We show code examples for 2D convolution and the reader is encouraged FIGURE 7.6 Parallelization and thread organization for 2D convolution.</p>
+<p>to adapt these code examples to 1D and 3D as exercises. Also, for simplicity, we assume the convolution filters are square. The first step is to define the major input parameters for the kernel. We assume that the 2D convolution kernel receives five arguments: a pointer to input array N, a pointer to the filter F, a pointer to output array P, the radius of the square filter r, the width of the input and output arrays width, and the height of the input and output arrays height. Thus, we have the following kernel signature: <strong>global</strong> void convolution_2D_basic_kernel(float *N, float *F, float *P, int r, int width, int height) { // kernel body } The second step is to determine and implement the mapping of threads to output elements. Since the output array is 2D, a simple and good approach is to organize the threads into a 2D grid and have each thread in the grid to calculate one output element. Each block, with up to 1024 threads in a block, can calculate up to 1024 output elements, typically organized as a 32×32 square. Fig. 7.6 shows a toy example where the input and output are 16 × 16 images. We assume in this toy example that each thread block is organized as a 4 × 4 array of threads, four threads in the x dimension and four in the y dimension. The grid in this example is organized as a 4 × 4 array of blocks. The assignment of threads to output elements, i.e., output pixels in this example, is simple: every thread is assigned to calculate an output pixel whose x and y indices are the same as thread’s x and y indices. The reader should recognize that the parallelization arrangement in Fig. 7.6 is the same as that of the ColorToGrayScaleConversion example in Chapter 3. Therefore, we can use the statements in lines 2-3 of the kernel in Fig. 7.7 to calculate the output element indices from the block index, block dimension, and thread index for each thread.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-7.png" alt="Figure 7.7" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.7.</strong> A 2D convolution kernel with boundary condition handling.</p>
+<p>For example, thread1,1 of block1,1 , is mapped to output element P1∗4+1,1∗4+1 = P5,5 which is marked as a shaded cell on the right side of Fig. 7.6. Once we have determined the output element indices for each thread, we can identify the input N elements needed for calculating the output element. As illustrated in Fig. 7.6, the calculation of P5,5 by thread1,1 of block1,1 uses the input elements whose x indices range from outCol − r = 5 − 2 = 3 to outCol + r = 5 + 2 = 7, and whose y indices range from outRow − r = 5 − 2 = 3 to outRow + r = 5 + 2 = 7. For all threads, outCol − r and outRow − r define the upper-left corner of the patch of input elements (shaded square on the left side of Fig. 7.6) needed for PoutRow,outCol . Therefore, we can use a doubly nested loop to iterate through all these index values and perform this calculation (lines 05-13 of Fig. 7.7). The register variable Pvalue accumulates all intermediate results to save DRAM bandwidth. The if-statement in the inner for-loop (line 09) tests if any of the input N elements used are ghost cells, on the left, right, top, or bottom side of the N array. Since we assume that 0 values will be used for ghost cells, we can simply skip the multiplication and accumulation of the ghost cell element and its corresponding filter element. After the end of the loop, we release the Pvalue into the output P element (line 14). We make two observations from the kernel in Fig. 7.7. First, there is control flow divergence on lines 09-10. The threads that calculate the output elements near the four edges of the P array need to handle ghost cells. As shown in Section 7.1, each of these threads encounters a different number of ghost cells. Therefore, they all make somewhat different decisions in the if-statement (line 09). The thread that calculates P0,0 skips the multiply-accumulate statement most of the time, whereas the one that calculates P0,1 skips fewer times, and so on. The cost of control divergence depends on the width and height of the input array and the radius of the filter. For large input arrays and relatively small filters, control divergence only occurs when computing a small portion of the output elements, which keeps the effect of control divergence small. Since convolution is often applied to large images, we expect that the effect of control divergence to be from modest to insignificant. A more important performance consideration is the memory bandwidth.</p>
+<h2 id="sec-7-3">7.3 Memory bandwidth considerations<a class="td-heading-self-link" href="#sec-7-3" aria-label="Link to this heading"></a>
+</h2>
+<p>Following the same approach introduced in Chapter 5 in the context of matrix multiplication, let us analyze the arithmetic intensity of convolution and reason about its demand for memory bandwidth. For simplicity, let us assume that the input array is square and has dimensions n × n. Let us also assume that the filter is square and has dimensions m × m (m = 2r + 1 where r is the filter radius). All array and filter elements are 32-bit (4 B) single-precision floating point values. Let us first calculate the number of arithmetic operations performed by convolution. For each of the n × n output elements, the convolution operation iterates through the m × m filter and performs two arithmetic operations for each filter element, a multiply and an add. Hence, the total number of arithmetic operations performed by the convolution operation is 2 · n2 · m2 FLOP. Now, let us calculate the amount of memory data that the convolution operation needs to access. At a minimum, the operation needs to load the convolution filter and the input array, and needs to store the output array. The filter consists of m2 elements. The input and output arrays consist of n2 elements each. Since each element is 4 B, the total number of bytes that convolution needs to access is 8 · n2 + 4 · m2 . Since the filter is typically much smaller than the array (m &laquo; n), we can ignore the accesses to the filter and approximate the number of bytes accessed as 8 · n2 B. Taking the ratio of the number of arithmetic operations performed to the number 2 2 of bytes accessed, we find the arithmetic intensity of convolution to be 2·n8·n·m = 4 · m FLOP/B. In other words, a perfect implementation of convolution that accesses each input and output element only once performs 14 · m2 floating point operations for every byte it accesses in memory. An interesting observation is that the arithmetic intensity of convolution is dependent on the convolution filter size m. Convolutions with small filter sizes have low arithmetic intensity, which makes them memory bound. For example, a convolution with a 3 × 3 filter has an arithmetic intensity of 14 · 32 = 2.25 FLOP/B, which makes it memory-bound on an H100 GPU. It is impossible for this computation to reach the peak compute throughput of the GPU because its performance is limited by the memory bandwidth. On the other hand, convolutions with large filter sizes have a high arithmetic intensity, which makes them compute-bound. For example, a convolution with an 11 × 11 filter has an arithmetic intensity of 14 · 112 = 30.25 FLOP/B, which makes it compute-bound on an H100 GPU. The performance of this computation can come close to the peak compute throughput of the GPU provided that the right optimizations are applied. Let us now turn our attention to our basic convolution kernel in Fig. 7.7 of Section 7.2. On line 10 of Fig. 7.7, each thread in each loop iteration loads two elements (8 B) from the global memory and performs two arithmetic operations on them. We ignore the store operation on line 14 because it is negligible in this kernel since it occurs outside the loop nest. Accordingly, the arithmetic intensity of this implementation is (2 FLOP)/(8 B) = 0.25 FLOP/B. Clearly, this arithmetic intensity is very low regardless of the filter size.</p>
+<p>In practice, the actual arithmetic intensity of the kernel is higher because of onchip caching. The same filter and input elements are accessed by multiple threads and are likely to be found in the L1 or L2 caches. Still, to more reliably achieve a higher arithmetic intensity and perform closer to the device’s peak throughput, programmers can use other on-chip memory structures such as shared memory or the constant cache. We discuss constant memory and the constant cache in Section 7.4 and shared memory tiling in Section 7.5.</p>
+<h2 id="sec-7-4">7.4 Constant memory and caching<a class="td-heading-self-link" href="#sec-7-4" aria-label="Link to this heading"></a>
+</h2>
+<p>There are three interesting aspects of the way the filter array F is used in convolution. First, the size of F is typically small; the radius of most convolution filters is 7 or smaller. Even in 3D convolution, the filter typically contains only less than or equal to 73 = 343 elements. Second, the contents of F do not change throughout the execution of the convolution kernel. Third, all threads access the filter elements. Even better, all threads access the filter elements in the same order, starting from F0,0 and moving by one element a time through the iterations of the doubly nested for-loop in Fig. 7.7. These three aspects make the filter an excellent candidate for constant memory and caching (Fig. 7.8).</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-8.png" alt="Figure 7.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.8.</strong> A review of the CUDA memory model.</p>
+<p>As we discussed in Chapter 5 (Fig. 5.4), CUDA allows programmers to declare variables to reside in the constant memory. Like global memory variables, constant memory variables are also visible to all thread blocks. The main difference is that the value of a constant memory variable cannot be modified by threads during kernel execution. Furthermore, the size of the constant memory is quite small, currently at 64 KB.</p>
+<p>To use constant memory, the host code needs to allocate and copy constant memory variables in a different way than global memory variables. We assume that the radius of the filter is specified in the compile-time constant FILTER_RADIUS. To declare a filter array F in constant memory, the host code declares it as a global variable as follows: #define FILTER_RADIUS 2 <strong>constant</strong> float F[2*FILTER_RADIUS+1][2*FILTER_RADIUS+1];</p>
+<p>This global variable declaration should be outside any function in the source file. The keyword <strong>constant</strong> (two underscores on each side) tells the compiler that array F should be placed into the device constant memory. Assume that the host code has already allocated and initialized the filter in an array F_h in the host memory with (2 ∗ F I LT ER_RADI U S + 1)2 elements. The contents of F_h can be transferred from the host memory to F in the device constant memory as follows: cudaMemcpyToSymbol(F, F_h, (2*FILTER_RADIUS + 1)*(2*FILTER_RADIUS + 1) *sizeof(float));</p>
+<p>The cudaMemcpyToSymbol() API function is a special memory copy function that informs the CUDA runtime that the data being copied into the constant memory will not be changed during kernel execution. In general, the use of cudaMemcpyToSymbol() function is as follows: cudaMemcpyToSymbol(dest, src, size)</p>
+<p>where dest is a pointer to the destination location in the constant memory, src is a pointer to the source data in the host memory, and size is the number of bytes to be copied.2 Kernel functions access constant memory variables as global variables. Thus, their pointers do not need to be passed to the kernel as arguments. We can revise our kernel to use the constant memory as shown in Fig. 7.9. Note that the kernel looks almost identical to that in Fig. 7.7. The only difference is that F is no longer accessed through a pointer passed in as a parameter. It is now accessed as a global variable. Keep in mind that all the C++ language scoping rules for global variables apply here. If the host code and kernel code are in different files, the kernel code file must include the relevant external declaration information to ensure that the declaration of F is visible to the kernel. Like global memory variables, constant memory variables are also located in DRAM. However, because the CUDA runtime knows that constant memory variables are not modified during kernel execution, it directs the hardware to aggressively cache the constant memory variables during kernel execution. To understand the benefit of 2 The function can take two more arguments, offset and kind but these are seldom used and often omitted.</p>
+<p>The reader is referred to CUDA C++ Programming Guide for details of these arguments.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-9.png" alt="Figure 7.9" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.9.</strong> A 2D convolution kernel using constant memory for F.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-10.png" alt="Figure 7.10" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.10.</strong> A simplified view of the cache hierarchy of modern processors.</p>
+<p>constant memory usage, we need to first understand more about modern processor memory and cache hierarchies. As we discussed in Chapter 5 and Chapter 6, the long latency and limited bandwidth of DRAM form a bottleneck in virtually all modern processors. To mitigate the effect of this memory bottleneck, modern processors commonly employ on-chip cache memories, or caches, to reduce the number of variables that need to be accessed from the main memory (DRAM), as shown in Fig. 7.10. Unlike the CUDA shared memory, or scratchpad memories in general, caches are “transparent&rsquo;&rsquo; to programs. That is, to use CUDA shared memory to hold the value of a global variable, a program needs to declare variables as <strong>shared</strong> and explicitly copy the value of the global memory variable into the shared memory variable. On the other hand, when using caches, the program simply accesses the original global memory variables. The processor hardware automatically retains the most recently or frequently used variables in the cache and remembers their original global memoryaddress. When one of the retained variables is used later, the hardware detects from their addresses that a copy of the variable is available in cache. The value of the variable is then served from the cache, eliminating the need to access DRAM. There is a tradeoff between the size of a memory and the speed of a memory. As a result, modern processors often employ multiple levels of caches. The numbering convention for these cache levels reflects the distance to the processor. The lowest level, Level 1 or L1, is the cache that is directly attached to a processor core, as shown in Fig. 7.10. It runs at a speed close to the processor in both latency and bandwidth. However, an L1 cache is small, typically up to 128 KB in capacity. L2 caches are larger, in the range of a few hundred KBs to a few tens of MBs, but can take tens to hundreds of cycles to access. They are typically shared among multiple CPU cores, or SMs in a CUDA device, so the access bandwidth is shared among SMs. In some high-end processors today, there are even L3 caches that can be of hundreds of MBs in size. Constant memory variables play an interesting role in designing and using memories in massively parallel processors. Since these constant memory variables are not modified during kernel execution, there is no need to support writes by threads when caching them in an SM. Supporting high-thought writes into a general cache requires sophisticated hardware logic and is costly in terms of chip area and power consumption. Without the need for supporting writes, a specialized cache for constant memory variables can be designed in a highly efficient manner in terms of chip area and power consumption. Furthermore, since the constant memory is quite small (64 KB), a small and specialized cache can be highly effective in capturing the heavily used constant memory variables for each kernel. This specialized cache is called a constant cache in modern GPUs. When all threads in a warp access the same constant memory variable, as is the case of F in Fig. 7.9 where the indices for accessing F are independent of the thread indices, the constant caches can provide a tremendous amount of bandwidth to satisfy the data needs of these threads. Also, since the size of F is typically small, we can assume that all F elements are effectively always accessed from the constant cache. Therefore, we can simply assume that no DRAM bandwidth is spent on accesses to the F elements. With this consideration in mind, let us calculate the arithmetic intensity of the kernel in Fig. 7.9. On line 10 of Fig. 7.9, each thread in each loop iteration loads one element (4 B) from the global memory and performs two arithmetic operations on them. The load from F in constant memory is not counted since it almost always hits the constant cache. We ignore the store operation on line 14 because it is negligible in this kernel since it occurs outside the loop nest. Accordingly, the arithmetic intensity of this implementation is (2 FLOP)/(4 B) = 0.5 FLOP/B. In other words, it is double that of the basic kernel in Fig. 7.7. In practice, the actual arithmetic intensity of the kernel in Fig. 7.9 is even higher because the elements of N are accessed by multiple threads and will sometimes be found in the L1 or L2 cache. Still, we can more reliably optimize the accesses to N using shared memory tiling, as we show in Section 7.5.</p>
+<p>There is another way to place the filter weights in constant memory without declaring a global array variable. The CUDA compiler actually places kernel parameters in the constant memory as well. Hence, if the filter weights were passed as kernel parameters, they would also be placed in constant memory. A concise way of passing the filter weights as kernel parameters is to place them in a C++ structure and pass the structure by value. This method would allow the kernel to be called many times with different filter weights without the need to explicitly copy these weights every time using cudaMemcpyToSymbol. The CUDA runtime will still need to copy them as part of the kernel launch process, but the copy operation is done transparently to the programmer. There is yet another way to leverage the constant nature of the filter weights to avoid accessing them from the global memory. If the filter weights do not change across program executions and were known at compile time, their values could be hard-coded in the code itself. However, this approach would make the kernel not reusable for other filter weight values.</p>
+<h2 id="sec-7-5">7.5 Tiled convolution with halo cells<a class="td-heading-self-link" href="#sec-7-5" aria-label="Link to this heading"></a>
+</h2>
+<p>We can address the memory bandwidth bottleneck of convolution by applying the shared memory tiling optimization. Recall from Chapter 5 that in shared memory tiling, threads collaborate to load input elements into an on-chip memory for subsequent repeated use of these elements. We start by establishing the definitions of input tiles and output tiles since these definitions are important for understanding the implementation of the optimization. We refer to the collection of output elements processed by each block as an output tile. Recall that Fig. 7.6 shows a toy example of a 16 × 16 2D convolution using 4 × 4 = 16 blocks with 4 × 4 = 16 threads each. In that example, there are 16 output tiles. Keep in mind that we use 16 threads per block to keep the example small. In practice, there should be at least 32 threads, or one warp, per block, and typically more to achieve a good level of occupancy and data reuse. We define an input tile as the collection of input elements that are needed to calculate the elements in an output tile. Fig. 7.11 shows the input tile (the shaded patch on the left side) that corresponds to the output tile (the shaded patch on the right side) processed by block1,1 . Note that the dimensions of the input tile need to be extended by the radius of the filter (2 in this example) in each direction to ensure that it includes all the halo input elements needed for calculating the output elements at the edges of the output tile. This extension can make the input tiles significantly larger than output tiles. In this toy example, each output tile consists of 42 = 16 elements whereas each input tile consists of (4 + 2 + 2)2 = 82 = 64 elements. In this case, the input tiles are or 4× larger than the output tiles. However, this large ratio is because we assume a tiny output tile dimension for ease of visualization in the toy example. In practice, the output tile dimensions would be much larger and the ratio between input tile size and output tile size would be smaller. For example, if the output tile size is 16 × 16 = 256, with the same 5 × 5 filter, the input tile size FIGURE 7.11 Input tile and output tile in 2D convolution.</p>
+<p>would be (16 + 2 + 2)2 = 400. In this case, the ratio between the input tile size and the output size is about 1.6. Although this ratio is much less than 4, it shows that the input tile size can still be significantly larger than output tiles even for practical output tile dimensions. In this section, we present one method for applying shared memory tiling to convolution. This method entails having all threads in a block collaboratively loading the entire input tile to the shared memory, then calculating the elements of the output tile by accessing the input elements from the shared memory. This method should sound familiar to the reader: the strategy resembles that of the tiled matrix multiplication implementation discussed in Chapter 5. The main difference is that the tiled matrix multiplication implementation in Chapter 5 assumes that the input tiles are of the same dimension as the output tiles, whereas the convolution input tiles are larger than the output tiles. This difference between input tile size and output tile size complicates the design of tiled convolution kernels. There are two simple thread organizations for addressing the discrepancy between the input tile size and the output tile size. The first one launches thread blocks whose dimension matches that of the input tiles. This simplifies the loading of the input tiles as each thread needs to load just one input element. However, since the block dimension is larger than that of the output tile, some of the threads need to be disabled during the calculation of output elements. The second approach launches blocks whose dimension matches that of the output tiles. On one hand, this second strategy makes the input tile loading more complex as the threads need to iterate to ensure that all input tile elements are loaded. On the other hand, it simplifies the calculation of the output elements since the dimension of the block is the same as the output tile and there is no need to disable any threads during the calculation of output elements. We present a kernel based on the first thread organization and leave the second organization as an exercise to the reader.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-12.png" alt="Figure 7.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.12.</strong> A tiled 2D convolution kernel using constant memory for F.</p>
+<p>Fig. 7.12 shows a kernel that is based on the first thread organization. Each thread first calculates the column index (col) and row index (row) of the input/output element that it is responsible for loading/computing (lines 06-07). The kernel allocates a shared memory array N_s whose size is the same as an input tile (line 09) and loads the input tile to the shared memory array (lines 10-15). The conditions on line 10 are used by each thread to check if the input tile element it is attempting to load is a ghost cell. If so, the thread does not perform a memory load. Rather, it places a zero into the shared memory. All threads perform a barrier synchronization (line 15) to ensure that the entire input tile is in place in the shared memory before any thread is allowed to proceed with the calculation of output elements. Now that all the input tile elements are in the N_s array, each thread can calculate its output P element value using the N_s elements. Keep in mind that the output tile is smaller than the input tile and the blocks are of the same size as the input tiles. For this reason, only a subset of the threads in each block are used to calculate the output tile elements. There are multiple ways we can select a subset of the block’s threads to calculate the output tile elements. Our implementation deactivates FILTER_RADIUS exterior layers of threads, as illustrated in Fig. 7.13. Fig. 7.13 shows a small example of convolution using a 3 × 3 filter (FILTER_RADIUS = 1), 8 × 8 input tiles, 8 × 8 blocks, and FIGURE 7.13 A small example that illustrates the thread organization for using the input tile elements in the shared memory to calculate the output tile elements.</p>
+<p>6 × 6 output tiles. The left side of Fig. 7.13 shows the input tile and the thread block. Since they are of the same size, they are overlayed on top of each other. In our implementation, we deactivate FILTER_RADIUS = 1 exterior layer of threads. The heavy-line box at the center of the left side encloses the active threads for calculating the output tile elements. In this example, the threadIdx.x and threadIdx.y values of the active threads both range from 1 to 6. Fig. 7.13 also shows the mapping of the active threads to the output tile elements. Active thread (tx, ty) calculates output element (tx &ndash; FILTER_RADIUS, ty -FILTER_RADIUS) using a patch of input tile elements whose upper-left corner is element (tx &ndash; FILTER_RADIUS, ty &ndash; FILTER_RADIUS) of the input tile. This is reflected in lines 17-18 of Fig. 7.12, where the column index (tileCol) and row index (tileRow) of the beginning of the input tile patch are assigned threadIdx.x &ndash; FILTER_RADIUS and threadId.y &ndash; FILTER_RADIUS, respectively. In our small example in Fig. 7.13, tileCol and tileRow of thread (1,1) receive 0 and 0 respectively. Thus, thread (1, 1) calculates element (0, 0) of the output tile using the 3 × 3 patch of input tile elements highlighted with the dashed box at the upper left corner of the input tile. The loop nest on lines 24-28 of Fig. 7.12 iterates through the input patch and generates the output element. Thread (1, 1) in the block iterates through the patch whose upper left corner is N_s[0][0], whereas Thread (5,5) iterates through the patch whose upper left corner is N_s[5][5]. In lines 06-07, blockIdx.x*OUT_TILE_DIM and blockIdx.y*OUT_TILE_DIM are the horizontal and vertical P array indices of the beginning of the output tile assigned to the block. As we discussed above, threadIdx.x &ndash; FILTER_RADIUS and threadIdx.y -FILTER_RADIUS give the offset into the tile. Thus, the row and the col variables provide the index of the output element assigned to each active thread. Each thread uses these two indices to write the final value of the output element in line 29.</p>
+<p>The tiled 2D convolution kernel in Fig. 7.12 is significantly longer and more complex than the basic kernel in Fig. 7.9. We introduced the additional complexity to reduce the number of DRAM accesses for the N elements. The goal is to improve the arithmetic intensity of the kernel so that the achieved performance is not limited or less limited by the memory bandwidth. Recall from Section 7.4 that the arithmetic intensity of the kernel in Fig. 7.9 is 0.5 FLOP/B. Let us now derive the arithmetic intensity for the kernel in Fig. 7.12. For the blocks that handle tiles at the edges of the data, the threads that handle ghost cells do not perform any memory access for these ghost cells. This reduces the number of memory accesses for these blocks. We can calculate the reduced number of memory accesses by enumerating the number of threads that use each ghost cell. However, it should be clear that for large input arrays, the effect of ghost cells for small filter sizes will be insignificant. So, we will ignore the effect of ghost cells when we calculate the arithmetic intensity of tiled convolution kernels, and only consider the internal thread blocks whose halo cells are not ghost cells. We now calculate the arithmetic intensity for the tiled kernel in Fig. 7.12. Let t represent the size of the square output tile along one dimension (i.e., OUT_TILE_DIM) and m represent the filter dimension (i.e., 2*FILTER_RADIUS+1). Every thread assigned to an output tile element performs one multiplication and one addition for every element of the filter. Therefore, the threads in an internal block collectively perform t 2 · m2 · 2 arithmetic operations. As for the global memory accesses, all the global memory loads have been shifted outside the loop nest to the code that loads the input elements into the shared memory. Each thread assigned to an input tile element loads one 4 B input value. Since the input tile dimension (IN_TILE_DIM) is t + m − 1, the total number of bytes that are loaded by each internal block is (t + m − 1)2 · 4. Since the loads are outside the loop nest, they no longer significantly outnumber the stores so we must also consider the stores in our analysis. The threads of an internal thread block collectively store an entire t × t output tile of elements that are 4 B each. Hence, the total number of bytes stored is t 2 · 4. Taking the ratio of the arithmetic operations performed by an internal block to the number of bytes the block loads, we find the arithmetic intensity of the tiled convolution kernel in Fig. 7.12 to be: t 2 · m2 · 2 = · m2 · 1 m−1 ((t + m − 1) + t ) · 4 4 2 · (1 + t ) + 2 It is notable that this arithmetic intensity is closer to the ideal arithmetic intensity of 14 · m2 derived in Section 7.3. It is attenuated by a factor that approaches 1.0 as the output tile dimension t increases. Intuitively, a larger output tile enables us to reuse input tile elements that are loaded to shared memory to compute a larger number of output tile elements. Hence, a larger t provides a higher arithmetic intensity. Of course, t in our kernel implementation is limited by multiple hardware resource constraints such as the thread block size limit and the shared memory capacity limit. We cover optimization techniques to overcome these challenges in Chapter 8.</p>
+<img src="/pmpp5-zh/figs/orig/fig-7-14.png" alt="Figure 7.14" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 7.14.</strong> Arithmetic intensity as a function of tile size and filter size for 2D tiled convolution.</p>
+<p>Fig. 7.14 shows how the value of the expression we derived for the arithmetic intensity of the tiled convolution kernel in Fig. 7.12 varies for different filter sizes and tile dimensions. It is clear that the computation is memory bound for small filter and tile dimensions, and compute bound for large filter and tile dimensions. For our example with a 5 × 5 filter and 28 × 28 output tiles (32 × 32 input tiles), the arithmetic intensity is 5.42 FLOP/B. In practice, it could be larger because some values used by different thread blocks can be found in the caches. This value is reasonably close to the ideal arithmetic intensity with a 5 × 5 filter, which is 6.25 FLOP/B. The tiled convolution kernel implemented in Fig. 7.12 has a number of inefficiencies. Much of the inefficiency has to do with the fact that the input tile dimensions and block dimensions are larger than the output tile dimensions because of the loading of halo cells. The first inefficiency is that the implementation launches threads that only load data from global memory to shared memory, but do not participate in the computation stage, thereby wasting compute resources. While this approach may be beneficial for memory-bound kernels where having more parallelism when accessing memory is useful, it may become a drawback in compute-bound kernels where the resources wasted by the excluded threads are more valuable. The second inefficiency is that the implementation has output tile dimensions that are not powers of two in size, which may cause misaligned memory accesses when storing the final result to the global memory. Since the maximum size of the thread block (and input tile) is 32 × 32, the output tile for a 5 × 5 filter is 28 × 28. Hence, the output tiles stored by each thread block are not perfectly aligned in memory which can cause some inefficiency when storing them. The third inefficiency is that supporting larger filter dimensions requires shrinking the output tile because the size of the input tile cannot be expanded. As we have seen, shrinking the output tile results in reducing the arithmetic intensity of the kernel, not to mention exacerbating the two aforementioned inefficiencies. To overcome these issues, one could match the block size to the output tile dimension and have threads iterate to load the larger input tile to shared memory. This alternative corresponds to the second thread organization mentioned earlier in this section and left as an exercise for the reader. Another possibility is to avoid loading the halo cells to shared memory entirely and rely on the caches for accessing them quickly. This alternative is introduced in Section 7.6 FIGURE 7.15 A tiled 2D convolution kernel using caching for halos and constant memory for F.</p>
+<h2 id="sec-7-6">7.6 Tiled convolution using caches for halo cells<a class="td-heading-self-link" href="#sec-7-6" aria-label="Link to this heading"></a>
+</h2>
+<p>Recall that the halo cells of an input tile of a block are also the internal elements of neighboring tiles. For example, in Fig. 7.11, the lightly shaded halo cells of an input tile are also internal elements of the input tiles of neighboring blocks. There is a significant probability that by the time a block needs to its halo cells, they are already in the L2 cache due to the accesses by its neighboring blocks. As a result, the memory accesses to these halo cells may be naturally served from L2 cache without causing additional DRAM traffic. That is, we can leave the accesses to these halo cells in the original N elements rather than loading them into the N_s. Doing so enables us to use the same dimension for the shared memory input tile and the output tile, and only load the internal elements of each input tile into the shared memory.</p>
+<h2 id="sec-7-7">7.7 Summary<a class="td-heading-self-link" href="#sec-7-7" aria-label="Link to this heading"></a>
+</h2>
+<p>Fig. 7.15 shows a 2D convolution kernel using caching for halo cells. In this tiled kernel, the shared memory N_s array only needs to hold the internal elements of the tile. Thus, the input tiles and output tiles are of the same dimension, which is defined as constant TILE_DIM (line 1). With this simplification, N_s is declared to have TILE_DIM elements in both the x and y dimensions (line 6). Because the input tiles and output tiles are of the same size, the thread blocks can be launched with the same size of the input/output tiles. Loading of the N_s elements becomes simpler since each thread can simply load the input element that has the same row and column index as its assigned output element (lines 4-5, 7-11). The condition for loading an input element is also simplified in line 7 because the kernel no longer loads halo cells into shared memory so there is no danger of loading ghost cells. Thus, the condition only needs to check for the usual boundary condition that a tile may extend beyond the valid range of the input data. The body of the loop that calculates the elements of P, however, becomes more complex. It needs to add conditions to check for use of both halo cells and ghost cells. The handling of halo cells are done with the conditions on lines 17-20, which test if the input element falls within the interior of the input tile. If so, the element is accessed from the shared memory. If not, the conditions on lines 24-27 check if the halo cells are ghost cells. If so, no action is taken for the element since we assume that the ghost values are 0. Otherwise, the element is accessed from the global memory. The reader should verify that the conditions for handling the ghost cells are similar to those used in Fig. 7.7. A subtle advantage of the kernel in Fig. 7.15 compared to the kernel in Fig. 7.12 is that its block size, input tile size, and output tile size can be the same and can be a power of two. Because the input tile size and output tile size are different for the kernel in Fig. 7.12, there is likely more memory divergence and control divergence during the execution of that kernel.</p>
+<p>In this chapter, we have studied convolution as an important parallel computation pattern. While convolution is used in many applications such as computer vision and video processing, it also represents a general pattern that forms the basis of many parallel algorithms. For example one can view the stencil algorithms in partial differential equation (PDE) solvers as a special case of convolution, and this will be the subject of Chapter 8. We will also apply much of what we learned in this chapter on convolutional neural networks in Chapter 20. We presented a basic parallel convolution implementation whose performance is limited by DRAM bandwidth for accessing both the input and filter elements. We then introduced constant memory and a simple modification to the kernel and host code to take advantage of constant caching and eliminate practically all DRAM accesses for the filter elements. We further introduced a tiled parallel convolution implementation that reduces DRAM bandwidth consumption by leveraging the shared memory whileintroducing more control flow divergence and programming complexity. Finally, we presented a tiled parallel convolution implementation that takes advantage of the L1 and L2 caches for handling halo cells. We presented an analysis of the benefit of tiling in terms of elevated arithmetic intensity. This analysis is an important skill that was introduced in Chapter 5 and will be useful in understanding the benefit of tiling for other patterns as well. Through the analysis, we learned about the limitation of small filter and tile sizes. Although we have shown examples for only 1D and 2D convolution, the techniques are directly applicable to 3D convolutions as well. In general, the index calculation for the input and output arrays is more complex due to higher dimensionality. Also, one will have more loop nesting for each thread since multiple dimensions need to be traversed when loading tiles and/or calculating output values. We encourage the reader to complete these higher dimension kernels as homework exercises.</p>
+<h2 id="sec-7-8">7.8 Exercises<a class="td-heading-self-link" href="#sec-7-8" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Calculate the P[0] value in Fig. 7.3. 2. Consider performing a 1D convolution on array N = {4, 1, 3, 2, 3} with filter F = {2, 1, 4}. What is the resulting output array? 3. What do you think the following 1D convolution filters are doing? a. [0, 1, 0] b. [0, 0, 1] c. [1, 0, 0] d. [− 12 , 0, 12 ] e. [ 13 , 13 , 13 ] 4. Consider performing a 1D convolution on an array of size N with a filter of size M: a. How many ghost cells are there in total? b. How many multiplications are performed if ghost cells are treated as multiplications (by 0)? c. How many multiplications are performed if ghost cells are not treated as multiplications? 5. Consider performing a 2D convolution on a square matrix of size N × N with a square filter of size M × M: a. How many ghost cells are there in total? b. How many multiplications are performed if ghost cells are treated as multiplications (by 0)? c. How many multiplications are performed if ghost cells are not treated as multiplications? 6. Consider performing a 2D convolution on a rectangular matrix of size N1 × N2 with a rectangular filter of size M1 × M2 : a. How many ghost cells are there in total?</p>
+<p>b. How many multiplications are performed if ghost cells are treated as multiplications (by 0)? c. How many multiplications are performed if ghost cells are not treated as multiplications? 7. Consider performing a 2D tiled convolution with the kernel shown in Fig. 7.12 on an array of size N × N with a filter of size M × M using an output tile of size T ×T. a. How many thread blocks are needed? b. How many threads are needed per block? c. How much shared memory is needed per block? d. Repeat the same questions if you were using the kernel in Fig. 7.15. 8. Revise the 2D kernel in Fig. 7.7 to perform 3D convolution. 9. Revise the 2D kernel in Fig. 7.9 to perform 3D convolution. 10. Revise the tiled 2D kernel in Fig. 7.12 to perform 3D convolution. 11. Revise the tiled 2D kernel in Fig. 7.12 to use as many threads per block as the output tile size, and have each thread load multiple elements when loading the input tile to shared memory.</p>
+<p>CHAPTER</p>
+<p>Stencil computation And thread coarsening</p>
+<img src="/pmpp5-zh/figs/orig/fig-8-1.png" alt="Figure 8.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 8.1.</strong> (a) Sine as a continuous and differentiable function for 0 ≤ x ≤ π, (b) Design of a regular grid with constant spacing ( π6 ) between grid point for discretization, (c) Resulting discrete representation of the sine function for 0 ≤ x ≤ π.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/06-ch6/"
+    aria-label="Previous - Chapter 6 Performance considerations" title="Chapter 6 Performance considerations" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 6 Performance considerations</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/08-ch8/"
+    aria-label="Next - Chapter 8 Stencil computation" title="Chapter 8 Stencil computation" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 8 Stencil computation</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-7-1">7.1 Background</a></li>
+    <li><a href="#sec-7-2">7.2 Parallel convolution &ndash; a basic kernel</a></li>
+    <li><a href="#sec-7-3">7.3 Memory bandwidth considerations</a></li>
+    <li><a href="#sec-7-4">7.4 Constant memory and caching</a></li>
+    <li><a href="#sec-7-5">7.5 Tiled convolution with halo cells</a></li>
+    <li><a href="#sec-7-6">7.6 Tiled convolution using caches for halo cells</a></li>
+    <li><a href="#sec-7-7">7.7 Summary</a></li>
+    <li><a href="#sec-7-8">7.8 Exercises</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/07-ch7/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/07-ch7/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/07-ch7/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/07-ch7.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/07-ch7.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+7+Convolution"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/07-ch7/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/07-ch7/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/07-ch7/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/07-ch7/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -1,0 +1,871 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/book/01-ch1/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/book/00-preface/">
+<link rel="next" href="/pmpp5-zh/book/02-ch2/"><meta name="robots" content="index, follow">
+
+<title>第1章 引言 | 大规模并行处理器编程（第5版）中文学习译稿</title>
+<meta name="description" content="第1章 引言 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/book/01-ch1/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/01-ch1/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/01-ch1/">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/book/01-ch1/">
+	<meta property="og:site_name" content="大规模并行处理器编程（第5版）中文学习译稿">
+	<meta property="og:title" content="第1章 引言">
+	<meta property="og:description" content="第1章 引言 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="第1章 引言">
+	<meta itemprop="description" content="第1章 引言 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta itemprop="wordCount" content="927">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="第1章 引言">
+	<meta name="twitter:description" content="第1章 引言 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="/pmpp5-zh/" class="td-nav-brand" data-td-navbar-route
+         aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/01-ch1/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/01-ch1/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/" aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/book/" title="大规模并行处理器编程（第5版）"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook"><span>全书目录</span></a>
+      
+    </div><div id="m-pmpp5-zhbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/00-preface/" title="前言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook00-preface"><span>前言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhbook01-ch1-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/book/01-ch1/" aria-current="page" title="第1章 引言"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhbook01-ch1"><span>第1章 引言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/02-ch2/" title="第2章 异构并行计算与 CUDA"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook02-ch2"><span>第2章 异构并行计算与 CUDA</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/03-ch3/" title="第3章 多维网格与数据"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook03-ch3"><span>第3章 多维网格与数据</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/04-ch4/" title="第4章 计算架构与调度"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook04-ch4"><span>第4章 计算架构与调度</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/05-ch5/" title="第5章 内存架构与数据局部性"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook05-ch5"><span>第5章 内存架构与数据局部性</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/06-ch6/" title="第6章 性能考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook06-ch6"><span>第6章 性能考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/07-ch7/" title="第7章 卷积"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook07-ch7"><span>第7章 卷积</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/08-ch8/" title="第8章 模板计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook08-ch8"><span>第8章 模板计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/09-ch9/" title="第9章 直方图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook09-ch9"><span>第9章 直方图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/10-ch10/" title="第10章 归约"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook10-ch10"><span>第10章 归约</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/11-ch11/" title="第11章 扫描"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook11-ch11"><span>第11章 扫描</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/12-ch12/" title="第12章 过滤器"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook12-ch12"><span>第12章 过滤器</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/13-ch13/" title="第13章 合并"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook13-ch13"><span>第13章 合并</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/14-ch14/" title="第14章 排序"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook14-ch14"><span>第14章 排序</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/15-ch15/" title="第15章 高级矩阵乘法"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook15-ch15"><span>第15章 高级矩阵乘法</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/16-ch16/" title="第16章 动态规划与波纹模式"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook16-ch16"><span>第16章 动态规划与波纹模式</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/17-ch17/" title="第17章 稀疏矩阵计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook17-ch17"><span>第17章 稀疏矩阵计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/18-ch18/" title="第18章 图遍历"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook18-ch18"><span>第18章 图遍历</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/19-ch19/" title="第19章 卷积神经网络"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook19-ch19"><span>第19章 卷积神经网络</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/20-ch20/" title="第20章 大语言模型"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook20-ch20"><span>第20章 大语言模型</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/21-ch21/" title="第21章 静电势图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook21-ch21"><span>第21章 静电势图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/22-ch22/" title="第22章 算法选择、问题分解与问题表述"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook22-ch22"><span>第22章 算法选择、问题分解与问题表述</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/23-ch23/" title="第23章 多 GPU 编程"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook23-ch23"><span>第23章 多 GPU 编程</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/24-ch24/" title="第24章 总结与未来展望"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook24-ch24"><span>第24章 总结与未来展望</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/30-cha/" title="附录A 数值计算考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook30-cha"><span>附录A 数值计算考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/31-chb/" title="附录B 深度学习基础"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook31-chb"><span>附录B 深度学习基础</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/32-chc/" title="附录C CUDA 内存、地址空间与指针"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook32-chc"><span>附录C CUDA 内存、地址空间与指针</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="面包屑导航" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/book/">全书目录</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    第1章 引言</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="打开双列视图" aria-label="打开双列视图" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="操作"><span>操作</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/01-ch1.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>查阅编辑历史</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/01-ch1.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>编辑当前页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>添加子页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC1%E7%AB%A0&#43;%E5%BC%95%E8%A8%80" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>提交文档议题</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>第1章 引言</h1>
+</div>
+
+	<div class="lead">第1章 引言 — 《大规模并行处理器编程(第5版)》学习译稿</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c1">引言<a class="td-heading-self-link" href="#c1" aria-label="标题锚点"></a>
+</h1>
+<p>从计算诞生之初起，许多高价值应用就要求比计算设备所能提供的更多执行速度和资源。早期应用依靠处理器速度、内存速度和内存容量的提升，来增强应用层面的能力，例如提高天气预报的及时性、工程结构分析的准确性、计算机生成图形的逼真度，以及每秒处理的航班预订数或资金转账数。近年来，深度学习等新应用对执行速度和资源的需求甚至超过了最先进计算设备的供给。这些应用需求在过去五十年中推动了计算设备能力的快速发展，并且在可预见的未来仍将继续推动这种发展。</p>
+<p>以单个中央处理器（central processing unit，CPU）为基础、看起来按照顺序执行指令的微处理器，例如 Intel 和 AMD 的 x86 处理器，在 20 世纪 80 年代和 90 年代依靠不断提高的时钟频率和硬件资源，推动了计算应用性能的快速提升和成本的持续下降。在这二十年的增长期内，单 CPU 微处理器把 GFLOPS（giga，即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mn>9</mn></msup></mrow><annotation encoding="application/x-tex">10^9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">9</span></span></span></span></span></span></span></span></span></span></span> 次浮点运算每秒）带到了桌面计算机，把 TFLOPS（tera，即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mn>12</mn></msup></mrow><annotation encoding="application/x-tex">10^{12}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">12</span></span></span></span></span></span></span></span></span></span></span></span> 次浮点运算每秒）带到了数据中心。这种对性能改进的不懈追求，使应用软件能够提供更多功能、更好的用户界面以及更有用的结果。用户一旦习惯了这些改进，就会进一步要求更多改进，从而形成计算机产业的正向（良性）循环。</p>
+<p>然而，由于能耗和散热问题，这种发展势头在 2003 年之后放缓了。这些问题限制了时钟频率的提升，也限制了单个 CPU 在保持“按顺序执行指令”这一表象的同时、能够在每个时钟周期内完成的有效工作量。此后，几乎所有微处理器厂商都转向在每个芯片中使用多个物理 CPU（称为处理器核心）来提高处理能力。在这种模型下，传统 CPU 可以看作单核 CPU。要从多个处理器核心中获益，用户必须拥有多个指令序列——它们可以来自同一个应用，也可以来自不同应用——以便在这些处理器核心上同时执行。对于某个应用而言，要想利用多个处理器核心，就必须把其工作划分为多个能够同时在这些核心上执行的指令序列。这种从单 CPU 按顺序执行指令转向多核心并行执行多个指令序列的变化，对软件开发者群体产生了深远影响。</p>
+<p>传统上，绝大多数软件应用都是顺序程序；处理器的设计思想源自冯·诺伊曼在 1945 年发表的奠基性报告 <a href="/pmpp5-zh/book/01-ch1/#bib-1">[1]</a>。人们可以借助程序计数器（program counter，在相关文献中也称 instruction pointer）这一概念，把这些程序的执行理解为沿着程序代码逐条向前推进。程序计数器保存处理器将要执行的下一条指令的内存地址。应用以这种逐步顺序方式执行指令所形成的指令执行序列，在相关文献中称为执行线程（thread of execution），简称线程。本书后文会更正式地定义线程，并广泛使用这一概念；它的重要性由此可见。</p>
+<p>历史上，大多数软件开发者依靠硬件进步——例如更高的时钟频率，以及硬件在幕后同时执行多条指令——来提高顺序应用的速度。随着新一代处理器问世，同一份软件通常会自动运行得更快；计算机用户也习惯了每一代微处理器都能让程序运行得更快。然而，这种预期已经十多年没有成为现实。顺序程序只能运行在某个处理器核心上，而单个核心在不同代际之间已经不再显著变快。随着性能改进停滞，顺序应用开发者无法再仅靠新微处理器的推出，为软件加入新的特性和能力，这也削弱了整个计算机产业的增长机会。</p>
+<p>相反，在每一代微处理器上仍能持续获得显著性能提升的，是并行软件：多个执行线程协作完成工作，从而更快地完成任务。并行程序相对于顺序程序的这种优势急剧扩大，被称为“并发革命”<a href="/pmpp5-zh/book/01-ch1/#bib-2">[2]</a>。并行编程并非新实践。高性能计算领域已经开发并行程序数十年；这些程序通常运行在规模庞大且价格昂贵的计算机上。只有少数精英应用能够证明使用这类昂贵计算机是合理的，因此并行编程一度只属于少数应用开发者。然而，当所有微处理器都变成并行计算机之后，需要以并行程序形式开发的应用数量急剧增加。软件开发者学习并行编程的需求也随之大幅增长，而这正是本书的重点。</p>
+<h2 id="sec-1-1">1.1 异构并行计算<a class="td-heading-self-link" href="#sec-1-1" aria-label="标题锚点"></a>
+</h2>
+<p>自 2003 年以来，半导体产业主要沿着两条微处理器设计路线发展 <a href="/pmpp5-zh/book/01-ch1/#bib-3">[3]</a>：多核（multi-core）和众线程（many-thread）。多核路线试图在转向多个核心的同时，保持顺序程序的执行速度。多核处理器最初是双核处理器，之后核心数量随着每一代半导体工艺不断增加。例如，Intel 和 AMD 的多核服务器微处理器可以拥有超过 100 个处理器核心；每个核心都是支持乱序执行和多指令发射、实现完整 x86 指令集的处理器，并支持两个硬件线程的超线程技术，目标是最大化顺序程序的执行速度。另一个例子是 ARM Ampere 多核服务器处理器，最多可拥有 128 个处理器核心。</p>
+<p>相比之下，众线程路线更加关注并行应用的执行吞吐量。众线程路线从大量线程起步，之后线程数量也随着每一代产品不断增加。近期的代表是 NVIDIA Hopper H100 图形处理器（graphics processing unit，GPU）：它拥有数十万个线程，这些线程在大量简单的顺序发射流水线上执行。自 2003 年以来，众线程处理器，尤其是 GPU，一直在浮点性能竞赛中领先。截至 2022 年，H100 GPU 的峰值浮点吞吐量为：64 位双精度 34 TFLOPS、32 位单精度 67 TFLOPS，以及 16 位半精度 1979 TFLOPS。相比之下，同年典型服务器级 CPU 的峰值浮点吞吐量只有几 TFLOPS。众线程 GPU 与多核 CPU 之间的峰值浮点计算吞吐量差距在过去几年持续扩大。需要注意的是，这些数字不一定代表应用速度，而只是芯片中的执行资源在理论上能够支持的原始速度。</p>
+<p>多核处理器和众线程处理器之间如此巨大的峰值性能差距，仿佛积累起了很大的“电势”；最终总会有某种变化发生。我们已经到达了这个时刻。迄今为止，这种巨大的峰值性能差距已经促使许多应用开发者把软件中计算密集的部分迁移到 GPU 上执行。也许更重要的是，并行执行能力的大幅提升使深度学习等革命性新应用成为可能；这类应用天然由计算密集的部分组成。不出意外，这些计算密集部分也正是并行编程的首要目标：工作越多，就越有机会把工作分配给协作的并行工作者，也就是线程。</p>
+<p>为什么众线程 GPU 与多核 CPU 之间会存在如此巨大的峰值性能差距？答案在于这两类处理器截然不同的基本设计理念，如图 1.1 所示。CPU 的设计（图 1.1 中的左侧部分）针对顺序代码性能进行了优化。算术单元和操作数数据传送逻辑经过设计，以尽量降低算术运算的有效延迟，但代价是每个单元占用更多芯片面积和功耗。较大的片上末级缓存用于捕获频繁访问的数据，把一部分长延迟内存访问转化为短延迟缓存访问。复杂的分支预测逻辑和执行控制逻辑则用来缓解条件分支指令带来的延迟。通过降低操作延迟，CPU 硬件降低了每个独立线程的执行延迟。然而，低延迟算术单元、复杂的操作数传送逻辑、大容量缓存和复杂控制逻辑都会消耗芯片面积与功耗；这些资源本可以用来提供更多算术执行单元和内存访问通道。这种设计方法通常称为面向延迟的设计（latency-oriented design）。</p>
+<p>另一方面，GPU 的设计理念受到快速增长的电子游戏产业塑造。该产业带来了巨大的经济压力，要求在高级游戏的每一帧画面中完成海量浮点计算和内存访问。这样的需求促使 GPU 厂商设法把尽可能多的芯片面积和功耗预算用于浮点计算与内存访问吞吐量。</p>
+<p>图形应用每秒需要完成海量浮点计算，例如视点变换和物体渲染，这一点很直观。此外，每秒进行海量内存访问同样重要，甚至可能更加重要。许多图形应用的速度受限于数据从内存系统送入处理器、以及从处理器送回内存系统的速率。GPU 必须能够在其 DRAM （动态随机存取存储器）与图形帧缓冲区之间搬运极大量数据，因为正是这种数据移动让视频显示对玩家而言丰富而有吸引力。游戏应用通常接受一种较为宽松的内存模型（即各种系统软件、应用和 I/O 设备对于内存访问应如何工作的共同预期），这也让 GPU 更容易支持对内存进行大规模并行访问。</p>
+<p>相比之下，通用处理器必须满足传统操作系统、应用和 I/O 设备提出的要求。这些要求使并行内存访问更加困难，也使提高内存访问吞吐量——通常称为内存带宽（memory bandwidth）——更加困难。因此，图形芯片的内存带宽一直约为同时代 CPU 芯片的 10 倍，我们预计在一段时间内 GPU 仍将在内存带宽方面占据优势。</p>
+<p>一个重要观察是：从功耗和芯片面积的角度看，降低延迟比提高吞吐量昂贵得多。例如，把算术单元数量加倍，可以把算术吞吐量加倍，代价大致是芯片面积和功耗加倍；但要把算术延迟减半，可能需要把电流加倍，芯片面积增加到两倍以上，功耗增加到四倍。因此，GPU 的主流方案是优化大量线程的执行吞吐量，而不是降低单个线程的延迟。这种设计方法允许流水化的内存通道和算术操作承受较长延迟，从而节省芯片面积和功耗。内存访问硬件与算术单元所节省下来的面积和功耗，可以让 GPU 设计者在同一芯片上放置更多这样的单元，进而提高总体执行吞吐量。图 1.1 通过视觉方式展示了两种设计方法的差异：CPU 设计包含较少但更大的算术单元和较少的内存通道，而 GPU 设计包含更多但更小的算术单元以及更多内存通道。</p>
+<figure id="fig:1-1">
+<img src="/pmpp5-zh/figs/orig/fig-1-1.png" alt="图 1.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 1.1　CPU 与 GPU 的基本设计理念的概念示意）</figcaption>
+</figure>
+<p>GPU 应用软件通常需要使用大量并行线程编写。硬件可以利用大量线程，在其中一些线程等待长延迟内存访问或算术操作时，寻找其他可执行的工作。图 1.1 右侧所示的小型缓存用于控制这些应用的带宽需求，使访问相同内存数据的多个线程不必全部访问 DRAM。这种设计风格通常称为面向吞吐量的设计（throughput-oriented design）：它允许单个线程可能需要很长时间执行，同时努力最大化大量线程的总体执行吞吐量。</p>
+<p>应当明确，GPU 是为并行、面向吞吐量的计算引擎而设计的；对于 CPU 擅长的某些任务， GPU 并不会表现良好。对于只有一个或很少线程的程序，具有更低操作延迟的 CPU 可以获得远高于 GPU 的性能。当程序拥有大量线程时，具有更高执行吞吐量的 GPU 则可以获得远高于 CPU 的性能。因此，应当预期许多应用会同时使用 CPU 和 GPU：在 CPU 上执行应用的顺序部分，在 GPU 上执行数值密集部分。这正是 NVIDIA 于 2007 年引入的 CUDA 编程模型被设计用来支持 CPU-GPU 协同执行应用的原因。</p>
+<p>应用开发者选择处理器时，速度也不是唯一的决策因素。其他因素甚至可能更加重要。首先，所选处理器必须在市场上拥有非常广泛的存在，这称为处理器的装机量（installed base）。原因很简单：只有面对庞大的客户群体，软件开发成本才有充分的经济合理性。运行在市场占有率很小的处理器上的应用不会拥有广泛的客户群体。与通用微处理器相比，传统并行计算系统的市场存在极其有限，这一直是一个主要问题。只有政府和大公司资助的少数精英应用，成功地在这类传统并行计算系统上实现了开发。众线程 GPU 改变了这一点。由于 GPU 在个人计算机市场上非常流行，其出货量已经达到数亿。几乎所有台式 PC 和高端笔记本电脑都配有 GPU。如今已有超过 10 亿个支持 CUDA 的 GPU 在使用。如此庞大的市场存在，使这些 GPU 成为对应用开发者具有经济吸引力的目标。</p>
+<p>另一个重要决策因素是实用的形态和易于获得的运行环境。2006 年以前，并行软件应用主要运行在数据中心服务器或部门级集群上，但这类执行环境往往限制了应用的使用。例如，在医学成像应用中，基于 64 节点集群机器发表论文没有问题；但实际临床应用中的 MRI 设备通常由 PC 与专用硬件加速器组合而成。原因很简单：GE 和 Siemens 等制造商不可能向临床场所销售必须配套几机架计算服务器的 MRI 系统，而这样的部署在高校院系环境中却很常见。事实上，美国国立卫生研究院（NIH）曾有一段时间拒绝资助并行编程项目，因为他们认为巨型集群机器无法用于临床环境，并行软件的影响会受到限制。如今，许多公司已经推出配备 GPU 的 MRI 产品，NIH 也在资助 GPU 计算研究。</p>
+<p>在 2006 年以前，图形芯片很难使用，因为程序员必须通过相当于图形 API （application programming interface，应用程序接口）的函数访问处理单元，也就是需要使用 OpenGL 或 Direct3D 技术来编程这些芯片。更直白地说，计算必须表达成某种“绘制像素”的函数，才能在早期 GPU 上执行。这种技术称为 GPGPU，即使用图形处理器进行通用编程（General Purpose Programming using a Graphics Processing Unit）。业界更常见的展开是 “General-Purpose Computing on Graphics Processing Units”；这里保留原书的表述，并不把两种展开混为一谈。即使有更高层的编程环境，底层代码仍然需要适配为面向像素绘制的 API。这些 API 限制了早期 GPU 实际能够编写的应用类型，因此 GPGPU 没有成为普遍的编程现象。尽管如此，这项技术仍然足够令人兴奋，激励人们完成了一些富有开创性的工作并取得了优秀的研究成果。</p>
+<p>2007 年 CUDA 发布后，一切发生了变化 <a href="/pmpp5-zh/book/01-ch1/#bib-4">[4]</a>。CUDA 带来的并不只是软件变化，芯片中还增加了额外硬件。NVIDIA 实际上专门划出硅片面积来简化并行编程。在用于并行计算的 G80 及其后继芯片中，GPGPU 程序不再需要经过图形接口，而是由芯片上的新型通用并行编程接口直接处理 CUDA 程序的请求。这个通用编程接口极大扩展了可以在 GPU 上轻松开发的应用类型。此外，其他软件层也全部重新设计，使程序员能够使用熟悉的 C/C++ 编程工具。</p>
+<p>虽然 GPU 是异构并行计算中的重要计算设备类型，但异构计算系统还会把其他重要设备用作加速器。例如，现场可编程门阵列（field programmable gate array，FPGA）被广泛用于加速网络应用。本书以 GPU 为学习载体所介绍的技术，同样适用于这类加速器的编程任务。</p>
+<h2 id="sec-1-2">1.2 为什么需要更高速度或更多并行性？<a class="td-heading-self-link" href="#sec-1-2" aria-label="标题锚点"></a>
+</h2>
+<p>正如第 01.1 节所述，大规模并行编程的主要动机，是让应用在未来几代硬件上继续获得速度提升。在“并行模式”和“高级模式与应用”两部分（第 2、3 部分，即第 7 至第 23 章）中我们会看到，对于适合并行执行的应用，优秀的 GPU 实现相对于单个 CPU 核心上的顺序执行，可以达到超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>100</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">100\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">100</span><span class="mord">×</span></span></span></span> 的加速比。如果应用包含我们所称的“数据并行性”，仅用几个小时的工作往往就可以获得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">10\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">10</span><span class="mord">×</span></span></span></span> 的加速。</p>
+<p>有人可能会问，为什么应用会继续要求更高的速度？今天的许多应用似乎已经运行得足够快了。尽管当今世界有无数计算应用，未来许多令人兴奋的大众市场应用，实际上就是我们过去称为“超级计算应用”或“超级应用”的东西。</p>
+<p>例如，生物学研究界正越来越深入分子层面。显微镜可以说是分子生物学最重要的仪器，过去主要依靠光学或电子仪器。然而，我们可以借助这些仪器进行的分子级观测存在限制。把计算模型纳入进来，模拟底层分子活动，并用传统仪器设置边界条件，可以有效地解决这些限制。借助仿真，我们能够测量比单靠传统仪器所能想象的更多细节，也能检验更多假设。在可预见的未来，仿真会继续受益于计算速度的提升：在可接受的响应时间内，能够建模的生物系统规模会扩大，能够模拟的反应时间也会延长。这些增强将对科学和医学产生巨大影响。</p>
+<p>对于视频、音频编码和处理等应用，可以想想我们对数字高清电视（HDTV）相对于旧式 NTSC 电视的满意程度。体验过 HDTV 的细节水平之后，人们很难再回到旧技术。但请考虑 HDTV 所需的全部处理工作：它是高度并行的过程，三维成像和可视化也一样。未来，视图合成、把低分辨率视频以高分辨率显示等新功能，将需要电视设备提供更多计算能力。在消费级产品中，我们正看到越来越多的视频和图像处理应用，用来改善照片和视频的对焦、光照以及其他关键方面。</p>
+<p>更高的计算速度还可以带来更好的用户界面。现代智能手机用户享受着更加自然的交互界面，高分辨率触摸屏的显示效果足以媲美大屏电视。毫无疑问，未来版本的这类设备将加入具有三维视角的传感器和显示器、把虚拟空间与物理空间信息结合起来以提高可用性的应用，以及基于语音和计算机视觉的交互界面；这些功能都需要更高的计算速度。</p>
+<p>消费电子游戏中也在发生类似的发展。过去，游戏中的驾驶实际上只是预先安排好的一组场景：汽车撞上障碍物后，车辆行驶路线并不会改变，只有游戏分数发生变化；车轮不会弯曲或损坏，无论撞到车轮还是失去一个车轮，驾驶难度都不会改变。随着计算速度提升，游戏可以基于动态仿真，而不再基于预先安排的场景。未来我们可以体验更多这样的真实效果：事故会损坏车轮，在线驾驶体验也会逼真得多。准确建模物理现象的能力已经催生了“数字孪生”概念：物理对象在仿真空间中拥有准确模型，可以以低得多的成本进行充分的压力测试和劣化预测。对物理效应进行逼真的建模和仿真，通常需要极其巨大的计算能力。</p>
+<p>计算吞吐量大幅提升所带来的新应用中，一个重要例子是基于人工神经网络的深度学习。尽管神经网络从 20 世纪 70 年代起就一直受到积极研究，但由于训练需要太多带标签数据和太多计算，它们在实际应用中一度效果不佳。互联网的兴起带来了海量带标签的图片，GPU 的兴起则带来了计算吞吐量的跃升。结果，自 2012 年以来，基于神经网络的应用在计算机视觉和自然语言处理领域迅速普及。这种普及彻底改变了计算机视觉和自然语言处理应用，也推动了自动驾驶汽车和家庭助手设备的快速发展。</p>
+<p>上述所有新应用都以不同方式、不同层次模拟和/或表示一个物理的、并发的世界，并且需要处理极大量数据。面对如此巨大的数据量，大部分计算都可以在数据的不同部分上并行完成，尽管这些结果最终需要在某个时刻汇合。多数情况下，有效管理数据传送会对并行应用能够达到的速度产生重大影响。少数每天处理这类应用的专家往往熟悉相关技术，但绝大多数应用开发者都能从对这些技术更直观的理解和实践性工作知识中获益。</p>
+<p>我们的目标是以直观的方式向应用开发者介绍数据管理技术，而他们的正规教育未必来自计算机科学或计算机工程。我们还希望提供大量实用代码示例和动手练习，帮助读者获得真正可工作的知识；这要求有一种既便于并行实现、又支持恰当管理数据传送的实用编程模型。CUDA 提供了这样的编程模型，并且已经得到庞大开发者社区的充分检验。</p>
+<h2 id="sec-1-3">1.3 加速真实应用<a class="td-heading-self-link" href="#sec-1-3" aria-label="标题锚点"></a>
+</h2>
+<p>把应用并行化后，能够期待多大的加速比？计算系统 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span> 相对于计算系统 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 的应用加速比，定义为应用在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 上的执行时间与在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span> 上执行同一应用所需时间之比。例如，某应用在系统 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span> 上需要 10 秒，在系统 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 上需要 200 秒，那么系统 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span> 相对于系统 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 的加速比为</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mrow><mn>200</mn><mtext> s</mtext></mrow><mrow><mn>10</mn><mtext> s</mtext></mrow></mfrac><mo>=</mo><mn>20</mn><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">\frac{200\text{ s}}{10\text{ s}}=20,</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">10</span><span class="mord text"><span class="mord"> s</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">200</span><span class="mord text"><span class="mord"> s</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">20</span><span class="mpunct">,</span></span></span></span></span><p>即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">20\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">20</span><span class="mord">×</span></span></span></span>（20 倍）加速。</p>
+<p>并行计算系统相对于串行计算系统能够达到的加速比，取决于应用中可以并行化的部分。例如，如果应用执行时间中可并行部分占 30%，即使把这部分加速 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>100</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">100\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">100</span><span class="mord">×</span></span></span></span>，应用总执行时间也最多只能减少 29.7%。换言之，整个应用的加速比只有</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mn>1</mn><mrow><mn>1</mn><mo>−</mo><mn>0.297</mn></mrow></mfrac><mo>≈</mo><mn>1.42</mn><mo>×</mo><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\frac{1}{1-0.297}\approx 1.42\times.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:2.0908em;vertical-align:-0.7693em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">0.297</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1.42</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.1056em;"></span><span class="mord">.</span></span></span></span></span><p>事实上，即使并行部分获得无限大的加速，也只能削减 30% 的执行时间，最高加速比不超过约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.43</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">1.43\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1.43</span><span class="mord">×</span></span></span></span>。另一方面，如果执行时间的 99% 都属于并行部分，那么将并行部分加速 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>100</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">100\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">100</span><span class="mord">×</span></span></span></span> 后，应用执行时间会降至原来的 1.99%，整个应用可以获得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>50</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">50\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">50</span><span class="mord">×</span></span></span></span> 加速。因此，要让大规模并行处理器有效加速应用，应用执行时间的绝大部分必须位于并行部分。并行执行所能达到的加速水平会受到应用可并行部分大小的严重限制，这一事实称为阿姆达尔定律（Amdahl’s Law）<a href="/pmpp5-zh/book/01-ch1/#bib-5">[5]</a>。</p>
+<p>研究人员已经在某些应用上取得超过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>100</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">100\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">100</span><span class="mord">×</span></span></span></span> 的加速。然而，这通常只有在进行大量优化和调优之后才可能实现，而且往往还需要改进算法，使应用工作量的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>99.9</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">99.9\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">99.9%</span></span></span></span> 以上处于并行部分。</p>
+<p>应用能够达到的加速水平还取决于从内存读取数据以及向内存写入数据的速度。在实践中，直接对应用进行并行化往往会使内存（DRAM）带宽达到饱和，结果只能获得约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">10\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">10</span><span class="mord">×</span></span></span></span> 加速。诀窍在于设法绕过内存带宽限制：通过某种变换利用 GPU 上的专用片上内存，大幅减少对 DRAM 的访问。不过，代码还需要继续优化，以应对片上内存容量有限等限制。本书的一个重要目标，就是帮助读者充分理解这些优化方法并熟练掌握它们。</p>
+<p>请记住，相对于单核 CPU 执行所得到的加速水平，也可能反映 CPU 是否适合该应用。在某些应用中，CPU 的表现非常好，因此很难再用 GPU 提升性能。大多数应用都有一些部分更适合由 CPU 执行。必须给 CPU 一个公平的机会，并确保代码编写方式能够让 GPU 与 CPU 执行互补，从而正确利用 CPU/GPU 组合的异构并行计算能力。如今，结合多核 CPU 和众核 GPU 的大众市场计算系统，已经把万亿次级（terascale）计算带到了桌面，把百亿亿次级（exascale）计算带到了集群。</p>
+<p>图 1.2 展示了典型应用的主要组成部分。真实应用的大量代码往往是顺序的。图中将这些顺序部分画成桃子的“果核区域”：试图对这些部分应用并行计算技术，就像咬桃核一样——感觉并不好！这些部分很难并行化。CPU 往往能够很好地处理它们。好消息是，尽管这些部分可能占据大量代码，却往往只占超级应用执行时间的一小部分。</p>
+<p>接下来是我们所谓的“桃肉区域”。这些部分容易并行化，早期图形应用也是如此。在异构计算系统中进行并行编程，可以大幅提升这类应用的速度。如图 1.2 所示，早期 GPGPU 编程接口只覆盖桃肉区域的一小部分，这类似于只能覆盖最令人兴奋的应用中的一小部分。我们将看到，CUDA 编程接口的设计目标是覆盖更多令人兴奋的应用“桃肉”。并行编程模型及其底层硬件仍在快速演进，以便高效并行化应用中越来越大的部分。</p>
+<figure id="fig:1-2">
+<img src="/pmpp5-zh/figs/orig/fig-1-2.png" alt="图 1.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 1.2　顺序部分与数据并行部分的应用结构的概念示意）</figcaption>
+</figure>
+<h2 id="sec-1-4">1.4 并行编程中的挑战<a class="td-heading-self-link" href="#sec-1-4" aria-label="标题锚点"></a>
+</h2>
+<p>并行编程为什么困难？有人曾说过：如果你不在乎性能，并行编程非常容易；你甚至可以在一小时内写出并行程序。但如果不在乎性能，又何必编写并行程序呢？</p>
+<p>本书讨论如何在并行编程中实现高性能所面临的几个挑战。首先，设计出与顺序算法具有相同算法（计算）复杂度的并行算法，可能相当困难。许多并行算法与对应的顺序算法执行相同数量的工作。然而，有些并行算法会做更多工作；事实上，有时它们会多做如此多工作，以至于在大规模输入数据集上最终运行得更慢。这尤其令人担忧，因为快速处理大规模输入数据集正是并行编程的重要动机。</p>
+<p>例如，许多现实问题最自然的描述方式是数学递推式。把这些问题并行化，通常需要以反直觉的方式思考问题，执行时也可能需要重复工作。有一些重要的算法原语，例如前缀和（prefix sum）或扫描（scan），可以帮助我们把问题的顺序递归形式转换为更适合并行的形式。第 11 章将更正式地介绍工作效率（work efficiency）概念，并借助前缀和等重要并行模式，说明如何设计具有与对应顺序算法相同计算复杂度的并行算法，以及其中涉及的方法和权衡。</p>
+<p>第二，许多应用的执行速度受内存访问延迟和/或吞吐量限制。我们把这类应用称为内存受限（memory-bound）应用，以区别于计算受限（compute-bound）应用；后者受硬件执行算术运算的速率限制。要让内存受限应用实现高性能并行执行，通常需要提高内存访问速度的方法。第 5 章和第 6 章将介绍内存访问优化技术，并在多章并行模式与应用中应用这些技术。</p>
+<p>第三，相比对应的顺序程序，并行程序的执行速度通常对输入数据特征更加敏感。许多现实应用必须处理特征变化很大的输入，例如不规则或不可预测的数据规模，以及不均匀的数据分布。这些规模和分布上的变化，可能导致分配给并行线程的工作量不均，并显著降低并行执行的有效性。并行程序的性能有时会随这些特征发生剧烈变化。我们将在介绍并行模式和应用的章节中，介绍使数据分布更加规整，或针对数据特征调整线程工作分配的技术，以应对这些挑战。</p>
+<p>第四，有些应用可以并行化，而且不同线程之间几乎不需要协作。这些应用通常称为易并行应用（embarrassingly parallel）。另一方面，另一些应用要求线程彼此协作，这就需要使用屏障或原子操作等同步操作。同步操作会给应用带来开销，因为线程常常需要等待其他线程，而不是执行有用工作。本书将始终讨论降低这种同步开销的各种策略。</p>
+<p>幸运的是，研究人员过去已经解决了其中许多挑战。不同应用领域之间还存在共同模式，使我们能够把一个领域中得到的解决方案应用到其他领域。这正是本书选择在重要并行计算模式和应用的语境中介绍应对这些挑战的关键技术的主要原因。</p>
+<h2 id="sec-1-5">1.5 相关并行编程接口<a class="td-heading-self-link" href="#sec-1-5" aria-label="标题锚点"></a>
+</h2>
+<p>过去几十年间，人们已经开发出许多并行编程语言和模型 <a href="/pmpp5-zh/book/01-ch1/#bib-6">[6]</a>。应用最广泛的包括：用于共享内存多处理器系统的 OpenMP <a href="/pmpp5-zh/book/01-ch1/#bib-7">[7]</a>，以及用于可扩展集群计算的消息传递接口（Message Passing Interface，MPI）<a href="/pmpp5-zh/book/01-ch1/#bib-8">[8]</a>。二者都已经成为由主要计算机厂商支持的标准化编程接口。</p>
+<p>一个 OpenMP 实现由编译器和运行时系统组成。程序员向 OpenMP 编译器指定有关循环的指令（directive）和编译提示（pragma）。借助这些指令和提示，OpenMP 编译器生成并行代码。运行时系统通过管理并行线程和资源，支持并行代码的执行。OpenMP 最初为 CPU 执行设计，后来扩展到支持 GPU 执行。OpenMP 的主要优点是，它提供编译器自动化和运行时支持，从而把许多并行编程细节抽象掉。这样的自动化和抽象，有助于让应用代码在不同厂商生产的系统之间，以及同一厂商不同代际的系统之间，实现更好的可移植性。我们把这一性质称为性能可移植性（performance portability）。不过，要有效地使用 OpenMP，程序员仍然需要理解涉及的全部并行编程概念。由于 CUDA 让程序员能够显式控制这些并行编程细节，因此即使读者打算把 OpenMP 作为主要编程接口，CUDA 也是很好的学习载体。此外，根据我们的经验，OpenMP 编译器仍在不断发展和改进。许多程序员可能仍需在 OpenMP 编译器能力不足的部分使用 CUDA 风格的接口。</p>
+<p>MPI 是一种编程接口：集群中的计算节点不共享内存，所有数据共享和交互都必须通过显式消息传递完成。MPI 已广泛用于高性能计算（high-performance computing，HPC）。使用 MPI 编写的应用已经在超过 100,000 个节点的集群计算系统上成功运行。如今，许多 HPC 集群采用异构 CPU/GPU 节点。由于计算节点之间没有共享内存，把应用移植到 MPI 可能需要相当大的工作量。程序员需要进行域分解，把输入和输出数据划分到各个节点上；还需要根据域分解结果调用消息发送和接收函数，管理节点之间的数据交换。</p>
+<p>另一方面，CUDA 为 GPU 内部的并行执行提供了共享内存，可以解决这一困难。CUDA 适合节点内部的编程，但大多数应用开发者仍需要使用 MPI 一类的接口来编程集群层级。随着 MPI 本身逐渐具备 CUDA 感知能力，以及 NCCL 和 NVSHMEM 等其他 API 不断提供支持，CUDA 的多 GPU 编程能力也在增强。因此，在使用多 GPU 节点的现代计算集群中，并行程序员必须理解如何在 MPI 等多 GPU 编程模型的语境下进行 CUDA 编程；第 23 章将介绍这一内容。</p>
+<p>2009 年，包括 Apple、Intel、AMD/ATI 和 NVIDIA 在内的多个产业参与者共同开发了一种标准化编程模型，称为开放计算语言（Open Computing Language，OpenCL） <a href="/pmpp5-zh/book/01-ch1/#bib-9">[9]</a>。原书正文将其写作 “Open Compute Language”；译文采用 OpenCL 的官方展开。与 CUDA 类似，OpenCL 编程模型定义了语言扩展和运行时 API，允许程序员管理大规模并行处理器中的并行性和数据传送。与 CUDA 相比，OpenCL 更多依赖 API，而较少依赖语言扩展。这样，厂商就可以快速调整现有编译器和工具，以处理 OpenCL 程序。</p>
+<p>OpenCL 是一种标准化编程模型：使用 OpenCL 开发的应用，无需修改，就能在所有支持 OpenCL 语言扩展和 API 的处理器上正确运行。不过，要在新的处理器上获得高性能，通常仍然需要修改应用。熟悉 OpenCL 和 CUDA 的读者会知道，二者的关键概念和特性非常相似。也就是说，CUDA 程序员只需很少努力就能学会 OpenCL 编程。更重要的是，使用 CUDA 学到的几乎所有技术，都可以轻松应用于 OpenCL 编程。</p>
+<h2 id="sec-1-6">1.6 总体目标<a class="td-heading-self-link" href="#sec-1-6" aria-label="标题锚点"></a>
+</h2>
+<p>我们的首要目标是教会读者如何编程大规模并行处理器，以实现高性能。因此，本书很大一部分内容都致力于开发高性能并行代码的技术。我们的方法不要求读者具备大量硬件专业知识；不过，读者需要对并行硬件架构有良好的概念性理解，才能推理代码的性能行为。因此，我们会用一些篇幅帮助读者直观理解基本硬件架构特征，并用大量篇幅介绍开发高性能并行程序的技术。特别是，我们将重点讨论计算思维（computational thinking）<a href="/pmpp5-zh/book/01-ch1/#bib-10">[10]</a> 技术，使读者能够用适合在大规模并行处理器上高性能执行的方式思考问题。</p>
+<p>在大多数处理器上进行高性能并行编程，都需要了解硬件的工作方式。要构建工具和机器，使程序员不必了解这些知识就能开发高性能代码，可能还需要很多年。即使有了这样的工具，我们也怀疑了解硬件的程序员会比不了解硬件的人更有效地使用它们。因此，第 4 章将介绍 GPU 架构的基础；在讨论高性能并行编程技术时，我们还会讨论更加专门的架构概念。</p>
+<p>我们的第二个目标是教授如何编写功能正确且可靠的并行程序；这是并行计算中一个微妙的问题。曾经开发过并行系统的人都知道，实现初始性能还不够，真正的挑战是以一种能够调试代码并支持用户的方式实现性能。CUDA 编程模型鼓励使用简单形式的屏障同步、原子性和内存一致性来管理并行性。此外，它还提供了一组强大的工具，不仅可以调试功能问题，也可以定位性能瓶颈。</p>
+<p>我们的第三个目标是让程序能够跨越未来的硬件代际进行扩展：探索并行编程方法，使未来更加并行的机器能够比今天的机器更快地运行代码。我们希望帮助读者掌握并行编程，使程序能够扩展到新一代机器的性能水平。实现这种可扩展性的关键，是使内存数据访问更加规整和局部化，从而尽量减少关键资源的消耗以及更新数据结构时发生的冲突。因此，开发高性能并行代码的技术，对保证应用在未来的可扩展性同样重要。</p>
+<p>要实现这些目标，需要大量技术知识，因此本书会介绍不少并行编程原则和模式 <a href="/pmpp5-zh/book/01-ch1/#bib-6">[6]</a>。我们不会孤立地教授这些原则和模式，而是把它们放在有用应用的并行化语境中来讲授。当然，我们无法覆盖全部原则和模式，所以选择了最有用且经过充分验证的技术进行详细介绍。事实上，本版显著增加了关于并行模式和应用的章节。现在，让我们快速概览本书其余内容。</p>
+<h2 id="sec-1-7">1.7 本书的组织结构<a class="td-heading-self-link" href="#sec-1-7" aria-label="标题锚点"></a>
+</h2>
+<p>本书分为三部分。第 1 部分介绍并行编程、数据并行、GPU 以及性能优化的基本概念。这些基础章节为读者成为 GPU 程序员提供必要的知识和技能。第 2 部分介绍基本的并行模式，第 3 部分介绍更高级的并行模式和应用。这两部分会应用第一部分所学的知识和技能，也会在需要时引入其他 GPU 架构特性和优化技术。</p>
+<p>第 1 部分“基础概念”包括第 2 至第 6 章。第 2 章介绍数据并行和 CUDA 编程模型，并假设读者此前有 C++ 编程经验。它首先把 CUDA 介绍为 C++ 的一个简单而小型的扩展，用于支持异构 CPU/GPU 计算以及广泛使用的单程序多数据（Single Program Multiple Data，SPMD）并行编程模型。随后，本章介绍以下思考过程：</p>
+<ol>
+<li>
+<p><a id="bib-1"></a> 识别应用程序中需要并行化的部分；</p>
+</li>
+<li>
+<p><a id="bib-2"></a> 隔离并行代码将使用的数据，并通过 API 函数在并行计算设备上分配内存；</p>
+</li>
+<li>
+<p><a id="bib-3"></a> 通过 API 函数把数据传送到并行计算设备；</p>
+</li>
+<li>
+<p><a id="bib-4"></a> 把并行部分开发为由并行线程执行的内核函数；</p>
+</li>
+<li>
+<p><a id="bib-5"></a> 启动内核函数，让并行线程执行它；</p>
+</li>
+<li>
+<p><a id="bib-6"></a> 最终通过 API 函数调用把数据传回主机处理器。</p>
+</li>
+</ol>
+<p>我们使用向量加法这一贯穿示例来说明这些概念。第 2 章的目标，是让读者掌握足够的 CUDA 编程模型概念，以便编写简单的并行 CUDA 程序；同时，它也涵盖了基于任何并行编程接口开发并行应用所需的若干基本技能。</p>
+<p>第 3 章进一步介绍 CUDA 的并行执行模型，尤其是它如何处理多维数据以及多维线程组织方式。本章提供关于线程创建、组织、资源绑定和数据绑定的足够洞见，使读者能够使用 CUDA 实现复杂计算。</p>
+<p>第 4 章介绍 GPU 计算架构，重点讨论计算核心如何组织，以及线程如何被调度到这些核心上执行。本章还讨论各种架构因素及其对 GPU 上运行代码性能的影响，包括透明可扩展性、SIMD 执行与控制分歧、多线程与延迟容忍度，以及占用率（occupancy）等概念。</p>
+<p>第 5 章在第 4 章基础上讨论 GPU 的内存架构，以及可用于保存 CUDA 变量、管理数据传送和提高程序执行速度的特殊内存。本章介绍分配和使用这些内存的 CUDA 语言特性。恰当地使用这些内存，可以大幅提高数据访问吞吐量，并帮助缓解内存系统中的流量拥塞。</p>
+<p>第 6 章介绍当前 CUDA 硬件中的若干重要性能因素，尤其是理想的线程执行模式和内存访问模式。这些细节构成了程序员推理计算和数据组织决策后果的概念基础。本章最后给出 GPU 程序员经常使用的常见优化策略检查清单，用于优化各种计算模式。在本书接下来的两部分中，我们会反复使用这份检查清单来优化不同的并行模式和应用。</p>
+<p>第 2 部分“基本并行模式”包括第 7 至第 15 章。第 7 章介绍卷积，这是一种常用的并行计算模式，源于数字信号处理和计算机视觉，并且需要仔细管理数据访问局部性。我们还借助该模式介绍现代 GPU 中的常量内存和缓存。第 8 章介绍与卷积相似的模板计算，但它源于求解微分方程，并具有为数据访问局部性进一步优化提供独特机会的特征。本章还用来介绍线程与数据的三维组织，并展示第 6 章中针对线程粒度的优化方法。</p>
+<p>第 9 章讨论直方图，这是一种广泛用于统计数据分析和大规模数据集模式识别的模式。我们还借助该模式介绍原子操作，用于协调对共享数据的并发更新；并介绍私有化（privatization）优化，以降低这些操作的开销。第 10 章介绍归约树模式，用于概括一组输入数据；同时用它展示控制分歧和过多屏障同步对性能的影响，以及减轻这些影响的技术。第 11 章介绍前缀和或扫描，这是一种重要的并行计算模式，可以把本质上顺序的计算转换为并行计算；我们也借此介绍并行算法中的工作效率概念。第 12 章以两种形式介绍过滤模式：不稳定过滤（允许改变被过滤元素的原始顺序）和稳定过滤（必须保留原始顺序）。不稳定过滤用于展示线程如何协作以减少原子操作，稳定过滤则展示第 11 章介绍的扫描模式的一个重要应用。第 13 章介绍并行归并，这是分治式工作划分策略中广泛使用的模式；本章还介绍动态输入数据识别与组织。最后，第 14 章介绍 GPU 上的排序，涵盖三种并行排序算法：奇偶排序、归并排序（依赖第 13 章的归并模式）以及基数排序（依赖第 11 章介绍的扫描模式）。第 15 章更深入地重新讨论矩阵乘法，应用第 6 章检查清单中的大量高级优化方法。</p>
+<p><sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<p>第 3 部分“高级并行模式与应用”在精神上与第 2 部分类似，但所涵盖的模式更加复杂，通常也包含更多应用背景。因此，这些章节较少侧重介绍新技术或新特性，而更多关注特定应用的考量。对于每个应用，我们首先识别构造并行执行的不同方式，然后分析每种方式的优点和缺点，接着逐步进行实现高性能所需的代码变换。这些章节帮助读者把前面章节的全部材料结合起来，并为读者承担自己的应用开发项目提供支持。</p>
+<p>第 3 部分包括第 16 至第 23 章。第 16 章以图处理中的经典 Floyd–Warshall 算法和基因组序列比对中的 Smith–Waterman 算法为贯穿示例，展示动态规划和波前并行。第 17 章介绍稀疏矩阵计算，这一技术广泛用于处理极大规模数据集。本章向读者介绍重新排列数据以实现更高效并行访问的概念，包括数据压缩、填充、排序、转置和规整化。第 18 章介绍图算法，以及如何在 GPU 编程中高效实现图搜索。本章给出并行化图算法的多种策略，并讨论图结构如何影响最佳算法的选择；这些策略建立在直方图和归并等更基本的模式之上。</p>
+<p>第 19 章和第 20 章讨论深度学习，它已经成为 GPU 计算中极其重要的领域。第 19 章介绍卷积神经网络的高效实现，利用分块等技术和卷积等模式。第 20 章介绍大语言模型，并讨论在 GPU 上训练和推理这些模型的先进优化方法，例如 KV 缓存和批处理。第 21 章讨论静电势图计算，以及如何利用从散布到聚集的变换来增强并行性、降低同步开销。</p>
+<p>第 22 章介绍计算思维，即以更适合高性能计算的方式构造和求解计算问题的艺术。本章讨论如何组织程序的计算任务，使其能够并行执行。我们首先讨论把抽象的、特定于科学问题的概念转化为计算任务的过程；无论开发串行还是并行应用，这是生成高质量应用软件的重要第一步。随后，我们讨论并行算法结构及其对应用性能的影响，并以 CUDA 性能调优经验为基础。虽然我们不深入介绍这些并行编程风格的实现细节，但希望读者能够凭借本书打下的基础，学会使用其中任何一种风格编程。本章最后区分并行化计算的两种广泛策略：以输入为中心和以输出为中心，并回到书中介绍的模式与应用，回顾性地研究每种模式和应用所采用的策略。</p>
+<p>第 3 部分的最后一章，即第 23 章，介绍异构集群上的 CUDA 编程，其中每个计算节点都包含 CPU 和 GPU。我们讨论如何在 CUDA 的配合下使用 MPI、NCCL 和 NVSHMEM 三种不同编程模型，把计算分配到集群中的多个 GPU，同时降低通信开销。</p>
+<p>虽然本书各章都以 CUDA 为基础，但它们帮助读者建立的是一般并行编程的基础。我们相信，人类从具体示例中学习效果最好：也就是说，必须首先在某个特定编程模型的语境中学习概念；该模型为我们把知识推广到其他编程模型提供坚实立足点。在推广过程中，我们可以借助从 CUDA 示例中获得的具体经验。深入体验 CUDA 也能帮助我们形成成熟的理解，从而学习那些甚至可能与 CUDA 模型无关的概念。</p>
+<p>第 24 章将对大规模并行编程作总结并展望未来。我们首先重新审视本书目标，总结各章如何共同帮助实现这些目标；然后预测快速发展的大规模并行计算会使其成为未来十年最令人兴奋的领域之一。</p>
+<h2 id="sec-refs">本章参考文献<a class="td-heading-self-link" href="#sec-refs" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li><a id="bib-1"></a>J. von Neumann. First draft of a report on the EDVAC. <em>IEEE Annals of the History of Computing</em>, 15(4), 1993, 27–75.</li>
+<li><a id="bib-2"></a>H. Sutter and J. Larus. Software and the concurrency revolution: leveraging the full power of multicore processors demands new tools and new thinking from the software industry. <em>ACM Queue</em>, 3(7), 2005, 54–62.</li>
+<li><a id="bib-3"></a>W.-M. Hwu, K. Keutzer, and T. G. Mattson. The concurrency challenge. <em>IEEE Design &amp; Test of Computers</em>, 25(4), 2008, 312–320.</li>
+<li><a id="bib-4"></a>NVIDIA. <em>CUDA C++ Programming Guide</em>, Release 13.0, 2025. <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide">https://docs.nvidia.com/cuda/cuda-c-programming-guide</a>.</li>
+<li><a id="bib-5"></a>G. M. Amdahl. Computer architecture and Amdahl’s law. <em>Computer</em>, 46(12), 2013, 38–46.</li>
+<li><a id="bib-6"></a>T. G. Mattson, B. Sanders, and B. Massingill. <em>Patterns for Parallel Programming</em>. Pearson Education, 2004.</li>
+<li><a id="bib-7"></a>OpenMP.org. <em>OpenMP: The OpenMP API Specification for Parallel Programming</em>, 2025. <a href="https://www.openmp.org">https://www.openmp.org</a>.</li>
+<li><a id="bib-8"></a>MPI Forum. <em>MPI: A Message-Passing Interface Standard</em>, 1994.</li>
+<li><a id="bib-9"></a>Khronos OpenCL Working Group. <em>The OpenCL Specification</em>, Version 1.0, 2008.</li>
+<li><a id="bib-10"></a>J. M. Wing. Computational thinking. <em>Communications of the ACM</em>, 49(3), 2006, 33–35.</li>
+</ol>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>原书此处把基数排序所依赖的扫描模式标为 Chapter 14；按本书目录和上下文，应为 Chapter 11。译文按语境更正，并保留此译者注。&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/book/00-preface/"
+    aria-label="上一页 - 前言" title="前言" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">前言</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/book/02-ch2/"
+    aria-label="下一页 - 第2章 异构并行计算与 CUDA" title="第2章 异构并行计算与 CUDA" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">第2章 异构并行计算与 CUDA</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-1-1">1.1 异构并行计算</a></li>
+    <li><a href="#sec-1-2">1.2 为什么需要更高速度或更多并行性？</a></li>
+    <li><a href="#sec-1-3">1.3 加速真实应用</a></li>
+    <li><a href="#sec-1-4">1.4 并行编程中的挑战</a></li>
+    <li><a href="#sec-1-5">1.5 相关并行编程接口</a></li>
+    <li><a href="#sec-1-6">1.6 总体目标</a></li>
+    <li><a href="#sec-1-7">1.7 本书的组织结构</a></li>
+    <li><a href="#sec-refs">本章参考文献</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/01-ch1/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/01-ch1/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>双列视图</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>切换语言</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"复制 Markdown 文本","disabledReason":"复制 Markdown 文本: 暂不可用","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":""},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://codingpracticegroup.github.io/pmpp5-zh/book/01-ch1/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":false,"description":"查阅 Markdown 源码","disabledReason":"查阅 Markdown 源码: 暂不可用","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":""},{"available":true,"description":"查阅编辑历史","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/01-ch1.md"},{"available":true,"description":"编辑当前页面","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/01-ch1.md"},{"available":true,"description":"添加子页面","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"提交文档议题","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC1%E7%AB%A0+%E5%BC%95%E8%A8%80"},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"切换语言","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/01-ch1/"},{"active":false,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/01-ch1/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":false,"description":"外观","disabledReason":"暂不可用","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"打开双列视图","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["双列视图","打开双列视图","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"双列视图","url":""}],"commands":[],"language":"zh","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/pmpp5-zh/third_party/katex/katex.min.180c2d77d434d7da51d6625c50a964d4fd6fdbdb9bc8796a0a016c30c49931fb.css" integrity="sha256-GAwtd9Q019pR1mJcUKlk1P1v29ubyHlqCgFsMMSZMfs=" crossorigin="anonymous">
+<script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"简体中文","url":"/pmpp5-zh/book/01-ch1/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"两页的部分标题不同，匹配标题之间的位置为估算结果。","close":"关闭","error":"无法加载此页面。","language":"选择语言","loading":"正在加载……","open":"打开","progress":"没有可用于对齐两页的共同标题，将按全文阅读进度同步。","retry":"重试","sync":"同步滚动","title":"双列视图","unavailable":"标题重复或顺序不一致，无法同步。"},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"en-US","direction":"ltr","label":"English","url":"/pmpp5-zh/en/book/01-ch1/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -1,0 +1,1161 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/book/23-ch23/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/book/22-ch22/">
+<link rel="next" href="/pmpp5-zh/book/24-ch24/"><meta name="robots" content="index, follow">
+
+<title>第23章 多 GPU 编程 | 大规模并行处理器编程（第5版）中文学习译稿</title>
+<meta name="description" content="第23章 多 GPU 编程 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/book/23-ch23/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/23-ch23/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/23-ch23/">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/book/23-ch23/">
+	<meta property="og:site_name" content="大规模并行处理器编程（第5版）中文学习译稿">
+	<meta property="og:title" content="第23章 多 GPU 编程">
+	<meta property="og:description" content="第23章 多 GPU 编程 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="第23章 多 GPU 编程">
+	<meta itemprop="description" content="第23章 多 GPU 编程 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta itemprop="wordCount" content="2551">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="第23章 多 GPU 编程">
+	<meta name="twitter:description" content="第23章 多 GPU 编程 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="/pmpp5-zh/" class="td-nav-brand" data-td-navbar-route
+         aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/23-ch23/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/23-ch23/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/" aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/book/" title="大规模并行处理器编程（第5版）"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook"><span>全书目录</span></a>
+      
+    </div><div id="m-pmpp5-zhbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/00-preface/" title="前言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook00-preface"><span>前言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/01-ch1/" title="第1章 引言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook01-ch1"><span>第1章 引言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/02-ch2/" title="第2章 异构并行计算与 CUDA"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook02-ch2"><span>第2章 异构并行计算与 CUDA</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/03-ch3/" title="第3章 多维网格与数据"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook03-ch3"><span>第3章 多维网格与数据</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/04-ch4/" title="第4章 计算架构与调度"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook04-ch4"><span>第4章 计算架构与调度</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/05-ch5/" title="第5章 内存架构与数据局部性"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook05-ch5"><span>第5章 内存架构与数据局部性</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/06-ch6/" title="第6章 性能考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook06-ch6"><span>第6章 性能考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/07-ch7/" title="第7章 卷积"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook07-ch7"><span>第7章 卷积</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/08-ch8/" title="第8章 模板计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook08-ch8"><span>第8章 模板计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/09-ch9/" title="第9章 直方图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook09-ch9"><span>第9章 直方图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/10-ch10/" title="第10章 归约"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook10-ch10"><span>第10章 归约</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/11-ch11/" title="第11章 扫描"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook11-ch11"><span>第11章 扫描</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/12-ch12/" title="第12章 过滤器"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook12-ch12"><span>第12章 过滤器</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/13-ch13/" title="第13章 合并"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook13-ch13"><span>第13章 合并</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/14-ch14/" title="第14章 排序"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook14-ch14"><span>第14章 排序</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/15-ch15/" title="第15章 高级矩阵乘法"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook15-ch15"><span>第15章 高级矩阵乘法</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/16-ch16/" title="第16章 动态规划与波纹模式"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook16-ch16"><span>第16章 动态规划与波纹模式</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/17-ch17/" title="第17章 稀疏矩阵计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook17-ch17"><span>第17章 稀疏矩阵计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/18-ch18/" title="第18章 图遍历"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook18-ch18"><span>第18章 图遍历</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/19-ch19/" title="第19章 卷积神经网络"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook19-ch19"><span>第19章 卷积神经网络</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/20-ch20/" title="第20章 大语言模型"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook20-ch20"><span>第20章 大语言模型</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/21-ch21/" title="第21章 静电势图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook21-ch21"><span>第21章 静电势图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/22-ch22/" title="第22章 算法选择、问题分解与问题表述"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook22-ch22"><span>第22章 算法选择、问题分解与问题表述</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhbook23-ch23-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/book/23-ch23/" aria-current="page" title="第23章 多 GPU 编程"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhbook23-ch23"><span>第23章 多 GPU 编程</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/24-ch24/" title="第24章 总结与未来展望"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook24-ch24"><span>第24章 总结与未来展望</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/30-cha/" title="附录A 数值计算考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook30-cha"><span>附录A 数值计算考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/31-chb/" title="附录B 深度学习基础"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook31-chb"><span>附录B 深度学习基础</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/32-chc/" title="附录C CUDA 内存、地址空间与指针"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook32-chc"><span>附录C CUDA 内存、地址空间与指针</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="面包屑导航" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/book/">全书目录</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    第23章 多 GPU 编程</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="打开双列视图" aria-label="打开双列视图" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="操作"><span>操作</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/23-ch23.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>查阅编辑历史</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/23-ch23.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>编辑当前页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>添加子页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC23%E7%AB%A0&#43;%E5%A4%9A&#43;GPU&#43;%E7%BC%96%E7%A8%8B" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>提交文档议题</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>第23章 多 GPU 编程</h1>
+</div>
+
+	<div class="lead">第23章 多 GPU 编程 — 《大规模并行处理器编程(第5版)》学习译稿</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c23">多 GPU 编程<a class="td-heading-self-link" href="#c23" aria-label="标题锚点"></a>
+</h1>
+<p><em>并介绍 MPI、NCCL 和 NVSHMEM。Jiri Kraus 和 Isaac Gelado 特别参与撰写。</em></p>
+<p>到目前为止，我们一直关注如何为一个主机和一个设备组成的异构计算系统编程。然而，许多应用需要汇集多个主机和设备的计算能力。如今，许多集群和数据中心的每个节点都包含一个或多个主机，并连接一个或多个设备。本章考察三种面向多 GPU 集群的编程模型：消息传递接口（Message Passing Interface，MPI）<a href="/pmpp5-zh/book/23-ch23/#bib-1">[1]</a>、NVIDIA 集体通信库（NVIDIA Collective Communications Library，NCCL）<a href="/pmpp5-zh/book/23-ch23/#bib-2">[2]</a>，以及 NVIDIA OpenSHMEM 库（NVIDIA OpenSHMEM Library，NVSHMEM）<a href="/pmpp5-zh/book/23-ch23/#bib-3">[3]</a>。</p>
+<p>我们只介绍每种编程模型中，将异构应用扩展到集群内多个 GPU 和节点时必须理解的关键概念。具体来说，我们以跨多个 GPU 节点扩展 CUDA 模板计算为背景，重点讨论域分区、点对点通信、集体通信，以及计算与通信的重叠执行。本章给出的实现旨在说明每种编程模型背后的核心原则；在各自模型中，它们都还有进一步优化的空间。掌握本章概念以后，建议读者查阅三种编程模型各自的教程和应用案例，以便更全面地了解它们的全部能力。</p>
+<figure id="fig:23-1">
+<img src="/pmpp5-zh/figs/orig/fig-23-1.png" alt="图 23.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.1　二维 Jacobi 迭代法的修改版模板内核。依据原书图 23.1 逐字符重排。</figcaption>
+</figure>
+<p>到目前为止，我们专注于对一个主机和一个设备组成的异构计算系统编程。然而，许多应用需要多台主机和多台设备的算力总和。如今的许多集群和数据中心都有一台或多台主机，每台主机又连接着一台或多台设备。在本章中，我们研究三种面向多 GPU 集群的编程模型：消息传递接口（MPI）[1]、NVIDIA 集合通信库（NCCL）[2] 和 NVIDIA OpenSHMEM 库（NVSHMEM）[3]。我们只介绍每种编程模型中程序员需要理解的关键概念，以把其异构应用扩展到集群环境中的多个 GPU 和节点。我们聚焦域划分、点对点通信、集合通信以及计算与通信的重叠，背景是把 CUDA 模板计算扩展到多个 GPU 节点。所给出的实现旨在说明每种编程模型背后的核心原理，并且各自都可以在相应的编程模型内进一步优化。希望读者在掌握本章概念后，参考这三种编程模型的教程和应用案例研究，更全面地了解每个模型的全部能力。</p>
+<h2 id="sec-23-1">23.1 作为贯穿示例的模板计算<a class="td-heading-self-link" href="#sec-23-1" aria-label="标题锚点"></a>
+</h2>
+<p>本章始终以第 8 章介绍的模板计算作为贯穿示例。具体而言，我们采用 Jacobi 迭代法：在每次迭代或每个时间步中，结构化网格<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>中一个点的值，等于上一时间步中其邻点值的加权和。模板内核会执行多次迭代，直到网格点值不再发生显著变化。为判断这些值是否已经停止变化，我们计算残差值的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数；每个网格点的残差，就是该点旧值与新值之差。</p>
+<p>图 23.1 的模板内核相对于第 8 章的版本有两处修改[4]。第一处修改是计算二维模板而不是三维模板，以便简化插图和代码示例。第二处修改是让模板内核同时计算残差及其 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数。图中，每个线程首先确定自己负责计算的网格点的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 坐标（第 3–4 行）。边界检查保证只有负责界内网格点的线程保持活动（第 7 行）。注意， <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">x=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>n</mi><mi>x</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x=nx-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">y=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>n</mi><mi>y</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">y=ny-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 处的点会被跳过，因为它们是边界点，或者是后文将会看到的 halo 点。线程把相邻网格点的旧值取平均，得到自己负责网格点的新值（第 8–12 行）。到此为止的代码应当与第 8 章的内核十分相似。</p>
+<p>计算出新值以后，每个线程用新值减去旧值，得到该网格点的残差（第 13 行）。计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数时，需要把线程网格中所有线程的残差平方加在一起。代码使用第 10 章讨论过的块范围归约，求出整个块的残差平方和（第 16 行）；随后由块中的一个线程，以原子方式把块级平方和累加到线程网格范围的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和中（第 17–19 行）。</p>
+<p>图 23.1 的内核还可以继续优化。例如，可以按照第 8 章的方法使用共享内存分块和线程粗化，减少全局内存访问；还可以采用第 10 章介绍的多种归约优化，或调用 CUB 库[5]的块范围归约函数。不过，这些优化不是本章重点；本章关注如何把模板计算分布到多个 GPU 上。</p>
+<figure id="fig:23-2">
+<img src="/pmpp5-zh/figs/orig/fig-23-2.png" alt="图 23.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.2　跨 4 个 GPU 划分建模系统的二维网格数组。；实线分隔各 GPU 负责的域分区，虚线标出 halo 行。</figcaption>
+</figure>
+<p>图 23.2 展示了建模系统，以及如何把它划分到多个 GPU 上。假定系统由结构化网格建模，各方向上相邻网格点的间距分别保持不变。根据这一假设，可以像第 8 章那样用二维数组表示系统，每个元素保存一个网格点的状态；每个维度上相邻元素的物理距离可以用一个网格间距变量表示。我们还假定二维数组在内存空间中采用行主序布局，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 是最低维度，随后是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span>。也就是说，所有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">y=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 的元素按照 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 坐标放入连续内存位置，接着存放所有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">y=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 的元素，依此类推。</p>
+<p>使用多个 GPU 时，通常把输入数据划分成若干称为**域分区（domain partition）**的部分，再把每个分区分配给集群中的不同 GPU。采用行主序布局时，沿 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 维在 GPU 之间划分系统很自然，因为每个 GPU 都会得到一组连续的行。图 23.2 用不同颜色表示各 GPU 负责计算的网格点，并用实线分隔各分区。这样划分以后，每个 GPU 的分区在行主序内存布局中都是连续的。</p>
+<p>回忆一下，计算每个网格点的新值时，需要相邻点的旧值。因此，一个 GPU 要计算其分区边缘网格点的新值，就必须取得相邻分区边缘网格点的旧值。这些网格点称为<strong>halo 点（halo point）</strong>，在图 23.2 中以虚线标出。例如，GPU 1 要计算自己分区内网格点的新值，除了需要这些点的旧值，还需要 GPU 0 分区最底一行和 GPU 2 分区最顶一行的旧值。 GPU 1 所需的输入行跨度用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">ny</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 表示；其中第一行和最后一行是只作输入的 halo 点，中间的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>y</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">ny-2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 行既是输入，也是输出。</p>
+<figure id="fig:23-3">
+<img src="/pmpp5-zh/figs/orig/fig-23-3.png" alt="图 23.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.3　各 GPU 在计算前后可用的值。</figcaption>
+</figure>
+<p>图 23.3 进一步说明每个 GPU 在计算其分区网格点之前和之后分别拥有哪些值。计算之前，GPU 需要图 23.3(a) 所示的 halo 行值。计算结束后，其 halo 行值会像图 23.3(b) 那样变得过期，因为这些行的新值由负责相应行的其他 GPU 计算。因此，进入下一次迭代之前，GPU 必须从计算相邻分区的 GPU 取得更新后的 halo 行。例如，GPU 1 需要从 GPU 0 复制顶部 halo 行，从 GPU 2 复制底部 halo 行；与此同时，GPU 1 还要把自己的顶部边界行发送给 GPU 0，把底部边界行发送给 GPU 2。相邻 GPU 之间这样发送和接收 halo 行，称为<strong>halo 交换（halo exchange）</strong>。</p>
+<p>这里还能看到，在行主序布局下沿 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 维进行一维域分解的另一项好处：GPU 之间需要复制的 halo 行在内存中连续，从而简化 halo 交换期间的复制操作。这种一维域分解也有缺点：根据域的形状和 GPU 数量，GPU 之间可能需要传输大量数据。例如，如果域很宽，每个 GPU 都必须传输完整的一行，代价可能很高。另一种选择是采用二维域分解，让每个 GPU 负责域中的一个二维瓦片。二维域分解可以降低表面积体积比，从而减少需要传输的数据量；但它会要求每个 GPU 与四个相邻 GPU 通信，而不再只是两个，并且部分通信数据在内存中并不连续。为保持本章示例简单，下面只讨论所述的一维域分解。</p>
+<p>总之，多 GPU Jacobi 迭代法的每次迭代包含两个阶段：一是计算阶段，求出网格点的新值；二是通信阶段，在负责相邻分区的 GPU 之间交换新的 halo 行值。由于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数必须覆盖所有分区内的全部网格点，通信阶段还包含一次归约操作，用来归约各 GPU 计算出的线程网格范围 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和。MPI、NCCL 和 NVSHMEM 分别提供了自己的 GPU 间数据交换机制；本章后续将依次说明如何用这三种编程模型完成这些操作。</p>
+<h2 id="sec-23-2">23.2 使用 MPI 的多 GPU 模板计算<a class="td-heading-self-link" href="#sec-23-2" aria-label="标题锚点"></a>
+</h2>
+<p>并行编程模型主要分为两类：共享内存模型和分布式内存模型。在共享内存模型中，不同线程或进程可以访问同一个内存空间，因而数据共享较为简单。例如，CUDA 内核采用共享内存模型，不同 CUDA 线程可以用同一个指针访问同一个全局内存变量。在分布式内存模型中，不同线程或进程访问各自独立的内存空间；此时必须通过消息传递等方式显式共享数据。</p>
+<p>当今计算集群中占主导地位的编程接口是 MPI[1]。MPI 是一组 API 函数，用于在计算集群中运行的进程之间通信。它假定分布式内存模型，各进程通过相互发送消息交换信息。应用使用这些通信 API 时，无须处理互连网络的具体细节。MPI 实现允许进程用逻辑编号彼此寻址，很像电话系统使用电话号码：电话用户可以拨号联系对方，无须知道对方实际位于何处，也无须知道通话经过怎样的路由。</p>
+<figure id="fig:23-4">
+<img src="/pmpp5-zh/figs/orig/fig-23-4.png" alt="图 23.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.4　程序员看到的 MPI 进程。；每个节点可以包含一个或多个进程。</figcaption>
+</figure>
+<p>典型 MPI 应用会在进程之间划分数据和工作。如图 23.4 所示，每个节点可以包含一个或多个进程，图中以节点内部的椭圆表示。进程向前执行时，可能需要其他进程的数据，例如 Jacobi 迭代法执行 halo 交换时就是如此；这种需求通过发送和接收消息满足。有时，进程还需要彼此同步并产生集体结果，例如归约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数；这类操作由集体通信 API 函数完成。</p>
+<p>MPI 程序与 CUDA 一样，都建立在 SPMD 并行编程模型之上：所有 MPI 进程执行同一个程序。 MPI 系统提供一组 API，用来建立允许进程相互通信的通信系统。图 23.5 列出为 MPI 应用建立和关闭通信系统所需的四类基本操作，图 23.6 则展示 MPI 应用通常如何使用这些函数。</p>
+<p>**译者注：**底本正文将图 23.5 概括为“five essential MPI functions”，但原图只列出 <code>MPI_Init()</code>、<code>MPI_Comm_rank()</code>、 <code>MPI_Comm_size()</code> 和 <code>MPI_Finalize()</code> 四个函数；译稿依照原图和后续示例改为“四类基本操作”。</p>
+<figure id="fig:23-5">
+<img src="/pmpp5-zh/figs/orig/fig-23-5.png" alt="图 23.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.5　建立和关闭通信系统所用的基本 MPI API 函数。依据原书图 23.5 逐字符重排，说明文字译为中文。</figcaption>
+</figure>
+<p>MPI 应用由 <code>mpirun</code> 或 <code>mpiexec</code> 启动。用户把程序的可执行文件交给命令，命令再创建执行这一文件的进程。<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>每个进程首先调用 <code>MPI_Init()</code> 初始化 MPI 运行时（图 23.6 第 3 行）；该调用为运行应用的所有进程初始化通信系统。</p>
+<figure id="fig:23-6">
+<img src="/pmpp5-zh/figs/orig/fig-23-6.png" alt="图 23.6" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.6　一个简单的 MPI 主程序。依据原书图 23.6 逐字符重排。</figcaption>
+</figure>
+<p>接下来调用 <code>MPI_Comm_rank()</code>（第 5 行），它向每个调用进程返回一个唯一编号，称为进程的 <strong>MPI 秩（MPI rank）</strong>。进程得到的编号范围是 0 到进程数减 1。MPI 秩在通信中唯一标识一个进程，相当于电话系统中的电话号码；对于 CUDA 线程，它类似表达式 <code>blockIdx.x*blockDim.x + threadIdx.x</code>。CUDA 线程最多可以组织成三个维度；同样， MPI 秩也可以用 MPI 笛卡尔通信器组织成多个维度。</p>
+<p><code>MPI_Comm_rank()</code> 接收两个参数。第一个参数的 MPI 内置类型为 <code>MPI_Comm</code>，它指定请求的范围，也就是由一个 <code>MPI_Comm</code> 变量标识的进程集合。<code>MPI_Comm</code> 类型的变量通常称为<strong>通信器（communicator）</strong>。<code>MPI_Comm</code> 和其他 MPI 内置类型都定义在 <code>mpi.h</code> 头文件中（第 1 行）；所有使用 MPI 的程序文件都应包含该头文件。 MPI 应用可以创建一个或多个通信器，每个通信器都指定调用通信函数时应包含的 MPI 进程组。调用 <code>MPI_Comm_rank()</code> 时，它在通信器参数指定的组内为每个进程分配唯一 ID。图 23.6 传入 <code>MPI_COMM_WORLD</code>；这是默认使用的通信器，表示包含运行应用的全部 MPI 进程。<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></p>
+<p><code>MPI_Comm_rank()</code> 的第二个参数是整数变量的指针，函数把返回的秩写入该变量。图 23.6 为此声明了变量 <code>rank</code>。函数返回后，<code>rank</code> 保存调用进程在给定通信器所指定进程组中的唯一 ID。MPI 文献经常交替使用“MPI 进程”和“MPI 秩”两个说法。</p>
+<p>随后调用 <code>MPI_Comm_size()</code>（第 7 行），返回通信器中运行的 MPI 进程总数。一个通信器指定的 MPI 进程总数称为该通信器的<strong>秩数（number of ranks）</strong>。 <code>MPI_Comm_size()</code> 同样接收两个参数：第一个是指定请求范围的 <code>MPI_Comm</code>；图 23.6 传入 <code>MPI_COMM_WORLD</code>，因而范围是应用的全部进程。第二个参数是整数变量的指针，函数把返回值写入该变量；图中为此声明了 <code>numRanks</code>。函数返回后， <code>numRanks</code> 就是运行应用的 MPI 进程数。这个数值由用户执行 <code>mpirun</code> 或 <code>mpiexec</code> 时配置。通过 <code>MPI_Comm_size()</code> 查询 MPI 运行时，可以在确定应创建多少个分区时避免对应用的启动方式作隐含假设。</p>
+<p>然后，应用执行主要计算（第 8 行），本节后续将展开这部分代码。主要计算结束后，应用调用 <code>MPI_Finalize()</code> 通知 MPI 运行时，并释放分配给应用的全部 MPI 通信资源（第 9 行）。最后，应用以 0 为返回值退出，表示没有发生错误（第 10 行）。</p>
+<p>现在考察各进程执行的主要计算。每个进程知道自己的秩和应用的秩数，因此可以确定自己负责建模系统的哪一个分区。接着，进程用熟悉的 <code>cudaMalloc</code> 为该分区分配 GPU 内存，用 <code>cudaMemset</code> 初始化内存，并启动一个简单内核，依据被建模系统的边界条件初始化分区的边界元素。</p>
+<p>下面省略这些初始化代码，重点考察反复执行模板计算、halo 交换和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数归约的主机端主要计算代码。假设进程 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span> 在主机 CPU 上执行图 23.7 的代码，并在连接该主机的 GPU 全局内存中分配输出数组和输入数组。两个数组都包含 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>y</mi><mo>×</mo><mi>n</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">ny\times nx</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span></span></span></span> 个元素，如图 23.3 所示。数组的第一行，也就是元素 0 到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>x</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">nx-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，由顶部邻居提供的 halo 元素组成；类似地，最后一行，即元素 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>n</mi><mi>y</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mi>n</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">(ny-1)nx</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span></span></span></span> 到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>y</mi><mtext> </mtext><mi>n</mi><mi>x</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">ny\,nx-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，由底部邻居提供的 halo 元素组成。</p>
+<figure id="fig:23-7">
+<img src="/pmpp5-zh/figs/orig/fig-23-7.png" alt="图 23.7" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.7　基于 MPI 的多 GPU Jacobi 迭代法主机代码。依据原书图 23.7 逐字符重排。</figcaption>
+</figure>
+<p>图 23.7 给出基于 MPI 的多 GPU 主机代码主循环。只要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数仍高于最小容差阈值，并且迭代次数没有超过允许的最大值，循环就会继续（第 1 行）。每次迭代首先调用 <code>cudaMemset</code> 把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和初始化为 0（第 4 行）。随后调用一个函数（第 7 行），启动图 23.1 实现的 Jacobi 内核。该内核执行一次模板计算：从输入数组读取网格点旧值，把新值写入输出数组，同时更新 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和。每次迭代都以双缓冲方式交换这两个数组（第 27 行）。代码等待 Jacobi 内核执行完毕（第 8 行），以保证开始 halo 交换前，新网格点值已经计算完成。</p>
+<p>下一步执行 halo 交换。MPI 进程需要与邻居通信，彼此发送新的边界网格点值。这样的通信可以用 MPI **点对点通信（point-to-point communication）**完成，它在两个通信进程之间交换消息。MPI 提供许多点对点通信例程；本例采用 <code>MPI_Sendrecv()</code>。理解该函数以前，先考察 MPI 提供的更基础点对点通信例程。</p>
+<p>最基本的点对点通信例程是 <code>MPI_Send()</code> 和 <code>MPI_Recv()</code>：源进程调用前者向目标进程发送数据，目标进程调用后者从源进程接收数据。这类似电话系统中一方拨号、另一方接听。由于通信双方都必须参与，通信才能发生，这种点对点通信称为<strong>双边通信（two-sided communication）</strong>。</p>
+<figure id="fig:23-8">
+<img src="/pmpp5-zh/figs/orig/fig-23-8.png" alt="图 23.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.8　<code>MPI_Send()</code> 函数的签名。依据原书图 23.8 逐字符重排，参数说明译为中文。</figcaption>
+</figure>
+<p>图 23.8 给出 <code>MPI_Send()</code> 的签名。第一个参数指向要发送数据所在内存区域的起始位置；第二个整数参数给出要发送的数据元素数；第三个参数是 MPI 内置类型 <code>MPI_Datatype</code>，表示 MPI 库所看到的各数据元素类型。<code>mpi.h</code> 定义了这一类型可以保存的值，包括 <code>MPI_DOUBLE</code>（双精度浮点数）、<code>MPI_FLOAT</code>（单精度浮点数）、 <code>MPI_INT</code>（整数）和 <code>MPI_CHAR</code>（字符）。这些类型的确切大小取决于主机处理器上相应 C 类型的大小；关于 MPI 类型更复杂的用法，请参阅 MPI 参考手册[1]。第四个参数给出目标进程的 MPI 秩；第五个参数提供标签，可以把同一进程发送的消息分类；第六个参数是通信器，指定定义目标 MPI 秩的进程组。</p>
+<figure id="fig:23-9">
+<img src="/pmpp5-zh/figs/orig/fig-23-9.png" alt="图 23.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.9　<code>MPI_Recv()</code> 函数的签名。依据原书图 23.9 逐字符重排，参数说明译为中文。</figcaption>
+</figure>
+<p>图 23.9 给出 <code>MPI_Recv()</code> 的签名。第一个参数指向接收数据应写入的内存区域；第二个整数参数给出该函数允许接收的最大元素数；第三个参数指定各接收元素的 <code>MPI_Datatype</code>；第四个参数给出消息源的秩；第五个参数指定目标进程期望的标签值。如果目标进程不想限定某个特定标签，可以使用 <code>MPI_ANY_TAG</code>，表示接收方愿意接受来自该源进程、具有任意标签值的消息。</p>
+<p>执行 halo 交换时，一个进程把自己的边界数据发送给一个邻居，同时还要从另一个邻居接收 halo 数据。例如，在图 23.3 中，当进程 1（即控制 GPU 1 的进程）把顶部边界网格点值发送给进程 0 时，进程 2 也会把自己的顶部边界网格点值发送给进程 1。所有进程都要同时把边界数据发送给顶部邻居，并从底部邻居接收 halo 数据。为此，MPI 提供 <code>MPI_Sendrecv()</code>，它同时向一个目标发送数据，并从一个源接收数据。该函数签名见图 23.10；它结合了 <code>MPI_Send()</code> 与 <code>MPI_Recv()</code>，因此不再逐一解释参数。</p>
+<figure id="fig:23-10">
+<img src="/pmpp5-zh/figs/orig/fig-23-10.png" alt="图 23.10" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.10　<code>MPI_Sendrecv()</code> 函数的签名。依据原书图 23.10 逐字符重排，参数说明译为中文。</figcaption>
+</figure>
+<p>也可以用 MPI 非阻塞通信达到同一目的：通过 <code>MPI_Isend</code> 发起非阻塞发送，通过 <code>MPI_Irecv</code> 发起非阻塞接收，再用 <code>MPI_Wait</code> 等待两项操作完成。这些非阻塞通信函数能够表达更复杂的模式，例如同时向不同邻居发送数据并从它们接收数据。不过，对于本例所需的并发通信模式，<code>MPI_Sendrecv()</code> 只需一次 API 调用，表达起来更方便。关于非阻塞通信函数的详细用法，请参阅 MPI 文档[1]。</p>
+<p>回到图 23.7，特别考察执行 halo 交换的第 11–18 行。首先，各进程确定顶部邻居（第 11 行）和底部邻居（第 12 行）。代码没有简单地计算 <code>rank - 1</code> 和 <code>rank + 1</code>，而是采用回绕策略：最顶端的秩把最底端的秩视为顶部邻居，反之亦然。这种回绕策略常称为<strong>周期边界条件（periodic boundary condition）</strong>。它只模拟大型系统的一小部分，却不会引入比例过高的边缘效应。周期边界条件需要对最顶端和最底端的秩作特殊处理，因为它们本来分别没有可通信的顶部邻居和底部邻居。</p>
+<p>接下来，两次 <code>MPI_Sendrecv</code> 调用完成 halo 交换。第一次调用（第 13–15 行）把从 <code>output + nx</code> 开始的顶部边界行发送给顶部邻居，并从底部邻居接收从 <code>output + (ny - 1)*nx</code> 开始的底部 halo 行。第二次调用（第 16–18 行）把从 <code>output + (ny - 2)*nx</code> 开始的底部边界行发送给底部邻居，并从顶部邻居接收从 <code>output</code> 开始的顶部 halo 行。所有情况下，通信元素数都是一行的大小 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">nx</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span></span></span></span>，数据类型都是 <code>MPI_FLOAT</code>，它对应 C 和 C++ 的 <code>float</code> 类型。</p>
+<p>需要特别注意，传给 <code>MPI_Sendrecv</code> 的输出和输入指针都指向 GPU 设备内存。CUDA 感知 MPI 允许把 GPU 设备内存指针传给 MPI 函数。如果 MPI 实现不具备 CUDA 感知能力，程序员就必须先把数据从设备内存复制到主机内存，再对主机内存数组调用 MPI 通信函数。相比之下， CUDA 感知 MPI 实现理解 CUDA 编程模型，允许通信函数直接作用于 CUDA 全局内存数组。让发送和接收函数直接处理设备数组，可以消除源代码中的 <code>cudaMemcpy</code> 调用，从而减少主机代码膨胀和额外通信延迟。大多数 MPI 实现，如 MPICH[6]、Open MPI[7] 和 MVAPICH2[8]，都支持 CUDA 感知并可在构建时启用。</p>
+<p>halo 交换结束后，主机代码需要计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数，判断系统是否仍有显著变化、是否需要继续迭代。每个 GPU 已经计算了自己分区残差的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和；现在还要跨所有分区把这些值相加。换句话说，需要跨全部 MPI 秩执行归约，每个秩贡献自己分区的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和。这样的跨秩归约可以用 MPI 集体通信完成。</p>
+<p>MPI 点对点通信只涉及两个秩之间的通信；与之不同，**MPI 集体通信（collective communication）**涉及通信器中的全部秩。常用集体通信类型包括屏障、广播、归约、聚集和散布。本章不逐一展开这些函数；细节请参阅 MPI 编程指南[1]。一般来说，MPI 运行时开发者和系统供应商会高度优化集体通信函数。与自行组合多次发送和接收调用实现同一功能相比，使用集体通信函数通常性能更好，代码也更易读、开发效率更高。</p>
+<p>计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数时，我们需要的 MPI 集体通信函数是 <code>MPI_Allreduce</code>。该函数从每个秩取得一份数值缓冲区，把这些缓冲区归约成一个缓冲区，再把结果缓冲区的副本交给每个秩。图 23.11 给出函数签名。第一个参数 <code>sendbuf</code> 指定各秩贡献给归约操作的输入缓冲区；第二个参数 <code>recvbuf</code> 指定最终结果缓冲区的存放位置。也就是说，接收缓冲区的每个元素，都是所有秩发送缓冲区同一下标元素的归约结果。第三个参数 <code>count</code> 指定发送缓冲区的元素数，也等于接收缓冲区的元素数；第四个参数 <code>datatype</code> 指定整数、浮点数等被归约元素的类型；第五个参数 <code>op</code> 指定归约操作。MPI 内置许多归约操作，包括求和、求积、最小值、最大值和逻辑运算等。最后一个参数 <code>comm</code> 指定参与归约的通信器。</p>
+<figure id="fig:23-11">
+<img src="/pmpp5-zh/figs/orig/fig-23-11.png" alt="图 23.11" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.11　<code>MPI_Allreduce()</code> 函数的签名。依据原书图 23.11 逐字符重排，参数说明译为中文。</figcaption>
+</figure>
+<p>再次回到图 23.7，考察归约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数的第 20–25 行。代码先把本分区的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和从设备复制到主机（第 21 行），再用 <code>MPI_Allreduce</code> 跨所有秩归约这些平方和（第 24 行）。这里缓冲区中的元素数是 1，因为每个秩只贡献一个数值，即本分区的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和。归约操作是 <code>MPI_SUM</code>，表示求所有秩贡献值之和。<code>MPI_Allreduce</code> 返回后，每个秩都得到全部 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和的总和；代码对它开平方，得到整个系统最终的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数（第 25 行），并用它判断循环是否应继续（第 1 行）。</p>
+<p>读者可能会问，为什么要在调用 <code>MPI_Allreduce</code> 以前，把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和从设备复制到主机。既然 MPI 具备 CUDA 感知能力，原本可以直接对 GPU 缓冲区调用 <code>MPI_Allreduce</code>。原因在于，主机需要归约结果来检查是否收敛，所以无论如何都必须把结果复制到主机。在这种情况下，先复制到主机，再调用 <code>MPI_Allreduce</code> 更高效。</p>
+<h2 id="sec-23-3">23.3 重叠计算与通信<a class="td-heading-self-link" href="#sec-23-3" aria-label="标题锚点"></a>
+</h2>
+<p>第 23.2 节的多 GPU 模板实现中，每个进程先计算整个分区的新值，再与顶部和底部邻居交换 halo 数据，然后重复这一过程。这种策略十分简单，却不够高效，因为它迫使系统在两种模式之间切换，而每种模式只利用系统的一部分资源。第一种模式下，所有进程都用 GPU 执行计算，通信网络闲置；第二种模式下，所有进程都通过通信网络与顶部、底部邻居交换 halo 数据，GPU 计算硬件利用不足。理想情况下，应当让通信网络与 GPU 计算硬件始终同时工作。如图 23.12 所示，把每个进程的计算任务分成两个阶段，就可以提高利用率。</p>
+<figure id="fig:23-12">
+<img src="/pmpp5-zh/figs/orig/fig-23-12.png" alt="图 23.12" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.12　让计算与通信重叠的两阶段策略。</figcaption>
+</figure>
+<p>第一阶段中，每个进程计算下一次迭代时相邻进程需要作为 halo 点的边界行。图 23.12 用着色行表示本阶段计算的边界行。例如，GPU 1 计算自己的顶部和底部边界行，它们分别是 GPU 0 与 GPU 2 的 halo 行。之所以先计算这些边界行，是因为相邻进程在下次迭代中需要它们；这样，第二阶段就可以一边把边界行传给邻居，一边计算其余内部网格点。</p>
+<p>第二阶段中，每个进程并行执行两项活动。第一项是把新边界值传给相邻进程；第二项是计算分区中的其余数据。如果通信时间短于计算时间，就可以隐藏通信延迟，并在绝大多数时间内充分利用计算硬件。通常，只要每个分区的内部部分有足够多的行，使各进程能执行足够多的计算来遮蔽通信，就可以做到这一点。</p>
+<figure id="fig:23-13">
+<img src="/pmpp5-zh/figs/orig/fig-23-13.png" alt="图 23.13" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.13　计算与通信不重叠和重叠时的执行时间线比较。</figcaption>
+</figure>
+<p>图 23.13 比较计算与通信不重叠和重叠时的执行时间线。在图 23.13(a) 中，计算不与通信重叠：计算硬件执行全部计算时通信网络闲置；随后通信网络完成顶部和底部 halo 交换时，计算硬件闲置；最后还要执行 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数归约。图 23.13(b) 则把顶部、底部网格点与内部网格点分开计算，相应边界点一旦算出，就立即发起顶部或底部 halo 交换。GPU 计算资源足够时，三类网格点可以并发计算，但应优先计算边界网格点，以便尽早发起 halo 交换。关键在于，halo 交换期间仍继续计算内部网格点；计算硬件与通信网络因而同时得到利用，总执行时间缩短。不可避免的是，归约 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数依赖所有网格点都已算完，因此无法与这些计算重叠。</p>
+<p>实现这种重叠，需要把一次 Jacobi 内核调用拆成分别处理边界元素和内部元素的多个内核调用。例如，可以拆成三个调用：一个计算顶部边界行，一个计算底部边界行，另一个计算内部元素。相应边界行内核一结束，就可以发起 halo 交换。为了让三个内核并发执行，并分别让通信活动与各内核独立同步，需要使用 CUDA 编程模型的重要特性：<strong>CUDA stream</strong>。</p>
+<p>CUDA stream 是按顺序排列的 CUDA 操作序列，操作可以包括内核调用、内存复制等。同一 stream 中的全部操作严格按照放入顺序依次执行；不同 stream 中的操作则没有彼此之间的顺序约束，可以并发执行。因此，要让上述三个 Jacobi 内核并发执行，应把它们放入三个不同的 stream。首先创建 stream 对象：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="4"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-0" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">cudaStream_t</span> <span class="n">topStream</span><span class="p">,</span> <span class="n">bottomStream</span><span class="p">,</span> <span class="n">internalStream</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaStreamCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">internalStream</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaStreamCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">topStream</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaStreamCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bottomStream</span><span class="p">);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>第一行声明三个 <code>cudaStream_t</code> 类型的 stream 对象，分别命名为 <code>topStream</code>、 <code>bottomStream</code> 和 <code>internalStream</code>，对应处理顶部边界行、底部边界行和内部行的内核调用。接下来三行分别调用 <code>cudaStreamCreate</code>，传入 stream 对象的指针；每次调用都会创建一个新 stream，并初始化它的状态。</p>
+<p>要把内核调用放入某个 stream，可以把 stream 对象作为内核调用的执行配置参数。第 2 章已经介绍，内核调用的尖括号中有两个必需的执行配置参数：线程网格维度和线程块维度。第 5 章还介绍了可选的第三个参数，它指定动态分配的共享内存大小，省略时默认为 0。类似地，内核调用还接受可选的第四个参数，指定应把调用放入哪个 stream；省略时调用会进入默认 stream。例如：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="1"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-1" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">kernelName</span><span class="o">&lt;&lt;&lt;</span><span class="n">dimGrid</span><span class="p">,</span> <span class="n">dimBlock</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">myStream</span><span class="o">&gt;&gt;&gt;</span><span class="p">(...)</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>这段代码调用内核 <code>kernelName</code>，线程网格维度由 <code>dimGrid</code> 指定，线程块维度由 <code>dimBlock</code> 指定，动态分配的共享内存为 0，并把调用放入 <code>myStream</code>。注意，调用返回并不表示内核已经执行，只表示内核已经放入指定 stream。内核一进入 stream，主机代码就会继续执行后面的语句。CUDA 内核调用之所以是异步的，正是因为主机端调用只是把内核放入 stream，而不是亲自执行内核。主机代码继续执行也不表示相应线程网格已经完成内核，甚至不表示线程网格已经开始执行；它只表示内核已经进入指定 stream，等该 stream 中所有先前操作执行完毕后，最终会启动线程网格执行内核。</p>
+<figure id="fig:23-14">
+<img src="/pmpp5-zh/figs/orig/fig-23-14.png" alt="图 23.14" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.14　基于 MPI、重叠计算与通信的多 GPU Jacobi 迭代法主机代码。依据原书图 23.14 逐字符重排。</figcaption>
+</figure>
+<p>了解如何创建 stream 并把内核调用放入其中以后，现在把 Jacobi 内核拆成三个调用，分别放入三个 stream。图 23.14 给出基于 MPI、重叠计算与通信的多 GPU Jacobi 迭代法主机代码。图 23.7 每次迭代只调用一次 <code>launch_jacobi_kernel</code>、启动一个内核；相比之下，图 23.14 分别调用它计算顶部边界行（第 10 行）、底部边界行（第 12–13 行）和内部网格点（第 15–16 行）。</p>
+<p>计算顶部边界行时（第 10 行），函数需要前三行作为输入，也就是顶部 halo 行、顶部边界行和顶部内部行。因此，代码原样传入 <code>output</code> 与 <code>input</code> 指针，并以 3 作为第 4 个参数，表示关心三行输入。重要的是，还要传入 <code>topStream</code>，<code>launch_jacobi_kernel</code> 会把内核调用放入这一 stream。</p>
+<p>计算底部边界行时（第 12–13 行），函数需要最后三行作为输入，也就是底部 halo 行、底部边界行和底部内部行。因此，代码传入指向最后三行开头的 <code>output + (ny - 3)*nx</code> 与 <code>input + (ny - 3)*nx</code>，并以 3 作为第 4 个参数；还传入 <code>bottomStream</code>，作为内核调用所在的 stream。</p>
+<p>最后，计算内部网格点时（第 15–16 行），函数需要除顶部和底部 halo 行以外的所有行，因此传入跳过第一行的 <code>output + nx</code> 与 <code>input + nx</code>，并传入 <code>ny - 2</code>，排除两条 halo 行；还传入 <code>internalStream</code>，作为内核调用所在的 stream。</p>
+<p>在三个 stream 中并发执行三个内核时，有一点非常重要：这些内核可能以任意顺序执行。最可能的情况是，计算边界网格点的内核因为先被调用而先执行，但不能保证这一顺序。计算内部网格点的内核可能抢先执行并占满 GPU 资源，使计算边界点的内核及随后的 halo 交换无法执行，从而达不到重叠计算与通信的目的。为避免这种情况，需要让计算边界点的内核具有比计算内部点的内核更高的优先级；也就是让 <code>topStream</code> 和 <code>bottomStream</code> 的优先级高于 <code>internalStream</code>。</p>
+<p>默认情况下，<code>cudaStreamCreate</code> 创建的 stream 优先级相同。要为不同 stream 指定不同优先级，需要使用其他 CUDA API：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-2" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaDeviceGetStreamPriorityRange</span><span class="p">(</span><span class="o">&amp;</span><span class="n">low</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">high</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaStreamCreateWithPriority</span><span class="p">(</span><span class="o">&amp;</span><span class="n">internalStream</span><span class="p">,</span> <span class="n">cudaStreamDefault</span><span class="p">,</span> <span class="n">low</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaStreamCreateWithPriority</span><span class="p">(</span><span class="o">&amp;</span><span class="n">topStream</span><span class="p">,</span> <span class="n">cudaStreamDefault</span><span class="p">,</span> <span class="n">high</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaStreamCreateWithPriority</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bottomStream</span><span class="p">,</span> <span class="n">cudaStreamDefault</span><span class="p">,</span> <span class="n">high</span><span class="p">);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>第二行查询 CUDA 运行时支持的 stream 优先级范围，也就是最高值和最低值；所用函数为 <code>cudaDeviceGetStreamPriorityRange</code>。随后三行调用 <code>cudaStreamCreateWithPriority</code>。代码以最低优先级创建 <code>internalStream</code>，再以最高优先级分别创建 <code>topStream</code> 和 <code>bottomStream</code>。本例只需区分两类 stream，因此两个优先级值就足够；其他场景可能需要两个以上的优先级层次，也可以使用中间值。优先级的绝对数值并不重要，只有相对关系有意义。</p>
+<p>把三个 Jacobi 内核调用放入不同 stream 以后，它们可以并发执行。下面考察如何等待某个特定内核结束，再发起 halo 交换等后续任务。为此，CUDA 提供 <code>cudaStreamSynchronize</code>。该函数会等待某个特定 stream 中此前已有的全部任务执行完毕。如图 23.14 所示，代码先等待顶部边界行内核在 <code>topStream</code> 中结束（第 27 行），再调用 <code>MPI_Sendrecv</code> 交换顶部边界行。类似地，代码等待底部边界行内核在 <code>bottomStream</code> 中结束（第 31 行），再调用 <code>MPI_Sendrecv</code> 交换底部边界行。在此期间，由于没有对包含内部行内核的 <code>internalStream</code> 执行同步，该内核可以在两次 MPI halo 交换期间继续执行。这样就让内部行计算与 halo 行通信重叠起来。</p>
+<p>**译者注：**底本在解释底部边界同步时写作“第 32 行”，但图 23.14 第 31 行才是对 <code>bottomStream</code> 的同步调用；第 32 行已经是 <code>MPI_Sendrecv</code>。译稿按代码实际行号作最小修正。</p>
+<p>虽然把一次内核调用拆成三个调用，可以为 halo 交换分别同步各个调用，但这也给 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数计算带来挑战。三个内核都会更新同一个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和，所以它们都必须等这个值初始化为 0 后才能执行，并且复制到主机、跨秩归约之前，三个内核又必须全部完成。然而，三个内核调用位于三个不同的 stream，而初始化与复制 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和的调用只能放入一个 stream。要解决这一问题，必须让一个 stream 中的操作等待另一个 stream 中的操作完成；这种 stream 间交互可以用 CUDA 事件实现。</p>
+<p>CUDA **事件（event）**是标记 stream 中某个位置的标记。CUDA 允许程序员对特定事件执行同步，也就是等待 stream 的执行到达事件所标记的位置。主机线程可以执行这种同步，也可以把对某个事件的等待操作放入另一个 stream。初始化和复制 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数时，需要的是后者。</p>
+<p>图 23.7 使用阻塞函数 <code>cudaMemset</code> 把 GPU 全局内存中的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和初始化为 0；只有初始化完成，该函数才返回。图 23.14 改用非阻塞变体 <code>cudaMemsetAsync</code>（第 4 行），它与内核调用一样，接收额外参数并把初始化操作放入指定 stream。本例把它放入 <code>internalStream</code>，从而保证该 stream 中后续的内部行内核调用不会在初始化结束前执行。</p>
+<p>不过，另外两个计算顶部、底部边界行的内核也必须等 <code>cudaMemsetAsync</code> 完成。为此，可以在 <code>internalStream</code> 的 <code>cudaMemsetAsync</code> 之后放入事件，再在 <code>topStream</code> 和 <code>bottomStream</code> 中、两个内核之前放入等待这一事件的同步操作。下面的代码创建用于这种同步的事件：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-3" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">cudaEvent_t</span> <span class="n">resetL2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaEventCreateWithFlags</span><span class="p">(</span><span class="o">&amp;</span><span class="n">resetL2</span><span class="p">,</span> <span class="n">cudaEventDisableTiming</span><span class="p">);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>第一行声明 <code>cudaEvent_t</code> 类型的事件对象，第二行创建该事件。第一个参数是事件对象的指针；第二个参数 <code>cudaEventDisableTiming</code> 是编译期常量，表示不把该事件用于计时；运行时因而可以更高效地实现基于事件的同步。事件创建以后，图 23.14 第 5 行调用 <code>cudaEventRecord</code>，把它放在 <code>internalStream</code> 的 <code>cudaMemsetAsync</code> 之后。此时，事件 <code>resetL2</code> 标记初始化操作的完成位置。</p>
+<p>要在另一条 stream 中插入对该事件的等待操作，可以像图 23.14 第 6–7 行那样调用 <code>cudaStreamWaitEvent</code>。第一个参数指定插入等待操作的 stream，即第 6 行的 <code>topStream</code> 和第 7 行的 <code>bottomStream</code>；第二个参数指定等待的事件，二者都是 <code>resetL2</code>；第三个参数决定是否使用特殊选项，取 0 表示采用默认选项。</p>
+<p>接着考察三个内核都结束以后，如何复制 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和。图 23.7 使用阻塞的 <code>cudaMemcpy</code>；图 23.14 改用非阻塞变体 <code>cudaMemcpyAsync</code>（第 21 行），后者还接受指定目标 stream 的额外参数。本例把它放入 <code>internalStream</code>，因此它会等待该 stream 中先前的内部行内核。</p>
+<p>复制还必须等待另外两个边界行内核。为此，可以在 <code>topStream</code> 和 <code>bottomStream</code> 的内核调用后记录事件，再在 <code>internalStream</code> 的 <code>cudaMemcpyAsync</code> 之前插入对这些事件的等待操作。图 23.14 正是如此：第 11 行和第 14 行调用 <code>cudaEventRecord</code>，分别在 <code>topStream</code> 与 <code>bottomStream</code> 中记录事件；第 19–20 行在内存复制操作前，把等待两个事件的操作放入 <code>internalStream</code>。</p>
+<p>图 23.14 还利用 <code>cudaMemcpyAsync</code> 非阻塞这一事实作了进一步优化：如图中所示，在调用 <code>MPI_Sendrecv</code> 以前，就把从全局内存向主机内存复制 <code>l2norm</code> 的操作放入 stream。如果计算内部网格点的内核比 halo 交换先结束，这会使 GPU 到主机 CPU 的内存复制与网络 halo 交换重叠。不过，在调用 <code>MPI_Allreduce</code> 以前，必须保证内存复制已经完成；第 37 行调用 <code>cudaStreamSynchronize</code>，等待执行 <code>cudaMemcpyAsync</code> 的 <code>internalStream</code>，从而提供这一保证。</p>
+<figure id="fig:23-15">
+<img src="/pmpp5-zh/figs/orig/fig-23-15.png" alt="图 23.15" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.15　使用 CUDA stream 和事件重叠计算与 MPI 通信的示例时间线。；实线框为计算或复制操作，点线框为事件与等待，粗虚线连接 stream 进度与主机同步。</figcaption>
+</figure>
+<p>图 23.15 说明图 23.14 的主机代码如何在 Jacobi 求解器每次迭代的第 4–41 行中，重叠内部网格点计算与 halo 交换。四条时间线分别表示主机 CPU、 <code>topStream</code>、<code>bottomStream</code> 和 <code>internalStream</code> 的活动。主机 CPU 时间线中的每个方格，要么是向某条 stream 插入操作（用图 23.14 的主机代码行号标记），要么表示主机 CPU 自己执行的活动。</p>
+<p>对于某条 stream 中的每个操作，主机时间线上的方格表示插入时刻，stream 时间线上的方格表示 GPU 执行时段；实线把插入动作与执行动作关联起来。例如，主机时间线上第 10 行的方格把计算顶部网格点的 Jacobi 内核放入 <code>topStream</code>。这个内核必须等待 <code>resetL2</code> 事件，所以执行会被推迟；如果复位 <code>l2norm</code> 所需时间更短或更长，Jacobi 内核就会相应地更早或更晚执行。</p>
+<p>点线箭头表示事件如何允许某个等待操作完成。例如，<code>resetL2</code> 事件有一条点线箭头指向 <code>topStream</code> 中对它的等待操作。<code>cudaMemset</code> 一结束，stream 就到达 <code>resetL2</code> 事件，等待操作随之完成，并允许同一 stream 中计算顶部网格点的 Jacobi 内核继续执行。</p>
+<p>粗虚线表示某条 stream 到达一个位置以后，主机上相应的同步调用便可以返回，主机因而能够继续后续活动；这里的同步函数是 <code>cudaStreamSynchronize</code>。例如，图中 <code>bottomStream</code> 的 <code>computeBottom</code> 事件之后有一条粗虚线，表示主机何时可以从针对 <code>bottomStream</code> 的同步调用返回。由于该同步函数在此位置之后才开始执行，它会立即返回，解除对底部网格点 halo 交换的阻塞。</p>
+<p>**译者注：**底本本段把 API 名写作 <code>cudaStreamsynchronize</code>；图 23.14 的代码及 CUDA API 正确名称均为 <code>cudaStreamSynchronize</code>。译稿按正确符号作最小修正。</p>
+<p>图 23.15 还揭示了一个重要现象：主机同步可能在计算操作完成（例如顶部 stream 的 Jacobi 内核）与依赖它的数据传输操作开始（例如主机执行的顶部 MPI 交换）之间引入显著延迟。这项额外延迟通常称为<strong>同步开销（synchronization overhead）</strong>，它会显著影响操作之间实际获得的重叠程度，例如内部 stream 的 Jacobi 内核与主机 MPI 交换之间的重叠。由于 MPI 交换调用是阻塞的，主机只有等顶部 MPI 交换完成以后，才能开始同步底部 stream 并执行底部 MPI 交换。这会在底部 stream 的 Jacobi 内核结束与底部单元的 MPI 交换开始之间增加延迟，减少 MPI 交换与内部 stream Jacobi 内核的重叠。降低这种同步开销，是第 23.4 节 NCCL 和第 23.5 节 NVSHMEM 的重要设计目标。</p>
+<p>还有一个重要细节：<code>l2norm_h</code> 指向的主机内存参与 <code>cudaMemcpyAsync</code> 等异步内存操作，因此不能用 <code>malloc()</code> 等普通主机内存分配方法取得，而必须分配为 <strong>固定页内存（pinned memory）</strong>，有时也称为页锁定内存（page-locked memory）。可以用 <code>cudaMallocHost</code> 分配固定页内存：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-4" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">float</span><span class="o">*</span> <span class="n">l2norm_h</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">cudaMallocHost</span><span class="p">(</span><span class="o">&amp;</span><span class="n">l2norm_h</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>要完整理解固定页内存及异步复制为何需要它，先补充一些操作系统内存管理背景。现代计算机系统中，操作系统同时管理许多应用的内存地址空间。每个应用都能访问一个庞大、逻辑上连续的 <strong>虚拟地址空间（virtual address space）</strong>。实际上，系统的物理内存容量有限，必须由所有运行中的应用共享。为实现这种共享，操作系统把应用的虚拟地址空间划分成虚拟页，再把这些虚拟页映射到物理内存中的物理页。</p>
+<p>虚拟页到物理页的映射实现了多个目标。其一是保证进程若未作显式共享安排，就不能访问其他进程在物理内存中的页面；进程只能访问映射到自己虚拟地址空间的物理页。其二是在内存需求超过可用物理内存时仍能运行应用：只有最活跃的虚拟页映射到物理页，其余虚拟页放在磁盘上。在这一过程中，操作系统可能需要把物理内存中的某些页面“换出（page out）”到磁盘等大容量存储，为其他页面腾出空间。因此，应用的数据在执行期间随时可能被换出物理内存。</p>
+<p><code>cudaMemcpy()</code> 的实现会使用一种称为**直接内存访问（Direct Memory Access， DMA）**设备的硬件。在主机与设备内存之间复制时，<code>cudaMemcpy()</code> 利用 DMA 完成任务。在主机内存一侧，DMA 硬件使用物理地址，所以操作系统必须向 DMA 提供转换后的物理地址。然而，DMA 操作结束前，数据有可能被换出；相应物理内存位置可能重新分配给另一虚拟内存位置的数据。这样，分页活动就可能覆盖 DMA 正在处理的数据，使复制损坏。</p>
+<p>常见的解决办法是让 CUDA 运行时分两步执行复制。对于主机到设备复制，运行时先把源主机内存数据复制到“固定”的内存缓冲区，也就是把这些内存位置标记为分页机制不得换出；然后由 DMA 设备把固定页缓冲区复制到设备内存。对于设备到主机复制，运行时先由 DMA 设备把数据从设备内存复制到固定页缓冲区，再把缓冲区复制到目标主机内存位置。借助额外的固定页内存缓冲区，DMA 复制不会受到分页活动干扰。</p>
+<p>这种方法有两个问题。第一，额外一次复制会增加 <code>cudaMemcpy()</code> 的延迟。第二，增加的复杂性会使 <code>cudaMemcpy()</code> 以同步方式实现：只有函数完成并返回以后，主机才能继续执行，因为主机必须参与内存复制。为了支持 <code>cudaMemcpyAsync()</code> 这样的异步复制，需要消除主机把数据从普通缓冲区复制到固定页缓冲区的步骤。因此，<code>cudaMemcpyAsync()</code> 要求传入的主机内存缓冲区本身就已经分配为固定页内存。</p>
+<h2 id="sec-23-4">23.4 使用 NCCL 的多 GPU 模板计算<a class="td-heading-self-link" href="#sec-23-4" aria-label="标题锚点"></a>
+</h2>
+<p>第 23.3 节的多 GPU Jacobi 迭代法通过并发的异步内核调用、内存复制和 CUDA stream，有效重叠了计算与通信。不过，实现中仍有一些同步点会造成低效。回看图 23.14，可以看到主机线程在调用 <code>MPI_Sendrecv</code> 前先调用 <code>cudaStreamSynchronize</code>（第 27、31 行），以保证计算顶部、底部边界行的内核已经完成，然后才发起 halo 交换的网络通信。等待期间，<code>cudaStreamSynchronize</code> 会阻塞主机线程，使其无法执行后续主机代码；同步必须由主机参与，也就意味着主机不能去完成其他有用工作。</p>
+<p>如果通信操作本身可以放入 stream，就能摆脱这种低效：stream 机制会在通信所依赖的操作完成后自动发起通信，无须主机线程充当同步中介。希望在 CUDA stream 的上下文中执行通信操作，正是 NVIDIA 集体通信库（NCCL）<a href="/pmpp5-zh/book/23-ch23/#bib-2">[2]</a> 的设计动机之一。</p>
+<p>NCCL 提供多种 GPU 间通信原语，既支持发送、接收等点对点通信，也支持归约、广播、散布和聚集等集体通信。NCCL 的通信原语虽然与 MPI 相似，但有一项重要区别：NCCL 原语在 GPU 而不是主机 CPU 上运行，并且可以放入 CUDA stream。因此，使用 NCCL 后，主机线程不再需要在内核调用与通信原语之间充当同步中介。NCCL 通信原语的另一项优势，是会感知拓扑，并针对节点内和跨节点多 GPU 通信作高度优化。开发者因而无须为具体系统和互连自行优化通信例程。 NCCL 支持 PCIe、NVLINK、InfiniBand Verbs 和套接字等多种互连技术。</p>
+<p>NCCL 并不能完整取代 MPI，而是可以与 MPI 结合使用、增强多 GPU 通信的库。二者结合时，需要像建立和关闭 MPI 通信系统一样建立和关闭 NCCL 通信系统。为此，需要了解三个重要的 NCCL API：<code>ncclGetUniqueId</code>、<code>ncclCommInitRank</code> 和 <code>ncclCommDestroy</code>。图 23.16 给出它们的签名和作用。</p>
+<figure id="fig:23-16">
+<img src="/pmpp5-zh/figs/orig/fig-23-16.png" alt="图 23.16" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.16　建立和关闭通信系统所用的基本 NCCL API 函数。依据原书图 23.16 逐字符重排，参数说明译为中文。</figcaption>
+</figure>
+<p>图 23.17 展示把 NCCL 与 MPI 结合使用时，通常如何用图 23.16 的 API 建立和关闭 NCCL 通信系统。建立和关闭 MPI 通信系统的代码与图 23.6 相同；新增部分包括访问 NCCL API 的头文件（第 2 行），以及建立（第 9–14 行）和关闭（第 16 行） NCCL 通信系统的 API 调用。</p>
+<figure id="fig:23-17">
+<img src="/pmpp5-zh/figs/orig/fig-23-17.png" alt="图 23.17" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.17　一个简单的 MPI + NCCL 主程序。依据原书图 23.17 逐字符重排。</figcaption>
+</figure>
+<p>NCCL 通信操作与 MPI 类似，同样以通信器为基础，由通信器指定参与每次操作的所有实体。因此，一组 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 个 CUDA 设备用 NCCL 相互通信以前，必须创建 NCCL 通信器。创建时，需要为通信器中的每个 CUDA 设备分配 0 到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 之间的唯一秩。如果应用中的 MPI 进程或线程与 CUDA 设备一一对应，就可以直接把 MPI 秩作为 NCCL 秩，图 23.17 的主机代码正是如此。</p>
+<p>秩分配以后，下一步是创建一个唯一对象，所有进程和线程用它同步，并确认自己属于同一个通信器。只能由一个秩调用 <code>ncclGetUniqueId</code> 完成这一步。图 23.17 中，秩 0 调用该函数创建唯一 ID（第 10 行），再用 <code>MPI_Bcast</code> 把唯一对象从秩 0 发送给所有其他 MPI 秩（第 11 行）。注意，所有接收秩也必须执行 <code>MPI_Bcast</code>，才能接收广播对象。关于 <code>MPI_Bcast</code> 的细节，请参阅 MPI 用户指南。简而言之，它的参数依次指定被广播数据的地址、大小和类型，执行广播的秩（本例为秩 0），以及广播范围（本例为应用的全部 MPI 秩）。第 12 行调用 <code>MPI_Barrier</code>，强制所有秩相互等待，直到全部收到 ID 对象，才创建通信器。</p>
+<p>接着，所有秩都调用 <code>ncclCommInitRank</code>，初始化每个秩中的 NCCL 通信器对象及通信系统（第 14 行）。所有秩向该函数传入同一个 <code>ncclID</code>，从而把参与秩注册为同一个通信器的成员；通信器在每个秩中都有一份副本。最后，主函数结束时调用 <code>ncclCommDestroy</code>，关闭 NCCL 通信系统（第 16 行）。本例只需一个通信器；关于在应用中使用多个 NCCL 通信器和多个 NCCL 通信系统的细节，请参阅 NCCL 用户指南[2]。</p>
+<p>建立好 NCCL 通信系统后，下面考察如何用 NCCL 原语替代 <code>MPI_Sendrecv</code> 执行 halo 交换。我们特别关心的通信原语是 <code>ncclSend</code> 和 <code>ncclRecv</code>，二者的签名与说明见图 23.18。它们与 <code>MPI_Send</code> 和 <code>MPI_Recv</code> 相似，但有一项主要区别：二者是异步函数，并且接收 CUDA stream 对象，指定自己应在哪条 stream 中执行。</p>
+<figure id="fig:23-18">
+<img src="/pmpp5-zh/figs/orig/fig-23-18.png" alt="图 23.18" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.18　发送和接收数据的 NCCL API 函数。依据原书图 23.18 逐字符重排，参数说明译为中文。</figcaption>
+</figure>
+<p>第 23.2 节已经说明，不能简单地用 <code>MPI_Send</code> 和 <code>MPI_Recv</code> 执行 halo 交换，因为每个秩都需要同时向一个秩发送数据、从另一个秩接收数据；为此，我们改用把两个操作融合起来的 <code>MPI_Sendrecv</code>。NCCL 没有提供相应的融合发送接收函数，而是提供了用于融合通信原语的<strong>组调用（group call）</strong>。NCCL 可以把一组通信原语夹在两个 API 调用之间，即 <code>ncclGroupStart</code> 和 <code>ncclGroupEnd</code>；它们的作用见图 23.19。因此，把 <code>ncclSend</code> 和 <code>ncclRecv</code> 放在两者之间，就能得到融合的发送接收操作。NCCL 原语会在每个 CUDA 设备上并发运行，使各设备可以把边界网格点发送给一个邻居，同时从另一个邻居接收 halo 网格点。</p>
+<figure id="fig:23-19">
+<img src="/pmpp5-zh/figs/orig/fig-23-19.png" alt="图 23.19" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.19　把通信原语组织在一起的 NCCL API 函数。依据原书图 23.19 逐字符重排，说明文字译为中文。</figcaption>
+</figure>
+<p>现在可以用 NCCL 实现 halo 交换，并重叠计算与通信。图 23.20 给出基于 NCCL 的主机代码。与图 23.14 的 MPI 代码相比，主要变化位于 halo 交换（第 25–36 行）。这里，每个 <code>MPI_Sendrecv</code> 都替换为一组夹在 <code>ncclGroupStart</code> 与 <code>ncclGroupEnd</code> 之间的 <code>ncclSend</code> 和 <code>ncclRecv</code> 调用。更重要的是，代码不再调用 <code>cudaStreamSynchronize()</code>。原先对 <code>topStream</code> 与 <code>bottomStream</code> 的同步改为把这两条 stream 作为最后一个参数传给 <code>ncclSend</code> 和 <code>ncclRecv</code>。 CUDA 运行时保证，只有相应 stream 中先前的内核算完 halo 行，这些通信原语才会发起。</p>
+<figure id="fig:23-20">
+<img src="/pmpp5-zh/figs/orig/fig-23-20.png" alt="图 23.20" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.20　基于 NCCL、重叠计算与通信的多 GPU Jacobi 迭代法主机代码。依据原书图 23.20 逐字符重排。</figcaption>
+</figure>
+<p><code>MPI_Sendrecv</code> 与 <code>ncclSend</code>/<code>ncclRecv</code> 组调用有一项重要区别：前者是阻塞调用，在通信完成前不会返回；后者是非阻塞调用，即使 <code>ncclGroupEnd</code> 已经返回，也只能保证 <code>ncclSend</code> 和 <code>ncclRecv</code> 已经放入指定 stream。因此，必须进一步保证 halo 交换真正完成以后才开始下一次迭代。图 23.20 在 <code>topStream</code> 和 <code>bottomStream</code> 各自的 <code>ncclSend</code>/<code>ncclRecv</code> 调用后，分别记录 <code>exchangeTop</code> 与 <code>exchangeBottom</code> 事件（第 31、36 行）；进入下一次迭代以前，再让 <code>internalStream</code> 等待这些事件（第 43–44 行），从而提供这项保证。</p>
+<figure id="fig:23-21">
+<img src="/pmpp5-zh/figs/orig/fig-23-21.png" alt="图 23.21" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.21　使用 CUDA stream 和事件重叠计算与 NCCL 通信的示例时间线。</figcaption>
+</figure>
+<p>图 23.21 展示图 23.20 主机代码用 NCCL 重叠计算与通信时得到的时间线。与图 23.15 相比，关键区别是 halo 交换不再是主机时间线中的 MPI 调用，而变成 <code>topStream</code> 和 <code>bottomStream</code> 时间线中的 NCCL 组调用；对两条 stream 的同步也从主机时间线中的 stream 同步，变成 <code>internalStream</code> 时间线中的事件同步。因此，除在 <code>MPI_Allreduce</code> 前同步 <code>internalStream</code> 以外，主机已经摆脱通信和同步操作。</p>
+<h2 id="sec-23-5">23.5 使用 NVSHMEM 的多 GPU 模板计算<a class="td-heading-self-link" href="#sec-23-5" aria-label="标题锚点"></a>
+</h2>
+<p>前面已经说明如何用 MPI 和 NCCL 为 halo 交换执行数据通信。两者采用的通信风格都称为双边通信。之所以称为“双边”，是因为一个进程向另一个进程发送数据或从中接收数据时，两个进程都必须执行相互对应的原语。对于 MPI，发送进程的 <code>MPI_Sendrecv</code> 必须与接收进程的 <code>MPI_Sendrecv</code> 相对应；对于 NCCL，发送进程的 <code>ncclSend</code> 必须与接收进程的 <code>ncclRecv</code> 相对应。双方都要参与，是因为发送进程指定通信数据来自何处，接收进程则指定收到的数据应放到何处。实际执行时，发送和接收进程必须等待彼此都到达这些调用以后才能发起通信，这会产生额外延迟。</p>
+<p>并行计算中另一种常见通信形式是<strong>单边通信（one-sided communication）</strong>。在单边通信中，一个进程无须另一个进程参与，就能向它发送数据或从中接收数据。进程通过 put 操作直接访问另一进程的地址空间，把数据存入其中；也可以通过 get 操作从另一进程的地址空间加载数据。直接访问另一进程地址空间的一部分，无须等待对方进程就绪，可以降低数据通信延迟。单边通信还允许在设备上执行的线程发起通信：对于设备上运行的数十万线程，配对的发送和接收调用无法扩展，而单边 put 与 get 操作可以扩展。</p>
+<p>OpenSHMEM[9] 是一种常用的单边通信库。NVIDIA 为 GPU 集群提供了 OpenSHMEM 实现，即 NVIDIA OpenSHMEM 库（NVSHMEM）<a href="/pmpp5-zh/book/23-ch23/#bib-3">[3]</a>。NVSHMEM 允许主机线程或内核中的单个设备线程发起 put 和 get 操作。换句话说，一个进程中在 CPU 或 GPU 上运行的任何线程，都可以直接向另一个进程中另一个 GPU 的部分内存空间加载或存储数据。在 NVSHMEM 术语中，进程或秩称为<strong>处理元素（processing element，PE）</strong>。</p>
+<p>读者可能会问，发起 put 或 get 的进程中，线程如何得知目标进程地址空间里被访问数据对象的地址。在双边通信中，这个地址由目标进程执行的配对调用指定；而在单边通信中，发起进程必须自己指定它。为此，需要使用<strong>对称堆（symmetric heap）</strong>。每个进程都划出自己地址空间的一部分，在本地容纳对称堆；所有进程都在各自对称堆本地实例的同一偏移处，分配相互对应的内存对象。因此，发起进程要访问目标进程地址空间中的对象时，只需给出自己地址空间内对应对象的地址。运行时可以推导对象的偏移，进而得到它在目标进程地址空间中的地址。</p>
+<figure id="fig:23-22">
+<img src="/pmpp5-zh/figs/orig/fig-23-22.png" alt="图 23.22" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.22　为对称堆分配、释放、put 和 get 数据的 NVSHMEM API 函数。依据原书图 23.22 逐字符重排，说明文字译为中文。</figcaption>
+</figure>
+<div class="minipage">
+<p>图 23.22 列出在对称堆中分配、释放以及从内核读写对象的四个 NVSHMEM API。下面的代码用 <code>nvshmem_malloc</code> 对称分配保存输入、输出网格点值的数组：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-5" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">input</span> <span class="o">=</span> <span class="p">(</span><span class="kt">float</span><span class="o">*</span><span class="p">)</span> <span class="n">nvshmem_malloc</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="n">output</span> <span class="o">=</span> <span class="p">(</span><span class="kt">float</span><span class="o">*</span><span class="p">)</span> <span class="n">nvshmem_malloc</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+</div>
+<p>随后可以用 <code>nvshmem_free</code> 释放这些数组：</p>
+<div class="td-code td-code--untitled" id="td-code-a1b7a269-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-a1b7a269-fence-6" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-a1b7a269-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">nvshmem_free</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">nvshmem_free</span><span class="p">(</span><span class="n">output</span><span class="p">);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>调用这些例程时，所有 PE 都必须参与。注意，每个 PE 只为输入和输出网格分配自己的分区。这里假定所有分区具有对称的，也就是完全相同的布局，包括顶部、底部网格点的偏移。</p>
+<figure id="fig:23-23">
+<img src="/pmpp5-zh/figs/orig/fig-23-23.png" alt="图 23.23" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.23　使用 NVSHMEM put 函数执行 halo 交换的 Jacobi 迭代模板内核。依据原书图 23.23 逐字符重排。</figcaption>
+</figure>
+<p>图 23.23 展示如何修改图 23.1 的内核，在内核内部用 NVSHMEM 交换 halo 值。主要变化是包含 NVSHMEM 库头文件（第 1 行），把顶部和底部 PE 的 ID 作为内核参数传入（第 3 行），以及调用 <code>nvshmem_float_p</code> 向顶部、底部 PE 发送边界值（第 15–20 行）。</p>
+<p>具体而言，每个线程检查自己是否在计算本 PE 顶部边界行中的值，即检查 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">y=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>（第 15 行）。若是，线程调用 <code>nvshmem_float_p</code> 把该值发给顶部 PE：第二个参数传入数值，第三个参数传入顶部 PE 的 ID（第 16 行）。由于该值需要放入顶部 PE 的底部 halo 行，线程把自己底部 halo 行中相应对称元素的地址作为第一个参数传入。类似地，每个线程还检查自己是否在计算本 PE 底部边界行中的值，即检查 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>n</mi><mi>y</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">y=ny-2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>（第 18 行）。若是，线程调用 <code>nvshmem_float_p</code> 把值发给底部 PE，第二个参数是数值，第三个参数是底部 PE 的 ID （第 19 行）。由于该值需要放入底部 PE 的顶部 halo 行，线程把自己顶部 halo 行中相应对称元素的地址作为第一个参数传入。</p>
+<p>实现使用 NVSHMEM 的内核以后，下面考察调用该内核的主机代码。NVSHMEM 与 NCCL 类似，可以和 MPI 结合使用。图 23.24 展示通常如何结合 MPI 建立 NVSHMEM。建立和关闭 MPI 通信系统的代码与图 23.6 相同；新增部分包括访问 NVSHMEM API 的头文件（第 2–3 行），以及分配、初始化（第 10–13 行）和释放（第 15 行）NVSHMEM 库资源的 API。</p>
+<figure id="fig:23-24">
+<img src="/pmpp5-zh/figs/orig/fig-23-24.png" alt="图 23.24" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.24　一个简单的 MPI + NVSHMEM 主程序。依据原书图 23.24 逐字符重排。</figcaption>
+</figure>
+<p>具体来说，代码创建 <code>nvshmemx_init_attr_t</code> 类型的对象（第 10 行），为初始化 NVSHMEM 通信系统提供配置细节。关于该类型支持的全部配置属性字段，请参阅 NVSHMEM 用户指南。本例只使用属性字段 <code>mpi_comm</code>，它指向一个 MPI 通信器对象，指定参与 NVSHMEM 通信的进程范围；模板示例的范围是 MPI 通信系统中的全部秩（第 11–12 行）。随后调用 <code>nvshmemx_init_attr</code>，用作为第二个参数传入的对象初始化 NVSHMEM 库资源（第 13 行）。第一个参数 <code>NVSHMEMX_INIT_WITH_MPI_COMM</code> 表示通过 MPI 通信器初始化 NVSHMEM。最后，主机代码完成 Jacobi 计算后，调用 <code>nvshmem_finalize</code> 释放 NVSHMEM 库资源（第 15 行）。 NVSHMEM 也可以在没有 MPI 通信器的情况下初始化；关于不与 MPI 结合时的初始化方法，请参阅 NVSHMEM 文档[3]。</p>
+<p>图 23.25 给出使用 NVSHMEM 内核执行 Jacobi 迭代法的主循环。复位 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和（第 4 行）与归约它（第 12–16 行）的代码与前面的示例相同，主要区别在启动计算内核和执行 halo 交换的第 7–9 行。MPI 示例图 23.14 与 NCCL 示例图 23.20 把三个内核放入三个 stream；这里则只把一个内核放入名为 <code>stream</code> 的一条 stream，用来计算整个分区（第 9 行）。内核新增 <code>top</code> 和 <code>bottom</code> 两个参数，告诉它应把边界值发送给哪些 PE。这两个值的计算方式与前面的示例相同（第 7–8 行）。本节稍后会讨论，每次 Jacobi 迭代只启动一个内核，同时执行计算和通信，有什么影响。</p>
+<figure id="fig:23-25">
+<img src="/pmpp5-zh/figs/orig/fig-23-25.png" alt="图 23.25" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 23.25　基于 NVSHMEM、重叠计算与通信的多 GPU Jacobi 迭代法主机代码。依据原书图 23.25 逐字符重排。</figcaption>
+</figure>
+<p>把同时执行计算和 halo 交换的内核放入 stream 后，必须保证边界值已经到达目标进程，才能进入下一次迭代。图 23.14 的 MPI 实现由 <code>MPI_Sendrecv</code> 的阻塞性质提供保证：数据到达前调用不会返回。因此，图 23.15 时间线中的所有进程到达 <code>MPI_Allreduce</code> 时，可以确信全部 halo 交换数据都已收到。</p>
+<p>图 23.20 的 NCCL 实现通过在相应 stream 中同步 <code>ncclSend</code> 和 <code>ncclRecv</code> 事件提供保证。迭代结束前的 <code>cudaStreamWaitEvent()</code> 调用保证每个进程都已收到 halo 交换数据，随后才为下一次迭代复位 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">L_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 范数平方和。</p>
+<p>图 23.25 的 NVSHMEM 实现则由计算网格点的同一个内核发送边界值。所有已启动线程完成网格点计算和 halo 数据发送后，内核就会结束。同步 stream 只能保证内核已经完成计算并发出了数据，不能保证数据已经收到。为保证接收完成，需要在同一条 stream 上调用 NVSHMEM API <code>nvshmemx_barrier_all_on_stream</code>（第 18 行）。这个调用让所有 PE 都在屏障处等待，直到 stream 中任何先前内核所发起的全部 NVSHMEM 内存访问操作都已经完成。因此，所有进程进入下一次迭代时，可以确信全部 halo 交换数据都已收到，能够安全地继续。</p>
+<p>用 NVSHMEM 在内核中直接对 halo 值执行 put 操作有两项主要优势。第一，它自动重叠计算与通信。采用 MPI 和 NCCL 时，必须先让内核结束才能开始通信，因此需要用不同内核分别计算边界值与内部值：只等待边界值内核，然后发起通信，并与内部值内核并行执行。NVSHMEM 不必启动多个内核，也不必协调它们之间的并发。部分 GPU 线程一算出 halo 值，就能在内核内部用 put 操作发送；put 发起的通信在后台进行时，其他线程继续计算内部网格点值。</p>
+<p>第二项优势是，在内核内直接执行 put 和 get 可以把多项操作融合进一个内核。在 Jacobi 迭代法示例中，这项优势不太明显，因为只有一种操作，也就是模板操作。然而，如果计算包含多项计算，而且各项计算之间还会发生通信，MPI 和 NCCL 就要求用独立内核执行每项计算；NVSHMEM 则允许把这些操作融合进同一个内核，并从内核内部通信。对于较小的内核，这种**内核融合（kernel fusion）**可以减少内核启动开销；如果被融合的不同操作会复用数据，还可以把数据一直保留在共享内存和寄存器中。</p>
+<p>一个值得继续研究的主题是，图 23.23 在内核中以细粒度方式使用 put 操作。对于通过 NVLINK 连接的 GPU，这种方法性能尚可，因为 NVLINK 能提供低延迟、高带宽通信；但对于速度更慢的互连和跨网络通信，执行更少、更粗粒度的 put 操作会更高效。NVSHMEM 提供另一函数 <code>nvshmemx_float_put_block</code>，同一个线程块中的线程可以协作执行一次粗粒度 put。关于这些高级技术的用法，请参阅 NVSHMEM 文档[3]。</p>
+<h2 id="sec-23-6">23.6 小结<a class="td-heading-self-link" href="#sec-23-6" aria-label="标题锚点"></a>
+</h2>
+<p>本章介绍了使用 MPI、NCCL 和 NVSHMEM 三种编程模型，为 GPU 集群编写多 GPU 程序的基本模式。我们以模板模式说明多个进程如何在执行期间持续交换数据。第一个实现只使用 MPI：每个进程先计算自己分区中的所有网格点值，全部计算结束后，再把边界值发送给相邻进程。随后我们改进 MPI 实现，先计算边界值，再把边界值发送给相邻进程，同时计算内部网格点，从而重叠计算与通信。要实现这种重叠，需要使用 CUDA stream 并发执行多个内核。</p>
+<p>接下来，我们考察如何把 NCCL 与 MPI 结合起来，实现同样的计算通信重叠。NCCL 的优势在于，它允许把通信操作放入 CUDA stream，使主机无须在 GPU 内核与 MPI 通信原语之间执行同步。此外，NCCL 库已经针对多 GPU 通信作了高度优化，程序员无须为底层系统组织和网络拓扑自行定制通信原语。</p>
+<p>随后，我们考察如何用 NVSHMEM 实现相同的重叠。MPI 和 NCCL 依赖双边通信，NVSHMEM 则依赖单边通信，免除了发送操作必须与相应接收操作配对的等待延迟。此外，NVSHMEM 的 put 和 get 可以从 GPU 内核内部执行，从而允许内核融合，并透明地重叠计算与通信。</p>
+<p>本章比较 NCCL 与 NVSHMEM 时，重点对照了 NCCL 由主机发起的双边通信和 NVSHMEM 由设备发起的单边通信。不过，多 GPU 编程 API 仍在不断演进，彼此共有的特性也越来越多。例如， NCCL 最近已经增加对称内存和设备发起通信的支持，将来还可能支持单边通信。另一方面， NVSHMEM 不仅支持设备发起通信，也支持主机发起通信。通信数据粒度较粗，而且可以独立于与通信重叠的计算来确定时，主机发起通信的效果很好；通信数据粒度较细，并且是在与通信重叠的计算过程中才确定时，则更适合设备发起通信。</p>
+<p>多 GPU 编程虽然与 GPU 内核编程很不相同，但本章介绍的主要编程概念，如 SPMD、秩和屏障，在 CUDA 编程模型中都有对应概念。这印证了我们的看法：扎实掌握一种模型的并行编程以后，学生就能快速、轻松地学习其他模型。建议读者以本章为基础，继续研究 MPI、NCCL 和 NVSHMEM 的高级功能，并把它们应用到其他重要模式中。</p>
+<h2 id="sec-23-7">23.7 练习<a class="td-heading-self-link" href="#sec-23-7" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li>
+<p><a id="bib-1"></a> 假设把本章的五点模板应用于一个网格，其 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 维包含 64 个网格点，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 维包含 512 个网格点；计算划分到 16 个 MPI 秩。</p>
+<ol>
+<li>
+<p>每个进程计算多少个输出网格点值？</p>
+</li>
+<li>
+<p>每个进程需要多少个 halo 网格点？</p>
+</li>
+<li>
+<p>图 23.12 阶段 1 中，每个进程计算多少个边界网格点？</p>
+</li>
+<li>
+<p>图 23.12 阶段 2 中，每个进程计算多少个内部网格点？</p>
+</li>
+<li>
+<p>图 23.12 阶段 2 中，每个进程发送多少字节？</p>
+</li>
+</ol>
+</li>
+<li>
+<p><a id="bib-2"></a> 如果以下 MPI 调用传输了 4000 字节：</p>
+ <div class="center">
+<p><code>MPI_Send(ptr_a, 1000, MPI_FLOAT, 2000, 4, MPI_COMM_WORLD)</code></p>
+ </div>
+<p>每个被发送数据元素的大小是多少？</p>
+<ol>
+<li>
+<p>1 字节</p>
+</li>
+<li>
+<p>2 字节</p>
+</li>
+<li>
+<p>4 字节</p>
+</li>
+<li>
+<p>8 字节</p>
+</li>
+</ol>
+</li>
+<li>
+<p><a id="bib-3"></a> 下列哪些说法正确？</p>
+<ol>
+<li>
+<p><code>MPI_Send()</code> 默认是阻塞的。</p>
+</li>
+<li>
+<p><code>MPI_Recv()</code> 默认是阻塞的。</p>
+</li>
+<li>
+<p>MPI 消息必须至少有 128 字节。</p>
+</li>
+</ol>
+<p>**译者注：**底本将本题写成单数问法“Which of the following statements is true?”，但 <code>MPI_Send()</code> 和 <code>MPI_Recv()</code> 默认均为阻塞调用，因而 a、b 同时正确；译稿相应改为复数问法。</p>
+</li>
+</ol>
+<h2 id="sec-refs">本章参考文献<a class="td-heading-self-link" href="#sec-refs" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li><a id="bib-1"></a>W. Gropp, E. Lusk, A. Skjellum, <em>Using MPI: Portable Parallel Programming with the Message-Passing Interface</em>, vol. 1, MIT Press, 1999.</li>
+<li><a id="bib-2"></a>NVIDIA, Overview of NCCL, <a href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html">https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html</a>, 2024.</li>
+<li><a id="bib-3"></a>NVIDIA, NVIDIA OpenSHMEM library (NVSHMEM) documentation, <a href="https://docs.nvidia.com/nvshmem/api/index.html">https://docs.nvidia.com/nvshmem/api/index.html</a>, 2024.</li>
+<li><a id="bib-4"></a>NVIDIA, Multi GPU programming models, 2025.</li>
+<li><a id="bib-5"></a><a href="https://github.com/NVIDIA/multi-gpu-programming-models">https://github.com/NVIDIA/multi-gpu-programming-models</a>.</li>
+<li><a id="bib-6"></a>NVIDIA, CUB, <a href="https://nvidia.github.io/cccl/cub/index.html">https://nvidia.github.io/cccl/cub/index.html</a>, 2025.</li>
+<li><a id="bib-7"></a>MPICH, MPICH, <a href="https://www.mpich.org">https://www.mpich.org</a>, 2025.</li>
+<li><a id="bib-8"></a>OpenMPI, Open MPI: open source high performance computing, <a href="https://www.open-mpi.org">https://www.open-mpi.org</a>, 2025.</li>
+<li><a id="bib-9"></a>MVAPICH, MVAPICH: MPI over InfiniBand, omni-path, Ethernet/iWARP, RoCE, and slingshot, <a href="https://mvapich.cse.ohio-state.edu">https://mvapich.cse.ohio-state.edu</a>, 2025.</li>
+<li><a id="bib-10"></a>B. Chapman, T. Curtis, S. Pophale, S. Poole, J. Kuehn, C. Koelbel, L. Smith, Introducing openshmem: shmem for the pgas community, in: <em>Proceedings of the Fourth Conference on Partitioned Global Address Space Programming Model</em>, 2010, pp. 1–3.</li>
+</ol>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>本章用“网格”表示第 8.1 节所介绍的、建模系统中由数据值组成的结构化网格。为免混淆，GPU 线程组成的网格称为“线程网格”。&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>MPI 标准建议把 <code>mpiexec</code> 作为启动 MPI 进程的标准命令名；Open MPI 等实现同时提供含义相同的 <code>mpirun</code>。&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>关于在应用中创建并使用多个通信器的细节，尤其是组内通信器（intracommunicator）与组间通信器（intercommunicator）的定义和用法，请参阅 MPI 参考手册[1]。&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/book/22-ch22/"
+    aria-label="上一页 - 第22章 算法选择、问题分解与问题表述" title="第22章 算法选择、问题分解与问题表述" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">第22章 算法选择、问题分解与问题表述</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/book/24-ch24/"
+    aria-label="下一页 - 第24章 总结与未来展望" title="第24章 总结与未来展望" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">第24章 总结与未来展望</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-23-1">23.1 作为贯穿示例的模板计算</a></li>
+    <li><a href="#sec-23-2">23.2 使用 MPI 的多 GPU 模板计算</a></li>
+    <li><a href="#sec-23-3">23.3 重叠计算与通信</a></li>
+    <li><a href="#sec-23-4">23.4 使用 NCCL 的多 GPU 模板计算</a></li>
+    <li><a href="#sec-23-5">23.5 使用 NVSHMEM 的多 GPU 模板计算</a></li>
+    <li><a href="#sec-23-6">23.6 小结</a></li>
+    <li><a href="#sec-23-7">23.7 练习</a></li>
+    <li><a href="#sec-refs">本章参考文献</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/23-ch23/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/23-ch23/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>双列视图</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>切换语言</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"复制 Markdown 文本","disabledReason":"复制 Markdown 文本: 暂不可用","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":""},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://codingpracticegroup.github.io/pmpp5-zh/book/23-ch23/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":false,"description":"查阅 Markdown 源码","disabledReason":"查阅 Markdown 源码: 暂不可用","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":""},{"available":true,"description":"查阅编辑历史","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/23-ch23.md"},{"available":true,"description":"编辑当前页面","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/23-ch23.md"},{"available":true,"description":"添加子页面","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"提交文档议题","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC23%E7%AB%A0+%E5%A4%9A+GPU+%E7%BC%96%E7%A8%8B"},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"切换语言","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/23-ch23/"},{"active":false,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/23-ch23/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":false,"description":"外观","disabledReason":"暂不可用","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"打开双列视图","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["双列视图","打开双列视图","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"双列视图","url":""}],"commands":[],"language":"zh","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/pmpp5-zh/third_party/katex/katex.min.180c2d77d434d7da51d6625c50a964d4fd6fdbdb9bc8796a0a016c30c49931fb.css" integrity="sha256-GAwtd9Q019pR1mJcUKlk1P1v29ubyHlqCgFsMMSZMfs=" crossorigin="anonymous">
+<script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/code-block.min.a5fdd6bd7e2db7deab97320e3847549321a1f44938f2dd382d876850511d95b2.js" integrity="sha256-pf3WvX4tt96rlzIOOEdUkyGh9Ek48t04LYdoUFEdlbI=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"简体中文","url":"/pmpp5-zh/book/23-ch23/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"两页的部分标题不同，匹配标题之间的位置为估算结果。","close":"关闭","error":"无法加载此页面。","language":"选择语言","loading":"正在加载……","open":"打开","progress":"没有可用于对齐两页的共同标题，将按全文阅读进度同步。","retry":"重试","sync":"同步滚动","title":"双列视图","unavailable":"标题重复或顺序不一致，无法同步。"},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"en-US","direction":"ltr","label":"English","url":"/pmpp5-zh/en/book/23-ch23/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

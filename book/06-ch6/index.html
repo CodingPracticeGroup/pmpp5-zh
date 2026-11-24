@@ -1,0 +1,1303 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/book/06-ch6/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/book/05-ch5/">
+<link rel="next" href="/pmpp5-zh/book/07-ch7/"><meta name="robots" content="index, follow">
+
+<title>第6章 性能考量 | 大规模并行处理器编程（第5版）中文学习译稿</title>
+<meta name="description" content="第6章 性能考量 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/book/06-ch6/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/06-ch6/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/06-ch6/">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/book/06-ch6/">
+	<meta property="og:site_name" content="大规模并行处理器编程（第5版）中文学习译稿">
+	<meta property="og:title" content="第6章 性能考量">
+	<meta property="og:description" content="第6章 性能考量 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="第6章 性能考量">
+	<meta itemprop="description" content="第6章 性能考量 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta itemprop="wordCount" content="1962">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="第6章 性能考量">
+	<meta name="twitter:description" content="第6章 性能考量 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="/pmpp5-zh/" class="td-nav-brand" data-td-navbar-route
+         aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/06-ch6/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/06-ch6/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/" aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/book/" title="大规模并行处理器编程（第5版）"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook"><span>全书目录</span></a>
+      
+    </div><div id="m-pmpp5-zhbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/00-preface/" title="前言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook00-preface"><span>前言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/01-ch1/" title="第1章 引言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook01-ch1"><span>第1章 引言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/02-ch2/" title="第2章 异构并行计算与 CUDA"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook02-ch2"><span>第2章 异构并行计算与 CUDA</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/03-ch3/" title="第3章 多维网格与数据"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook03-ch3"><span>第3章 多维网格与数据</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/04-ch4/" title="第4章 计算架构与调度"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook04-ch4"><span>第4章 计算架构与调度</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/05-ch5/" title="第5章 内存架构与数据局部性"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook05-ch5"><span>第5章 内存架构与数据局部性</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhbook06-ch6-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/book/06-ch6/" aria-current="page" title="第6章 性能考量"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhbook06-ch6"><span>第6章 性能考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/07-ch7/" title="第7章 卷积"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook07-ch7"><span>第7章 卷积</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/08-ch8/" title="第8章 模板计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook08-ch8"><span>第8章 模板计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/09-ch9/" title="第9章 直方图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook09-ch9"><span>第9章 直方图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/10-ch10/" title="第10章 归约"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook10-ch10"><span>第10章 归约</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/11-ch11/" title="第11章 扫描"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook11-ch11"><span>第11章 扫描</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/12-ch12/" title="第12章 过滤器"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook12-ch12"><span>第12章 过滤器</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/13-ch13/" title="第13章 合并"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook13-ch13"><span>第13章 合并</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/14-ch14/" title="第14章 排序"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook14-ch14"><span>第14章 排序</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/15-ch15/" title="第15章 高级矩阵乘法"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook15-ch15"><span>第15章 高级矩阵乘法</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/16-ch16/" title="第16章 动态规划与波纹模式"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook16-ch16"><span>第16章 动态规划与波纹模式</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/17-ch17/" title="第17章 稀疏矩阵计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook17-ch17"><span>第17章 稀疏矩阵计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/18-ch18/" title="第18章 图遍历"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook18-ch18"><span>第18章 图遍历</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/19-ch19/" title="第19章 卷积神经网络"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook19-ch19"><span>第19章 卷积神经网络</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/20-ch20/" title="第20章 大语言模型"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook20-ch20"><span>第20章 大语言模型</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/21-ch21/" title="第21章 静电势图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook21-ch21"><span>第21章 静电势图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/22-ch22/" title="第22章 算法选择、问题分解与问题表述"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook22-ch22"><span>第22章 算法选择、问题分解与问题表述</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/23-ch23/" title="第23章 多 GPU 编程"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook23-ch23"><span>第23章 多 GPU 编程</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/24-ch24/" title="第24章 总结与未来展望"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook24-ch24"><span>第24章 总结与未来展望</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/30-cha/" title="附录A 数值计算考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook30-cha"><span>附录A 数值计算考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/31-chb/" title="附录B 深度学习基础"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook31-chb"><span>附录B 深度学习基础</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/32-chc/" title="附录C CUDA 内存、地址空间与指针"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook32-chc"><span>附录C CUDA 内存、地址空间与指针</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="面包屑导航" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/book/">全书目录</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    第6章 性能考量</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="打开双列视图" aria-label="打开双列视图" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="操作"><span>操作</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/06-ch6.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>查阅编辑历史</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/06-ch6.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>编辑当前页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>添加子页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC6%E7%AB%A0&#43;%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>提交文档议题</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>第6章 性能考量</h1>
+</div>
+
+	<div class="lead">第6章 性能考量 — 《大规模并行处理器编程(第5版)》学习译稿</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c6">性能考量<a class="td-heading-self-link" href="#c6" aria-label="标题锚点"></a>
+</h1>
+<p>并行程序的执行速度会随着程序的资源需求与硬件资源限制之间的相互作用而发生很大变化。要在几乎所有并行编程模型中获得高性能，就必须管理并行代码与硬件资源限制之间的相互作用。这是一项实用技能，需要深入理解硬件架构；而且，最好的学习方式是在面向高性能设计的并行编程模型中亲自完成练习。</p>
+<p>到目前为止，我们已经学习了 GPU 架构的基本方面，以及这些方面对性能的影响。第四章介绍了 GPU 的计算架构和相关性能考量，例如控制流分歧与占用率。第五章介绍了 GPU 的片上内存架构，以及使用共享内存分块和寄存器分块来缓解全局内存带宽限制。本章将进一步介绍片外内存（DRAM）架构，并讨论与之相关的性能考量，例如内存访问合并、隐藏内存延迟以及向量加载和存储。我们还将介绍其他重要优化，包括避免共享内存 bank 冲突、线程粒度粗化、循环展开和双缓冲。最后，我们用一份常见性能优化检查清单结束本书的第一部分；这份清单将指导后文第二、第三部分中并行模式的性能优化。</p>
+<p>不同应用对架构资源的需求不同，因此不同的架构限制可能成为主导因素和性能限制，通常称为<strong>瓶颈（bottleneck）</strong>。在某个 CUDA 设备上，通过用一种资源的使用换取另一种资源的使用，往往可以显著改善应用性能。如果被缓解的资源限制原本确实是主导限制，并且被加重的另一种资源不会对并行执行造成负面影响，这种策略通常很有效。缺少这种理解时，性能调优就会变成猜测：看似合理的策略可能带来性能提升，也可能完全没有效果。</p>
+<p>并行程序的执行速度可以相差很大，这取决于程序对资源的需求与硬件的资源约束之间的相互作用。管理并行代码与硬件资源约束之间的相互作用，对几乎所有并行编程模型实现高性能都很重要。这是一项实践技能，要求对硬件架构有深入理解，并且最好在面向高性能设计的并行编程模型中通过动手练习来掌握。</p>
+<p>到目前为止，我们学习了 GPU 架构的基本方面及其对性能的影响。在第 4 章中，我们学习了 GPU 的计算架构，以及控制流分歧、占用率等相关性能考量。在第 5 章中，我们学习了 GPU 的片上内存架构，以及利用共享内存分块和寄存器分块缓解全局内存带宽限制的方法。在本章中，我们将进一步了解片外内存（DRAM）架构，讨论相关的性能考量，如内存合并、内存延迟隐藏以及向量装载与存储。我们还将介绍更多重要优化，例如避免共享内存 bank 冲突、线程粒度粗化、循环展开和双缓冲。最后，我们用一份常见性能优化清单为本部分收尾，作为优化本书第二、三部分所讨论的并行模式性能的指南。</p>
+<p>由于不同应用对架构资源的需求不同，起主导作用、成为性能限制因素的架构约束（通常称为瓶颈）也各不相同。通过用一种资源的用量换取另一种资源，人们往往能显著提升某个应用在特定 CUDA 设备上的性能。如果由此缓解的资源约束正是策略应用之前的主导约束，且被加重的约束不会对并行执行产生负面影响，这一策略就会奏效。没有这种理解，性能调优就成了猜测；看似合理的策略也许能，也许不能带来性能提升。</p>
+<h2 id="sec-6-1">6.1 全局内存访问合并<a class="td-heading-self-link" href="#sec-6-1" aria-label="标题锚点"></a>
+</h2>
+<p>CUDA 内核性能最重要的因素之一，是如何访问全局内存；全局内存的有限带宽可能成为性能瓶颈。CUDA 应用利用大规模数据并行性，自然会在很短时间内从全局内存处理大量数据。第五章研究了利用共享内存的分块技术：线程块中的线程协作，从而减少必须从全局内存访问的数据总量。本节进一步讨论如何高效地在全局内存与共享内存或寄存器之间搬运数据，这一技术称为<strong>内存访问合并（memory coalescing）</strong>。内存访问合并通常与分块技术结合使用，使 CUDA 设备能够高效利用全局内存带宽，达到其潜在性能。</p>
+<p>CUDA 设备的全局内存由 DRAM 实现，这一点我们在第五章已经看到。DRAM 中的数据位存储在 DRAM 单元中；DRAM 单元是很小的电容，电荷的有无分别表示 1 和 0。从 DRAM 单元读取数据时，小电容必须用其中极少的电荷驱动一条通向传感器的高电容线路，并触发传感器的检测机制，由后者判断电容中的电荷是否足以表示“1”。现代 DRAM 芯片完成这一过程需要几十纳秒（见“为什么 DRAM 很慢？”侧栏）。这与现代计算设备亚纳秒级的时钟周期形成鲜明对比。由于这一过程相对于理想的数据访问速度（每字节亚纳秒级访问）非常慢，现代 DRAM 设计使用并行性来提高数据访问速率，通常称为 <strong>内存访问吞吐量（memory access throughput）</strong>。</p>
+<figure id="fig:6-1">
+<img src="/pmpp5-zh/figs/orig/fig-6-1.png" alt="图 6.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.1　按照行主序把矩阵元素放入线性数组</figcaption>
+</figure>
+<h5 id="sec-x-1">为什么 DRAM 很慢？<a class="td-heading-self-link" href="#sec-x-1" aria-label="标题锚点"></a>
+</h5>
+<p>DRAM 单元中的电容很小，而用于访问它的位线却连接着大量单元，具有很大的电容。译码器必须驱动连接到成千上万个单元输出晶体管栅极的水平线；水平线完全充电或放电到足以打开输出栅极的电平，可能需要较长时间。更困难的是，输出栅极打开后，单元还要驱动通向传感放大器的垂直线，使传感放大器能够检测其内容。这一过程依赖电荷共享：栅极释放单元中存储的极少电荷，而这点电荷必须足以改变长位线的大电容上的电势，触发传感放大器的检测机制。可以把它类比为：有人在连接许多办公室的长走廊一端拿着一小杯咖啡，另一端的人要根据沿走廊传播的香味判断咖啡的味道。</p>
+<p>增大每个单元中的电容、使用更强的电容，可以加快这一过程。然而，DRAM 的发展方向恰恰相反。为了让每个芯片存储更多比特，每个单元中的电容一直在缩小、强度也一直在降低。这就是 DRAM 访问延迟长期没有下降的原因。</p>
+<p>每次访问一个 DRAM 位置时，还会同时访问包含该位置在内的一段连续位置。每个 DRAM 芯片都配有许多传感器，它们并行工作，每个传感器感测这些连续位置中的一个数据位。传感器完成检测后，这些连续位置中的数据可以高速传输到处理器。这些被同时访问并交付的连续位置称为<strong>DRAM 突发（DRAM burst）</strong>。如果应用集中使用一个突发中的数据，DRAM 就能以远高于真正随机访问的速率提供数据；随机访问会把位置分散在许多突发中。</p>
+<p>现代 GPU 还使用基于 SRAM 的片上 L1 和 L2 缓存，以降低全局内存访问延迟并提高吞吐量。由于这些缓存不是 CUDA 编程模型的主要组成部分，我们没有专门介绍它们；不过，它们的存在和行为会影响 CUDA 应用的实际性能。就全局内存访问模式而言，即使数据已经从 DRAM 取出并放入 SRAM 缓存，集中访问连续内存位置仍然有益。当访问 L2 缓存中的数据时，一段连续位置会从 L2 缓存移动到 L1 缓存。数据在不同缓存层级之间移动时所采用的这种粒度称为<strong>缓存块（cache block）<strong>或</strong>缓存行（cache line）</strong>。如果应用集中使用一个缓存行中的数据，缓存就能以更高的速率提供数据，因为需要移动的缓存行更少。</p>
+<p>认识到现代 DRAM 的突发组织方式以及现代缓存层次的缓存行组织方式后，当前 CUDA 设备采用了一种让程序员能够高效访问全局内存的技术：把线程的内存访问组织成有利的模式。这一技术利用了 warp 中线程在任意时刻执行同一条指令这一事实。当 warp 中所有线程执行加载指令时，硬件会检测它们是否访问连续的全局内存位置。最有利的访问模式是：warp 中所有线程访问同一个 DRAM 突发和/或缓存行中的连续全局内存位置。此时，硬件会把这些访问合并为一个较大的访问请求。例如，对 warp 的一条加载指令，如果线程 0 访问全局内存位置 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span></span></span></span>，线程 1 访问位置 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">X+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，线程 2 访问位置 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>+</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">X+2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，依此类推，那么访问 DRAM 或缓存时，这些访问就会被合并为一个针对连续位置的请求。</p>
+<p>除了保证 warp 中线程访问连续的全局内存位置，还要注意这些访问在全局内存中的对齐方式。当这段连续位置的起始地址与一个突发或缓存行的起始位置对齐时，合并访问只需最少数量的内存事务。相反，如果起始地址未对齐，访问的数据可能跨越更多突发或缓存行，从而产生额外的内存流量。</p>
+<p>为了理解如何有效利用合并硬件，我们需要回顾 C 多维数组元素的内存地址是如何形成的。回忆第三章（图 3.3，此处为方便起见复制为图 6.1）：C 和 CUDA 中的多维数组元素按照行主序约定放入线性寻址的内存空间。行主序是指，数据的放置保留了行的结构：同一行中相邻元素被放入地址空间中连续的位置。在图 6.1 中，第 0 行的四个元素先按出现顺序放置，接着是第 1 行、第 2 行和第 3 行的元素。显然，虽然 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mrow><mn>0</mn><mo separator="true">,</mo><mn>0</mn></mrow></msub></mrow><annotation encoding="application/x-tex">M_{0,0}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span><span class="mpunct mtight">,</span><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mrow><mn>1</mn><mo separator="true">,</mo><mn>0</mn></mrow></msub></mrow><annotation encoding="application/x-tex">M_{1,0}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mpunct mtight">,</span><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span> 在二维矩阵中看起来相邻，但在线性寻址的内存中，它们相隔四个位置。</p>
+<p>假设与图 6.1 中的矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 类似的多维数组 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 被用作矩阵乘法的第二个输入矩阵。在这种情况下，被分配来计算连续输出元素的 warp 中相邻线程，会遍历该输入矩阵中连续的列。图 6.2 左上部分给出了这种计算的代码，右上部分给出了访问模式的逻辑视图：相邻线程遍历连续的列。检查代码可以看出，对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的访问能够合并。数组 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的索引是 <code>k*Width + col</code>。所有线程中的变量 <code>k</code> 和 <code>Width</code> 都相同；变量 <code>col</code> 定义为 <code>blockIdx.x*blockDim.x + threadIdx.x</code>，因此相邻线程（具有连续的 <code>threadIdx.x</code> 值）拥有连续的 <code>col</code> 值，也就会访问 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 中连续的元素。</p>
+<figure id="fig:6-2">
+<img src="/pmpp5-zh/figs/orig/fig-6-2.png" alt="图 6.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.2　合并的全局内存访问模式</figcaption>
+</figure>
+<p>图 6.2 下半部分展示了这种访问模式的物理视图。在第 0 次迭代中，相邻线程访问第 0 行中相邻的元素；这些元素在内存中相邻，对应图中的“第 0 次迭代的加载”。在第 1 次迭代中，相邻线程访问第 1 行中同样相邻的元素，对应“第 1 次迭代的加载”。这个过程继续遍历所有行。可以看出，线程形成的内存访问模式是有利于合并的。事实上，到目前为止本书实现的所有内核都具有自然合并的内存访问。</p>
+<p>现在假设矩阵不是按行主序存储，而是按列主序存储。出现这种情况可能有多种原因。例如，我们可能需要访问一个按行主序存储矩阵的转置形式。在线性代数中，经常需要同时使用矩阵的原始形式和转置形式；最好避免同时创建并存储这两种形式。常见做法是先以一种形式（例如原始形式）创建矩阵；需要转置形式时，通过访问原始矩阵并交换行索引和列索引的角色来访问其元素。这等价于把转置矩阵视为按列主序布局。无论原因是什么，下面观察当矩阵乘法示例的第二个输入矩阵按列主序存储时得到的内存访问模式。</p>
+<p>图 6.3 展示了矩阵按列主序存储时，相邻线程遍历连续列的情况。图的左上部分是代码，右上部分是内存访问的逻辑视图。程序仍然试图让每个线程访问矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的一列；不过，for 循环中访问 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的索引计算已经调整，以反映假设的列主序布局。检查代码可以看出，对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的访问不利于合并。数组 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的索引是 <code>col*Width + k</code>。与之前一样，<code>col</code> 定义为 <code>blockIdx.x*blockDim.x + threadIdx.x</code>，因此相邻线程拥有连续的 <code>col</code> 值。但是，索引中的 <code>col</code> 乘以 <code>Width</code>，这意味着相邻线程访问的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 元素相隔 <code>Width</code> 个位置，所以这种访问不利于合并。</p>
+<figure id="fig:6-3">
+<img src="/pmpp5-zh/figs/orig/fig-6-3.png" alt="图 6.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.3　未合并的全局内存访问模式</figcaption>
+</figure>
+<p>图 6.3 下半部分展示了与图 6.2 很不相同的内存访问物理视图。在第 0 次迭代中，相邻线程在逻辑上访问第 0 行中的连续元素，但由于列主序布局，这些元素在内存中并不相邻；图中将这些加载标为“第 0 次迭代的加载”。类似地，在第 1 次迭代中，相邻线程访问第 1 行中的连续元素，但它们在内存中同样不相邻。对于实际矩阵，每个维度通常有数百甚至数千个元素。相邻线程在每次迭代访问的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 元素可能相隔数百甚至数千个位置。硬件会判断这些访问彼此相距很远，因而无法合并。</p>
+<p>当计算本身不自然地适合合并时，有多种策略可以优化代码以实现内存访问合并。一种策略是重新安排线程到数据的映射方式，另一种策略是重新安排数据本身的布局。第 06.8 节会讨论这些策略，并在全书中看到它们的应用。还有一种策略，是以合并方式在全局内存和共享内存之间传输数据，然后在对数据布局不太敏感、访问延迟更低的共享内存中执行不利的访问模式。本书后续会反复看到这种策略，包括现在要应用于矩阵–矩阵乘法的一个优化：第二个输入矩阵按列主序布局。该优化称为<strong>转角（corner turning）</strong>。</p>
+<p>图 6.4 展示了转角的一个应用示例。例子中，输入矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 在全局内存中按行主序存储，输入矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 在全局内存中按列主序存储；二者相乘得到输出矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span>，输出矩阵在全局内存中按行主序存储。图中展示了负责输出瓦片顶边四个连续元素的四个线程如何加载输入瓦片元素。</p>
+<p>对矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 输入瓦片的访问方式与第五章相同。四个线程加载输入瓦片顶边的四个元素。每个线程加载的输入元素，在输入瓦片中的局部行、列索引与该线程负责的输出元素在输出瓦片中的局部行、列索引相同。由于相邻线程访问 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 同一行中的连续元素，而按行主序布局的这些元素在内存中相邻，因此访问是合并的。</p>
+<p>另一方面，对矩阵 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 输入瓦片的访问必须不同于第五章。图 6.4(a) 展示了如果采用第五章的相同安排会得到什么访问模式。尽管线程块中的前四个线程在逻辑上加载输入瓦片顶边的四个连续元素，但由于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 采用列主序布局，相邻线程加载的元素在内存中相距很远。换句话说，负责输出瓦片同一行中连续元素的相邻线程，会加载内存中不连续的位置，导致未合并的内存访问。</p>
+<figure id="fig:6-4">
+<img src="/pmpp5-zh/figs/orig/fig-6-4.png" alt="图 6.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.4　通过转角合并对列主序矩阵 <span class="math inline"><em>N</em></span> 的访问</figcaption>
+</figure>
+<p>解决这个问题的方法，是让线程块中前四个连续线程加载输入瓦片左边（同一列）的四个连续元素，如图 6.4(b) 所示。直观地说，就是在线程计算加载 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 输入瓦片的线性化索引时，交换 <code>threadIdx.x</code> 和 <code>threadIdx.y</code> 的角色。由于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 按列主序布局，同一列中的连续元素在内存中相邻。因此，相邻线程会加载内存中相邻的输入元素，从而保证内存访问合并。可以把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的元素瓦片按列主序或行主序放入共享内存；无论采用哪种方式，输入瓦片加载完成后，每个线程都能以很小的性能代价访问自己的输入。这是因为共享内存由 SRAM 技术实现，并不要求访问合并。注意，这里用的是访问 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo>×</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">4\times4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 瓦片时前四个线程的玩具示例；实际的转角瓦片大小将是 warp 大小 32，因此线程块中的前 32 个线程会访问瓦片左边的 32 个连续元素。</p>
+<p>虽然上面的例子关注于合并全局内存加载操作，但合并对于全局内存存储操作同样重要。事实上，未合并存储的影响可能比未合并加载更严重，因为未合并存储会产生部分存储操作，执行读–改–写访问；在启用了纠错码（Error Correcting Code，ECC）的 GPU 上，这可能需要更多内存带宽。</p>
+<p>合并内存访问的主要优点，是把多个内存访问合并为一次访问，从而减少全局内存流量。只有在同一时刻发生、并且访问相邻内存位置的访问，才有可能被合并。</p>
+<p>计算机系统之外也会出现交通拥堵，如图 6.5 所示的高速公路交通拥堵。拥堵的根本原因是，太多汽车挤过一条原本只为更少车辆设计的道路。发生拥堵后，每辆车的行驶时间都会大幅增加；上下班通勤时间很容易变成原来的两三倍。</p>
+<figure id="fig:6-5">
+<img src="/pmpp5-zh/figs/orig/fig-6-5.png" alt="图 6.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.5　降低高速公路系统中的交通拥堵的概念示意）</figcaption>
+</figure>
+<p>减少交通拥堵的大多数方案，都是减少道路上的汽车数量。在通勤人数不变的情况下，人们需要共享车辆。常见方式是拼车：一组通勤者轮流驾驶一辆车送大家上班。在一些国家，政府会通过政策鼓励拼车；例如，规定某些车辆类别在特定日期不能上路，促使不同日期允许上路的车主组成拼车小组。在另一些国家，政府会为减少道路车辆的行为提供激励，例如把拥堵高速公路的部分车道指定为合乘车道，只允许载有两三名以上乘客的车辆使用。还有一些国家把汽油价格设置得很高，使人们通过拼车节省费用。这些鼓励拼车的措施，都是为了克服拼车需要额外协调这一事实，如图 6.6 所示。</p>
+<p>希望拼车的工作人员必须妥协，并就共同的通勤时间表达成一致。图 6.6 上半部分展示了适合拼车的时间表。时间从左向右流逝；工作人员 A 和工作人员 B 拥有相似的睡眠、工作和晚餐安排，因此很容易共乘一辆车上下班。相似的时间表使他们更容易同意共同的出发时间和返程时间。图的下半部分则不同：工作人员 A 和 B 的生活习惯非常不同。工作人员 A 通宵聚会、白天睡觉、晚上工作；工作人员 B 夜间睡觉、早上上班、下午 6 点回家吃晚餐。两人的时间表差异太大，无法协调出共同的时间乘坐同一辆车上下班。</p>
+<figure id="fig:6-6">
+<img src="/pmpp5-zh/figs/orig/fig-6-6.png" alt="图 6.6" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.6　拼车需要参与者之间进行时间同步</figcaption>
+</figure>
+<p>内存访问合并与拼车安排非常相似。可以把数据看作通勤者，把 DRAM 访问请求看作车辆。当 DRAM 请求速率超过 DRAM 系统提供的访问吞吐量时，就会出现交通拥堵，算术单元随之空闲。如果多个线程访问同一个 DRAM 位置，它们有可能组成“合乘”，把多个访问合并为一个 DRAM 请求。不过，这要求线程具有相似的执行时间表，使它们的数据访问能够合并。warp 中的线程是理想候选者，因为得益于 SIMD 执行，它们会同时执行加载指令。</p>
+<p>现代 CPU 也会在缓存设计中识别 DRAM 的突发组织方式。CPU 缓存行通常对应 DRAM 突发的一部分、一个突发，甚至多个突发。充分使用所触及的每个缓存行中的字节的应用，通常比随机访问内存位置的应用性能高得多。本章介绍的技术同样可以帮助 CPU 程序通过减少 DRAM 访问拥堵来提高速度。</p>
+<h2 id="sec-6-2">6.2 隐藏内存延迟<a class="td-heading-self-link" href="#sec-6-2" aria-label="标题锚点"></a>
+</h2>
+<p>如第 06.1 节所述，DRAM 突发是一种并行组织方式：DRAM 核心阵列中的多个位置可以并行访问。不过，仅靠突发还不足以实现现代处理器所需要的 DRAM 访问带宽。DRAM 系统通常还采用两种并行组织方式，即 bank 和通道（channel）。在最高层次上，一个处理器包含一个或多个通道。每个通道都是一个内存控制器，其总线把一组 DRAM bank 连接到处理器。图 6.7 展示了一个包含四个通道的处理器，每个通道的总线连接四个 DRAM bank。在实际系统中，处理器通常有一到八个通道，而每个通道会连接更多 bank。</p>
+<figure id="fig:6-7">
+<img src="/pmpp5-zh/figs/orig/fig-6-7.png" alt="图 6.7" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.7　DRAM 系统中的通道与 bank</figcaption>
+</figure>
+<p>总线的数据传输带宽由总线宽度和时钟频率决定。现代双倍数据速率（Double Data Rate，DDR）总线在每个时钟周期传输两次数据，分别发生在时钟周期的上升沿和下降沿。例如，一个时钟频率为 3.2 GHz 的 64 位 DDR5-6400 总线，其带宽为</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>8</mn><mtext> </mtext><mi mathvariant="normal">B</mi><mo>×</mo><mn>2</mn><mo>×</mo><mn>3.2</mn><mtext> </mtext><mrow><mi mathvariant="normal">G</mi><mi mathvariant="normal">H</mi><mi mathvariant="normal">z</mi></mrow><mo>=</mo><mn>51.2</mn><mtext> </mtext><mrow><mi mathvariant="normal">G</mi><mi mathvariant="normal">B</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">s</mi></mrow><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">8\ \mathrm{B}\times2\times3.2\ \mathrm{GHz}
+  =51.2\ \mathrm{GB/s}.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">8</span><span class="mspace"> </span><span class="mord mathrm">B</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">3.2</span><span class="mspace"> </span><span class="mord"><span class="mord mathrm">GHz</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">51.2</span><span class="mspace"> </span><span class="mord"><span class="mord mathrm">GB/s</span></span><span class="mord">.</span></span></span></span></span><p>这个数值看起来很大，但对于现代 CPU 和 GPU 往往仍然太小。例如，现代 CPU 可能至少需要 200 GB/s 的内存带宽，而 GPU 可能需要超过 1000 GB/s，这相当于 CPU 需要四条总线、GPU 需要 20 条总线。传统电路板上的处理器驱动如此多的总线会消耗过多功耗，这促使人们采用高带宽内存（High Bandwidth Memory，HBM）技术。HBM 把处理器与 DRAM 封装在一起，大幅缩小二者之间连接的尺寸和容量，并提高时钟频率以及连接处理器和 DRAM 的总线数量。例如，HBM3E 支持 4.9 GHz/s 的总线时钟频率和 16 条 64 位总线，可提供 1 TB/s 的内存带宽。</p>
+<p>**译者注：**底本在 HBM3E 的例子中写作 <code>4.9 GHz/s</code>。频率的常用单位通常是 GHz，而不是 GHz/s；这里保留底本的数值和单位写法，以便与原文对照。</p>
+<p>对每个通道而言，与之连接的 bank 数量由充分利用总线数据传输带宽所需的 bank 数量决定，如图 6.8 所示。每个 bank 都包含 DRAM 单元阵列、用于访问这些单元的传感放大器，以及把数据突发交付到总线的接口（见第 06.1 节）。</p>
+<p>图 6.8(a) 展示了单个 bank 连接到一个通道时的数据传输时序，其中有两次对该 bank 中 DRAM 单元的连续内存读取。回顾第 06.1 节，每次访问都需要较长延迟：译码器要启用单元，单元还要把存储的电荷共享给传感放大器。图中的浅灰部分表示这种延迟。传感放大器完成工作后，突发数据通过总线传输；图 6.8(a) 左侧的深色部分表示突发数据传输时间。第二次内存读取同样会在传输突发数据之前经历很长的访问延迟（时间帧中两个深色部分之间的浅色部分）。</p>
+<figure id="fig:6-8">
+<img src="/pmpp5-zh/figs/orig/fig-6-8.png" alt="图 6.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.8　通过多个 bank 提高通道数据传输带宽利用率</figcaption>
+</figure>
+<p>实际上，访问延迟（浅灰部分）比数据传输时间（深色部分）长得多。显然，单 bank 组织方式会严重浪费通道总线的数据传输带宽。例如，如果 DRAM 单元阵列访问延迟与数据传输时间之比为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20</mn><mo>:</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">20:1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">20</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，通道总线的最大利用率只有</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mfrac><mn>1</mn><mn>21</mn></mfrac><mo>=</mo><mn>4.8</mn><mi mathvariant="normal">%</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">\frac{1}{21}=4.8\%.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">21</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4.8%.</span></span></span></span></span><p>也就是说，一个 16 GB/s 的通道向处理器交付数据的速率不会超过 0.76 GB/s，这完全不可接受。把多个 bank 连接到通道总线可以解决这个问题。</p>
+<p>当两个 bank 连接到同一条通道总线时，第一个 bank 正在服务另一个访问的同时，可以在第二个 bank 中启动一次访问。因此，可以重叠访问 DRAM 单元阵列的延迟。图 6.8(b) 展示了双 bank 组织方式的时序。假设 bank 0 在图示时间窗口之前已经开始工作；第一个 bank 开始访问其单元阵列后不久，第二个 bank 也开始访问其单元阵列。当 bank 0 的访问完成时，它传输突发数据（时间帧最左侧的深色部分）。 bank 0 完成数据传输后，bank 1 就可以传输自己的突发数据（第二个深色部分）。接着这一模式会在后续访问中重复。</p>
+<p>从图 6.8(b) 可以看出，拥有两个 bank 可能使通道总线的数据传输带宽利用率翻倍。一般而言，如果单元阵列访问延迟与数据传输时间之比为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span>，而我们希望完全利用通道总线的数据传输带宽，那么至少需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">R+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 个 bank。例如，当比值为 20 时，每条通道总线至少需要连接 21 个 bank。通常，每条通道总线连接的 bank 数量还需要大于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span>，原因有两个。</p>
+<p>第一，更多 bank 可以降低多个同时访问指向同一 bank 的概率，这种情况称为 <strong>bank 冲突（bank conflict）</strong>。每个 bank 一次只能服务一个访问；发生冲突时，这些访问的单元阵列访问延迟就不能再重叠。bank 数量越多，这些访问分散到多个 bank 的概率越高。第二，每个单元阵列的大小需要在访问延迟和可制造性之间取得合理平衡，这限制了每个 bank 能提供的单元数量。仅为了支持所需的内存容量，系统就可能需要很多 bank。</p>
+<p>图 6.9 展示了把数组 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 的元素分布到通道和 bank 中的玩具示例。假设突发大小很小，只包含两个元素（8 字节）。这种分布由硬件设计决定：数组的前 8 字节（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">0</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">1</span><span class="mclose">]</span></span></span></span>）存储在通道 0 的 bank 0 中；接下来的 8 字节（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[2]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">2</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>3</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[3]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">3</span><span class="mclose">]</span></span></span></span>）存储在通道 1 的 bank 0 中；再接下来的 8 字节（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>4</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[4]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">4</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>5</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[5]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">5</span><span class="mclose">]</span></span></span></span>）存储在通道 2 的 bank 0 中；最后 8 字节（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>6</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[6]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">6</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>7</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[7]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">7</span><span class="mclose">]</span></span></span></span>）存储在通道 3 的 bank 0 中。</p>
+<figure id="fig:6-9">
+<img src="/pmpp5-zh/figs/orig/fig-6-9.png" alt="图 6.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.9　把数组元素交错分布到通道和 bank</figcaption>
+</figure>
+<p>此时分布回绕到通道 0，但下一个 8 字节会使用 bank 1。这样，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>10</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[10]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">10</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>11</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[11]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">11</span><span class="mclose">]</span></span></span></span> 位于通道 1 的 bank 1，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>12</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[12]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">12</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>13</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[13]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">13</span><span class="mclose">]</span></span></span></span> 位于通道 2 的 bank 1，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>14</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[14]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">14</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>15</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[15]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">15</span><span class="mclose">]</span></span></span></span> 位于通道 3 的 bank 1。虽然图中没有画出，后续元素也会回绕，并从通道 0 的 bank 0 开始。例如，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>16</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[16]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">16</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>17</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[17]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">17</span><span class="mclose">]</span></span></span></span> 会存储在通道 0 的 bank 0，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>18</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[18]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">18</span><span class="mclose">]</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo stretchy="false">[</mo><mn>19</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">M[19]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mopen">[</span><span class="mord">19</span><span class="mclose">]</span></span></span></span> 会存储在通道 1 的 bank 0，依此类推。</p>
+<p>图 6.9 所示的分布方案通常称为<strong>交错数据分布（interleaved data distribution）</strong>，它把元素分散到系统中的多个 bank 和通道。即使数组比较小，这种方案也能很好地把元素分散开：在转移到通道 1 的 bank 0 之前，只向通道 0 的 bank 0 分配足以填满其 DRAM 突发的元素。在这个玩具示例中，只要数组至少有 16 个元素，存储这些元素时就会涉及所有通道和 bank。</p>
+<p>线程的并行执行与 DRAM 系统的并行组织之间存在重要联系。为了达到设备规定的内存访问带宽，必须有足够多的线程同时发起内存访问。这一观察体现了最大化占用率的另一个好处。回顾第四章：最大化占用率可以保证 SM 上驻留足够多的线程来隐藏核心流水线延迟，从而高效利用指令吞吐量。现在可以看到，最大化占用率还可以保证有足够多的内存访问请求来隐藏 DRAM 访问延迟，从而高效利用内存带宽。当然，要获得最佳带宽利用率，这些内存访问必须均匀分布到多个通道和 bank 中，而且对每个 bank 的访问也必须是合并的。</p>
+<p>下面用一个例子说明并行线程执行与并行内存组织之间的相互作用。我们使用图 5.5 中的例子，并将其复制为图 6.10。假设矩阵乘法使用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">2\times2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 线程块和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">2\times2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 瓦片完成。</p>
+<figure id="fig:6-10">
+<img src="/pmpp5-zh/figs/orig/fig-6-10.png" alt="图 6.10" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.10　矩阵乘法中线程块并行加载输入瓦片的示例</figcaption>
+</figure>
+<p>在内核执行的第 0 阶段，四个线程块都加载它们的第一个瓦片。每个瓦片涉及的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 元素如图 6.11 所示。表的第 2 行给出了第 0 阶段访问的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 元素及其二维索引；第 3 行给出了相同的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 元素及其线性化索引。假设所有线程块并行执行，可以看到每个线程块会发起两次合并访问。根据图 6.9 中的分布，第 0 阶段所有线程块的这些合并访问会发送到通道 0 和通道 2 中的 bank。访问可以并行执行，从而同时利用两个通道，并提高每条通道的数据传输带宽利用率。</p>
+<p>还可以看到，<code>Block_``0,0</code> 和 <code>Block_``0,1</code> 会加载相同的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 元素。只要这些线程块的执行时间足够接近，现代设备中的大多数缓存就会把这些访问合并为一次。事实上，GPU 设备中的缓存主要就是为了合并这种访问、减少对 DRAM 系统的访问次数而设计的。</p>
+<figure id="fig:6-11">
+<img src="/pmpp5-zh/figs/orig/fig-6-11.png" alt="图 6.11" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.11　各阶段由线程块加载的 <span class="math inline"><em>M</em></span> 元素</figcaption>
+</figure>
+<p>图 6.11 的第 4、5 行展示了内核执行第 1 阶段时加载的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 元素。此时，访问会发送到通道 1 和通道 3 中的 bank；这些访问同样可以并行执行。读者应当能够看出，线程并行执行与 DRAM 系统的并行结构之间存在相互促进的关系：一方面，充分利用 DRAM 系统潜在的访问带宽，需要许多线程同时访问 DRAM 中的数据；另一方面，设备的执行吞吐量依赖于高效利用 DRAM 系统的并行结构，即 bank 和通道。例如，如果同时执行的线程都访问同一个通道中的数据，内存访问吞吐量和设备整体执行速度都会大幅降低。</p>
+<p>读者可以自行验证：使用同样的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">2\times2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 线程块配置，计算两个更大的矩阵（例如 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn><mo>×</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">8\times8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span> 矩阵）将使用图 6.9 中的全部四个通道。另一方面，如果 DRAM 突发大小增加，就需要计算更大的矩阵，才能充分利用所有通道的数据传输带宽。</p>
+<h2 id="sec-6-3">6.3 向量加载与存储<a class="td-heading-self-link" href="#sec-6-3" aria-label="标题锚点"></a>
+</h2>
+<p>第 06.2 节已经说明，最大化 GPU 上线程的占用率，可以让线程同时发起足够多的内存访问，从而高效利用内存带宽。还可以让每个线程在一条指令中访问更大块的连续数据，进一步增加同时访问的数据量。每个线程在一条指令中访问大量连续数据的加载和存储指令，分别称为<strong>向量加载（vector load）</strong> 和<strong>向量存储（vector store）</strong>。</p>
+<p>例如，考虑第二章图 2.10 中的向量加法内核。该内核中，每个线程加载两个 4 B（即 4 字节）的浮点值，并存储一个 4 B 的浮点值。由于相邻线程在每次访问中访问内存中的相邻元素，所以这些内存访问是合并的。此外，由于该内核没有过度使用任何资源，它达到了最大占用率，并能同时发起足够多的内存加载和存储，以高效利用内存带宽。不过，该内核的内存带宽利用率仍然可以进一步提高。原实现中，每访问 4 B 内存，线程就执行一条加载或存储指令；相反，可以使用向量加载和存储，让每个线程每条指令访问 16 B 内存。</p>
+<p>图 6.12 给出了实现这一优化的代码。在该例中，每个线程像以前一样计算自己的全局索引（第 02 行）。不过，启动的线程数只有待相加元素数量的四分之一，索引 <code>i</code> 表示四个浮点值组成的数据块，而不是单个值。为了加载包含四个浮点值的数据块，先把 <code>x</code> 和 <code>y</code> 数组的指针转换为 <code>float4</code> 类型，再对其解引用（第 03–04 行）。<code>float4</code> 类型把四个浮点值表示为一个组合的 16 B 对象。对 <code>float4</code> 类型指针解引用时，编译器会把访问转换为向量加载或存储，一次访问整个 16 B 对象。加载得到的 <code>x4</code> 和 <code>y4</code> 各包含四个浮点值，可以通过字段 <code>.x</code>、<code>.y</code>、<code>.z</code> 和 <code>.w</code> 访问。代码分别相加这些字段，并把结果放入另一个 <code>float4</code> 对象 <code>z4</code>（第 05–09 行）。最后，在存储 <code>z4</code> 时把 <code>z</code> 数组的指针转换为 <code>float4</code> 类型（第 10 行），从而确保该存储操作作为向量存储执行。</p>
+<figure id="fig:6-12">
+<img src="/pmpp5-zh/figs/orig/fig-6-12.png" alt="图 6.12" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.12　使用向量加载的向量加法内核</figcaption>
+</figure>
+<p>如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 数组中的元素总数不能被 4 整除，就需要边界条件，确保边界线程使用标量加载和存储，而不是向量加载和存储，以免访问越界数据。还需要边界条件，确保最后一个线程块中的越界线程不处于活动状态。这些边界条件留给读者作为练习。</p>
+<p>向量加载和存储减少了访问全局内存相关的指令执行开销，使内存带宽能够得到更高效的利用。在图 6.12 中，两条向量加载指令（第 03–04 行）取代了八条标量加载指令，使加载相同数据量的指令执行开销降低了 75%。当内核无法以满占用率执行时，向量加载和存储也很重要：它们仍然允许内核发起足够多的并发内存访问，以容忍内存延迟并充分利用内存带宽。第 15 章将看到这种情况的一个例子。</p>
+<h2 id="sec-6-4">6.4 共享内存 bank 冲突<a class="td-heading-self-link" href="#sec-6-4" aria-label="标题锚点"></a>
+</h2>
+<p>全局内存由 DRAM 技术实现，而 GPU 中的共享内存由访问延迟短得多的 SRAM 技术实现。较短的访问延迟使共享内存不需要采用 DRAM 的突发技术，因此可以使用较窄的 bank。例如，GPU 中一种典型的共享内存结构有 32 个 bank，每个 bank 宽 32 位（4 字节）。因此，当一个 GPU 线程从共享内存访问一个 32 位整数或浮点值时，该线程就独占了一个 bank 的整个输出。</p>
+<p>当同一 warp 中的线程访问共享内存中的不同值时，最好让每个线程访问不同的内存 bank，使这些值能够并行提供。为此，共享内存把连续的 4 B 数据块以交错方式放入不同 bank，方式类似于第 06.2 节描述的 DRAM bank 和通道中的数据放置。例如，前 4 B 放在 bank 0，接下来的 4 B 放在 bank 1，再接下来的 4 B 放在 bank 2，依此类推；32 个 bank 用尽后，重新从 bank 0 开始。因此，如果 warp 中的 32 个线程访问 32 个连续的 4 B 整数或浮点值，每个线程都会由不同的 bank 并行服务。</p>
+<p>遗憾的是，如果同一 warp 中线程的访问彼此不够相邻，这些访问可能在同一时刻命中同一个 bank，从而产生<strong>bank 冲突</strong>。发生共享内存 bank 冲突时，一个 bank 无法同时服务多个线程；对同一 bank 的访问必须逐个服务。硬件会检测同一 warp 中线程的共享内存访问是否存在 bank 冲突，并把这些访问拆分为多个无冲突访问。</p>
+<p>例如，考虑第 06.1 节图 6.4(b) 中的转角优化。虽然线程以合并方式从全局内存加载数据，但它们写入共享内存时采用的是跨步模式。写入共享内存的代码如下：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-2" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">__shared__</span> <span class="kt">float</span> <span class="n">a</span><span class="p">[</span><span class="n">TILE_DIM</span><span class="p">][</span><span class="n">TILE_DIM</span><span class="p">];</span> <span class="c1">// TILE_DIM = 32
+</span></span></span><span class="line"><span class="cl"><span class="n">a</span><span class="p">[</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">][</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>假设线程块维度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn><mo>×</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">32\times32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">32</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span>，同一 warp 中的线程具有相同的 <code>threadIdx.y</code> 值，而 <code>threadIdx.x</code> 值连续。因此，这些线程会写入同一列中的连续元素。线程 0 写入 <code>a[0][0]</code>，线程 1 写入 <code>a[1][0]</code>，线程 2 写入 <code>a[2][0]</code>，依此类推。由于数组 <code>a</code> 按行主序存储，<code>a[i][j]</code> 的线性索引为</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>i</mi><mo>×</mo><mn>32</mn><mo>+</mo><mi>j</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">i\times32+j.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">32</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mord">.</span></span></span></span></span><p>所以 <code>a[0][0]</code>、<code>a[1][0]</code>、<code>a[2][0]</code> 等元素的线性索引是 0、32、 64 等。也就是说，同一 warp 中的线程访问的元素相隔 32 个位置（128 B）。</p>
+<p>现在假设索引 0 处的元素位于 bank 0。索引 1 到 31 处的元素分别位于 bank 1 到 bank 31；到达最后一个 bank 后，顺序重新从 bank 0 开始，所以索引 32 处的元素位于 bank 0。于是，线程 0 和线程 1 都写入 bank 0；同样，线程 2 写入的索引 64 处元素也位于 bank 0（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>64</mn><mtext> </mtext><mo lspace="0.22em" rspace="0.22em"><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow></mo><mtext> </mtext><mn>32</mn></mrow><annotation encoding="application/x-tex">64\bmod32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">64</span><span class="mspace" style="margin-right:0.0556em;"></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.0556em;"></span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span>）。实际上，同一 warp 中的所有线程都会写入同一个 bank，造成 32 路 bank 冲突！硬件会把这些写入串行化，对同一个 bank 执行 32 次连续访问，而其他 bank 都没有被使用。</p>
+<p>为了避免 bank 冲突，需要重新安排数据，使同一 warp 中线程访问的元素位于不同 bank。可以在瓦片中增加一列，从而在连续行之间加入额外元素。这些为改变数据布局而加入、但不使用的额外元素称为<strong>填充（padding）</strong>。下面的代码展示了如何在转角示例中加入填充：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-4" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">__shared__</span> <span class="kt">float</span> <span class="n">a</span><span class="p">[</span><span class="n">TILE_DIM</span><span class="p">][</span><span class="n">TILE_DIM</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span> <span class="c1">// TILE_DIM = 32
+</span></span></span><span class="line"><span class="cl"><span class="n">a</span><span class="p">[</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">][</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>关键变化是，数组 <code>a</code> 的列数从 <code>TILE_DIM</code> 变成了 <code>TILE_DIM + 1</code>。</p>
+<p>下面观察这一变化对共享内存 bank 访问的影响。现在数组 <code>a</code> 有 33 列， <code>a[i][j]</code> 的线性索引是</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>i</mi><mo>×</mo><mn>33</mn><mo>+</mo><mi>j</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">i\times33+j.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">33</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mord">.</span></span></span></span></span><p>因此，线程 0 在线性索引 0 处访问 <code>a[0][0]</code>，它位于 bank 0。线程 1 访问 <code>a[1][0]</code>，线性索引为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>×</mo><mn>33</mn><mo>+</mo><mn>0</mn><mo>=</mo><mn>33</mn></mrow><annotation encoding="application/x-tex">1\times33+0=33</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">33</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">33</span></span></span></span>，它位于 bank 1 （<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>33</mn><mtext> </mtext><mo lspace="0.22em" rspace="0.22em"><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow></mo><mtext> </mtext><mn>32</mn></mrow><annotation encoding="application/x-tex">33\bmod32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">33</span><span class="mspace" style="margin-right:0.0556em;"></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.0556em;"></span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span>）。线程 2 访问 <code>a[2][0]</code>，线性索引为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>×</mo><mn>33</mn><mo>+</mo><mn>0</mn><mo>=</mo><mn>66</mn></mrow><annotation encoding="application/x-tex">2\times33+0=66</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">33</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">66</span></span></span></span>，它位于 bank 2（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>66</mn><mtext> </mtext><mo lspace="0.22em" rspace="0.22em"><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow></mo><mtext> </mtext><mn>32</mn></mrow><annotation encoding="application/x-tex">66\bmod32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">66</span><span class="mspace" style="margin-right:0.0556em;"></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.0556em;"></span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span>）。显然，bank 冲突被消除了： warp 中 32 个线程分别访问不同的 bank，bank 可以并行服务这些访问，不需要硬件串行化。</p>
+<p>与许多性能优化技术一样，填充也有代价和限制。最明显的代价是会消耗额外的共享内存资源。另一个重要代价是：访问填充数组时，线性化索引的计算可能比原数组维度为 2 的幂时更昂贵。例如，当列数为 32（即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>5</mn></msup></mrow><annotation encoding="application/x-tex">2^5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">5</span></span></span></span></span></span></span></span></span></span></span>）时，线性化索引中的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>×</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">i\times32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 可以简化为移位操作 <code>i &gt;&gt; 5</code>。但是，当列数填充为 33 时，乘法必须实现为</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>i</mi><mo>×</mo><mo stretchy="false">(</mo><mn>32</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>i</mi><mo lspace="0.22em" rspace="0.22em"><mtext mathvariant="monospace">&gt;&gt;</mtext></mo><mn>5</mn><mo stretchy="false">)</mo><mo>+</mo><mi>i</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">i\times(32+1)=(i\mathbin{\texttt{&gt;&gt;}}5)+i.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">32</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin"><span class="mord text"><span class="mord texttt">&gt;&gt;</span></span></span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">5</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span><span class="mord">.</span></span></span></span></span><p>增加的操作数取决于填充引入的额外列数。</p>
+<p>填充数组所带来的实际收益取决于访问模式和数组原始维度。例如，如果原数组的列数是 16 而不是 32，那么同一 warp 中线程之间的 bank 冲突会分散到两个 bank，每个 bank 上形成 16 路冲突。因此，填充带来的性能收益会更低。这是直观的：更小的步长意味着同一 warp 内的访问彼此更接近。</p>
+<h2 id="sec-6-5">6.5 线程粗化<a class="td-heading-self-link" href="#sec-6-5" aria-label="标题锚点"></a>
+</h2>
+<p>到目前为止，在我们看到的所有内核中，工作都以最细粒度在线程之间并行化。也就是说，每个线程被分配最小可能的工作单元。例如，第二章的向量加法内核中，每个线程负责一个输出元素；第三章的 RGB 转灰度和图像模糊内核中，每个线程负责输出图像中的一个像素；第三章和第五章的矩阵乘法内核中，每个线程负责输出矩阵中的一个元素。</p>
+<p>以最细粒度在线程之间并行化的优点，是能够增强第四章讨论过的透明可扩展性。如果硬件拥有足够资源并行执行全部工作，应用就向硬件暴露了足够多的并行性，可以充分利用硬件。相反，如果硬件没有足够资源同时执行全部工作，硬件可以简单地把工作拆成多个 wave 串行执行：当前运行的线程块完成并释放足够资源后，再延迟执行其他线程块。</p>
+<p>以最细粒度并行化的缺点，在于并行化工作本身可能存在开销。这种开销有多种形式，例如不同线程块重复加载数据、重复工作、同步开销和指令执行开销等。当硬件并行执行线程时，承担这些并行化开销通常是值得的。然而，如果由于资源不足，硬件最终不得不把工作串行化，那么这些开销就是不必要的。此时，更好的做法是由程序员部分地串行化工作，降低并行化开销；方法是让每个线程负责多个工作单元，这通常称为<strong>线程粗化（thread coarsening）</strong>。</p>
+<p>例如，考虑下面的代码。内核中的每个线程负责对不同数据执行某种计算 <code>foo</code>，数据由索引 <code>i</code> 区分：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-7" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">blockIdx</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">blockDim</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">foo</span><span class="p">(</span><span class="n">i</span><span class="p">);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>这里，每个线程只对一个 <code>i</code> 值执行一次 <code>foo</code>。另一种方式是使用线程粗化，让每个线程对多个 <code>i</code> 值多次执行 <code>foo</code>。线程被分配执行的工作单元数量称为<strong>粗化因子（coarsening factor）</strong>。下面的代码以粗化因子 4 为例，展示如何对上面的代码进行线程粗化：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-8" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">iStart</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">blockIdx</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">blockDim</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">iStart</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">foo</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>这里，把全局线程索引乘以 4，使每个线程得到 4 个连续整数的起始值。例如，线程 0 的 <code>iStart</code> 为 0，负责整数 0、1、2、3；线程 1 的 <code>iStart</code> 为 4，负责整数 4、5、6、7，依此类推。然后，每个线程执行一个循环，遍历分配给自己的 4 个值。这个循环称为<strong>粗化循环（coarsening loop）</strong>。在每次循环迭代中，线程计算该迭代负责的工作单元对应的索引 <code>i</code>，并调用 <code>foo</code>。</p>
+<p>本章用玩具示例介绍线程粗化；在全书中还会看到把线程粗化应用到真实内核的例子。第 06.3 节已经给出一个线程粗化例子：向量加法内核中，每个线程负责相加四对元素，而不是一对元素，从而利用向量加载和存储。这里，把向量加法分配到更多线程上的开销，是加载和存储指令的指令执行开销。如果线程确实并行运行，承担这种开销可能值得；但是，如果线程过多而硬件必须把它们串行执行，那么最好像图 6.12 中那样，在每个线程内部自行串行执行多次加法。在单个线程中串行执行多次加法，可以把内存访问合并为向量加载和存储，从而减少访问内存的指令执行开销。</p>
+<p>另一个适合线程粗化的例子，是第五章的分块矩阵乘法内核。在该例中，把计算分配给许多线程块意味着不同线程块会重复加载相同的输入瓦片。减少线程块数量、让每个线程块处理更大的输出瓦片，可以减少每个输入瓦片被加载的次数。第 15 章将深入讨论这个例子，并使用线程粗化改善矩阵乘法的数据重用。</p>
+<p>线程粗化是一种强大的优化，对许多应用都可能带来显著性能提升。它是一种常用优化，在本书许多章节中都会反复出现。不过，应用线程粗化时需要避免几个陷阱。</p>
+<p>第一个陷阱是在线程粗化没有必要时仍然使用它。回顾前文，只有并行化计算存在开销时，线程粗化才有益。并非所有计算都有这种开销；对于某些计算，线程完全独立运行，不需要协调，也不共享数据。对这类计算应用线程粗化，通常不会带来显著性能差异。</p>
+<p>第二个陷阱是粗化过度，导致硬件资源利用不足。回顾第四章，尽可能向硬件暴露并行性，可以实现透明可扩展性，让硬件根据执行资源数量灵活地并行或串行执行工作。程序员粗化线程时，会减少暴露给硬件的并行性。如果粗化因子太大，暴露的并行性不足，一些并行执行资源就会闲置。</p>
+<p>例如，一个包含 1056 个线程块的内核运行在一块能够同时执行 264 个线程块的 GPU 上时，会有 4 个 wave，且每个 wave 都能充分利用 GPU。但如果该内核中的线程按因子 8 粗化，内核就只包含 132 个线程块，即 0.5 个 wave。此时 GPU 一半的资源会闲置，很可能导致性能下降。程序员还应选择不会产生部分 wave 的粗化因子。例如，一个未粗化、包含 1584 个线程块的内核运行在同一块 GPU 上时，有 6 个能够充分利用 GPU 的 wave；如果线程按因子 4 粗化，内核将有 396 个线程块，即 1.5 个 wave。因此，第一个完整 wave 完成后，第二个部分 wave 会降低 GPU 资源利用率，并产生第四章讨论过的尾部效应。</p>
+<p>在实践中，不同设备拥有不同数量的执行资源，因此最佳粗化因子通常与设备和数据集都有关，需要针对不同设备和数据集重新调优。应用线程粗化后，可扩展性就不再那么透明：为了在不同代 GPU 上达到最佳性能，可能需要使用不同粗化因子重新编译内核。</p>
+<p>第三个陷阱是增加资源消耗，以至于显著降低占用率并损害性能。根据内核的不同，线程粗化可能要求每线程使用更多寄存器，或每线程块使用更多共享内存，因为线程和线程块负责执行更多工作。如果程序员使用过多寄存器或共享内存，占用率就可能下降。程序员必须谨慎权衡：降低占用率带来的性能损失，不能大于线程粗化可能带来的性能收益。</p>
+<h2 id="sec-6-6">6.6 循环展开<a class="td-heading-self-link" href="#sec-6-6" aria-label="标题锚点"></a>
+</h2>
+<p>回顾第一章，GPU 采用吞吐量导向设计，而不是延迟导向设计；GPU 核心被优化为并发执行大量线程，代价是单个线程会经历较长延迟。第四章讨论过一种重要的延迟容忍优化，即最大化 SM 上的线程占用率。最大化占用率可以确保：当 warp 因等待长延迟指令的输出而停顿时，很可能有另一个已经准备好的 warp 可以执行，从而让 SM 核心保持忙碌。本节讨论另一种重要的延迟容忍优化，即<strong>循环展开（loop unrolling）</strong>。</p>
+<p>循环展开是一种转换循环的优化：按某个因子复制循环体，同时将循环迭代次数减少同样的因子。例如，考虑下面的循环：</p>
+<div class="minipage">
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="4"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-9" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+</div>
+<p>其中，<code>A(i)</code> 和 <code>B(i)</code> 表示循环第 <code>i</code> 次迭代执行的某些操作或指令。如果以 4 为展开因子，循环会转换为：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="10"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-10" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">;</span> <span class="n">i</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>循环展开有两个与延迟容忍相关的优点。第一个优点是，减少循环迭代次数会减少分支指令数量。CPU 拥有复杂的分支预测机制来降低分支指令延迟，而 GPU 没有这样复杂的分支预测。当 GPU 线程遇到分支指令时，会停顿，直到分支结果确定。循环展开减少分支指令数量，可以降低这种停顿。</p>
+<p>第二个优点是，循环展开暴露出更多可以重新排序的独立指令，从而避免停顿。在上面的例子中，如果 <code>B(i)</code> 依赖 <code>A(i)</code>，线程执行 <code>A(i)</code> 后必须停顿，等待 <code>A(i)</code> 完成，才能执行 <code>B(i)</code>。如果还有不必等待 <code>A(i)</code> 的其他操作，就可以把这些操作放到 <code>A(i)</code> 和 <code>B(i)</code> 之间，以避免停顿。例如，如果 <code>A(i + 1)</code> 独立于 <code>A(i)</code> 和 <code>B(i)</code>，则展开后的循环体可以进一步转换为：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="10"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-11" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">;</span> <span class="n">i</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>把 <code>A(i + 1)</code>、<code>A(i + 2)</code> 和 <code>A(i + 3)</code> 移到 <code>A(i)</code> 与 <code>B(i)</code> 之间，可以确保线程在等待 <code>A(i)</code> 完成、准备执行 <code>B(i)</code> 时仍有足够指令可执行。以这种方式重新排列指令来避免停顿，是一种重要优化，称为<strong>指令调度（instruction scheduling）</strong>。</p>
+<p>在实践中，循环展开和指令调度会由编译器自行决定，并且通常会积极执行，程序员不必为此操心。在上面的例子中，循环体很小，循环边界也是已知且很小的常量，编译器很可能完全展开该循环，消除所有分支，并暴露最多的可调度指令。如果程序员希望控制循环展开，可以在循环前放置 <code>#pragma unroll N</code> 指令，要求编译器按因子 <code>N</code> 展开循环。例如：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-12" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="cp">#pragma unroll 4
+</span></span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">A</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">B</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>在这段代码中，循环只会按因子 4 展开。把展开因子设为 1，则要求编译器不执行循环展开。在全书中，除非特别需要强调某个循环应当展开，否则我们不会在循环上标注 <code>#pragma unroll</code> 指令。</p>
+<p>一类常能从循环展开中受益的循环，是应用线程粗化的循环（见第 06.5 节）。循环展开对于高效实现线程粗化至关重要。例如，考虑下面的代码：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-13" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-13" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-13-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>在这段代码中，每个线程负责处理一个放在寄存器中的变量 <code>x</code>。如果对它应用线程粗化，每个线程就要负责多个 <code>x</code>。假设粗化因子为 4，粗化后的代码可以写成：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-14" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="4"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-14" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-14-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">c</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>然而，回顾第五章，像 <code>x[4]</code> 这样的局部数组默认放在全局内存中。数组必须放在能够用变量索引访问的内存中，因为代码通过 <code>x[c]</code> 进行访问。不幸的是，把 <code>x[4]</code> 放在全局内存中可能引入内存访问开销，抵消线程粗化的收益。不过，线程粗化循环的循环边界很小且为常量（这对粗化循环很典型），因此可以完全展开。完全展开后，代码如下：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-15" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-15" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-15-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="n">foo</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>循环展开后，对局部数组 <code>x</code> 的所有访问都使用常量索引，而不是变量索引，因而编译器可以把局部数组 <code>x</code> 从内存提升到寄存器。因此，循环展开不仅减少分支、暴露更多可调度指令，还暴露了传播常量以及把变量提升到寄存器以实现更高效访问的机会。</p>
+<h2 id="sec-6-7">6.7 双缓冲<a class="td-heading-self-link" href="#sec-6-7" aria-label="标题锚点"></a>
+</h2>
+<p>回顾第五章，同一线程块中的线程使用 <code>__syncthreads()</code> 执行屏障同步，以协调对共享内存的访问。考虑下面的代码：同一线程块中的线程在计算过程中彼此传递数据。</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-16" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="6"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-16" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-16-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">[</span><span class="n">anotherThreadID</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__syncthreads</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buffer</span><span class="p">[</span><span class="n">myThreadID</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__syncthreads</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>在每次循环迭代中，每个线程从一个先前由另一个线程写入的内存位置读取值，然后把一个新值写入与自己 ID 对应的内存位置。这个新值可能在后续迭代中被其他线程读取。上面的代码包含两次屏障同步，以保证正确执行。第二次屏障同步确保所有线程都完成向内存写值之后，其他线程才读取这些值。换句话说，该屏障强制执行 <strong>读后写依赖（read-after-write dependence）</strong>。这种依赖也称为 <strong>真依赖（true dependence）</strong>，因为它不可避免：必须先写入一个值，才能读取它。</p>
+<p>另一方面，第一次屏障同步确保所有线程都完成当前所需的读操作，其他线程才能在下一次迭代中覆盖这些值。换句话说，该屏障强制执行<strong>写后读依赖（write-after-read dependence）</strong>。这种依赖也称为<strong>假依赖（false dependence）</strong>，因为实际上不必等待读取一个值之后再写入另一个值。之所以被迫等待，只是因为被读取的值和要写入的值占据同一个内存位置。如果这两个值不占据同一个内存位置，写后读依赖（即假依赖）就会消失，第一次屏障同步也就不需要了。</p>
+<p>基于这一观察，可以在不同循环迭代中使用不同的内存缓冲区，从而消除不必要的屏障同步。一种方法是为每次迭代分配一个不同的缓冲区，但这需要大量内存资源，并不理想。更好的方法是只分配两个缓冲区，并在每次迭代之间交替使用它们。这种优化称为<strong>双缓冲（double-buffering）</strong>，因为总共只需分配两个不断交换角色的缓冲区。</p>
+<p>下面的代码展示了如何把双缓冲应用到上面的例子：</p>
+<div class="minipage">
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-17" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="6"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-17" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-17-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span> <span class="o">=</span> <span class="n">inBuffer</span><span class="p">[</span><span class="n">anotherThreadID</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">outBuffer</span><span class="p">[</span><span class="n">myThreadID</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__syncthreads</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">swap</span><span class="p">(</span><span class="n">inBuffer</span><span class="p">,</span> <span class="n">outBuffer</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+</div>
+<p>在这个例子中，分配了两个不同的缓冲区，一个由 <code>inBuffer</code> 指向，另一个由 <code>outBuffer</code> 指向。由于从 <code>inBuffer</code> 读取、向 <code>outBuffer</code> 写入，写操作不会覆盖其他线程正在读取的值。因此，可以删除分隔这两次内存访问的 <code>__syncthreads()</code> 调用。不过，写操作完成后，最新数据位于 <code>outBuffer</code>，下一次迭代应当从这个缓冲区读取。在循环体末尾交换两个缓冲区，就能保证下一次迭代从正确的缓冲区读取。本例只是一个玩具示例；在全书中还会看到把双缓冲应用到真实内核的更具体例子。</p>
+<p>**译者注：**底本在“消除哪一次屏障”的表述中写作“消除第二次屏障”，但给出的双缓冲代码实际删除的是读操作与写操作之间的第一次屏障，并保留写入后用于跨线程同步的第二次屏障。本译文按代码和后续解释的实际含义表述。</p>
+<h2 id="sec-6-8">6.8 优化检查清单<a class="td-heading-self-link" href="#sec-6-8" aria-label="标题锚点"></a>
+</h2>
+<p>在本书第一部分中，我们已经介绍了 CUDA 程序员为改善代码性能而采用的各种常见优化。图 6.13 把这些优化汇总为一份检查清单。这份清单并不穷尽所有可能的优化，但包含了不同应用中普遍存在、程序员应当优先考虑的许多通用优化。在本书第二、第三部分中，我们会把清单中的优化应用到各种并行模式和应用中，以理解它们在不同上下文中的具体表现。本节先简要概览每种优化，以及应用它们的策略。</p>
+<figure id="fig:6-13">
+<img src="/pmpp5-zh/figs/orig/fig-6-13.png" alt="图 6.13" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 6.13　常见性能优化检查清单</figcaption>
+</figure>
+<p>图 6.13 中的优化按照其试图改善的性能方面分为三大类。计算利用率类优化旨在减少 GPU 核心空闲，让核心始终有有用工作可做。内存利用率类优化旨在提高内存子系统访问数据的效率。同步延迟类优化旨在减少线程等待屏障同步的需要。某些优化可能同时属于多个类别；这里把它们归入通常使用时的主要目标类别。最后一种优化“线程粗化”标为一般优化，因为它所属的类别取决于应用场景。</p>
+<p>计算利用率类包含三种主要优化。第一种是调节 SM 上线程的占用率。第四章介绍过，让线程数远多于核心数，可以提供足够多的工作来隐藏核心流水线中的长延迟操作。为了最大化占用率，程序员可以调节内核的资源使用，确保每个 SM 允许的最大线程块数量或寄存器数量不会限制同时分配到 SM 的线程数量。第五章还介绍了共享内存，它也是一种需要谨慎调节使用量、以免限制占用率的资源。本章第 06.2 节讨论过，最大化占用率不仅可以隐藏核心流水线延迟，也有助于隐藏内存延迟。让更多线程同时执行，可以产生足够多的内存访问，充分利用内存带宽。</p>
+<p>在全书中，我们会应用各种增加内核共享内存或寄存器使用量的优化，并假设程序员能够适当调节这些资源的使用，使其不会不利地影响占用率。第 15 章将看到一个例子：使用更多资源所带来的收益可能超过占用率下降的代价；同时，还会用其他优化改善计算利用率，以补偿占用率下降。</p>
+<p>提高计算利用率的第二种优化是循环展开。本章第 06.6 节说明，循环展开可以减少长延迟分支指令的数量，暴露更多可调度的独立指令以减少停顿，还可能把局部数组索引转化为常量，使数组能够提升到寄存器。全书中，我们会假设编译器能够在有利可图时恰当地展开循环。第 11 章介绍前缀和模式，第 15 章介绍矩阵乘法的高级优化；在这两章中，我们会强调循环展开对于在线程粗化后启用寄存器分块的重要性。第 15 章还会说明，内核以低占用率执行时，循环展开对于补偿性能损失至关重要。</p>
+<p>提高计算利用率的第三种优化是减少控制流分歧。第四章介绍过控制流分歧，并强调同一 warp 中线程采取相同控制路径，才能保证 SIMD 执行期间所有核心都有效工作。到目前为止，本书第一部分中的内核除了边界条件处不可避免的分歧外，都没有表现出控制流分歧。不过，在第二、第三部分的许多例子中，控制流分歧会成为性能的显著损害因素。</p>
+<p>有多种策略可以减少控制流分歧。一种策略是重新安排工作和/或数据在线程之间的分配，确保先使用一个 warp 中的所有线程，再使用其他 warp 中的线程。第 10 章介绍归约模式时会看到这种策略。重新安排工作和/或数据的分配方式，也可以确保同一 warp 中的线程具有相近的工作量。第 18 章介绍图遍历时，会讨论以顶点为中心和以边为中心的并行化方案之间的权衡。另一种减少控制流分歧的策略，是重新安排数据布局，确保处理相邻数据的同一 warp 线程具有相近工作量。第 17 章介绍稀疏矩阵计算和存储格式时，尤其是在讨论 JDS 格式时，会看到这种策略。</p>
+<p>图 6.13 中的内存利用率类包含六种主要优化。第一种是使用合并的全局内存访问：确保同一 warp 中的线程在同一个缓存行和/或 DRAM 突发内访问相邻的内存位置。本章第 06.1 节介绍过这种优化，重点是硬件能够把对相邻内存位置的访问合并为单个内存请求，从而减少全局内存流量，提高 DRAM 突发和缓存行的利用率。到目前为止，本书第一部分中的内核都自然地产生合并访问；不过，第二、第三部分中会看到更多不规则内存访问模式，需要额外努力才能实现合并。</p>
+<p>对于访问模式不规则的应用，可以采用多种策略实现合并。一种策略是以合并方式把数据从全局内存加载到共享内存，然后在共享内存中执行不规则访问。第 06.1 节已经通过转角看到了这种策略；第 12 章介绍过滤模式、第 14 章介绍排序模式时还会看到其他例子。在这些模式中，线程会以分散方式把结果写入数组；相反，线程可以协作在共享内存中执行分散访问，然后把共享内存中的结果写回全局内存，并让目标地址相近的元素以更合并的方式写出。这种优化有时称为<strong>打包（packing）</strong>。第 13 章介绍归并模式时也会看到该策略：同一线程块中的线程需要在同一个数组中执行二分搜索，因此它们先以合并方式把数组加载到共享内存，然后每个线程在共享内存中执行二分搜索。</p>
+<p>在访问模式不规则的应用中，实现合并的另一种策略，是重新安排线程到数据元素的映射方式。第 10 章介绍归约模式、第 15 章介绍矩阵乘法的高级优化时，会看到这种策略。还有一种策略是重新安排数据本身的布局。第 17 章介绍稀疏矩阵计算和存储格式时，尤其在讨论 ELL 和 JDS 格式时，会看到这种策略。重新安排数据布局的其他常见例子包括转置矩阵，或把结构体数组转换为数组结构体。</p>
+<p>提高内存利用率的第二种优化，是把线程块内部会重用的数据分块放入共享内存，并反复从共享内存访问，使这些数据只需在全局内存与 SM 之间传输一次。第五章在矩阵乘法上下文中介绍过共享内存分块：处理同一个输出瓦片的线程协作，把相应的输入瓦片加载到共享内存，然后反复从共享内存访问这些输入瓦片。在第二、第三部分的大多数并行模式中，还会再次应用共享内存分块。我们会看到，当输入瓦片和输出瓦片尺寸不同时，分块会遇到挑战；第 7 章的卷积模式和第 8 章的模板模式都会遇到这种情况。第 15 章会把共享内存分块更复杂地应用于矩阵乘法，第 16 章会把它应用于动态规划中的序列比对。</p>
+<p>提高内存利用率的第三种优化，是把 warp 或线程内部会重用的数据分块放入寄存器，并反复从寄存器访问，使这些数据只需在全局内存或共享内存与寄存器之间传输一次。第三章和第五章已经应用过寄存器分块：每个线程使用局部变量或寄存器累积结果，然后再写回全局内存。可以把所有线程的寄存器集合看作共同组成输出数据的一个瓦片。第 8 章会再次看到寄存器分块：共享内存输入瓦片暂时移动到寄存器，再从寄存器移回，以实现高效访问并节省共享内存容量。第 11 章介绍前缀和模式、第 15 章介绍矩阵乘法高级优化时，也会再次使用寄存器分块；在这些例子中，每个线程负责多个输出元素，并重用多个对应的输入元素。</p>
+<p>提高内存利用率的第四种优化，是使用向量加载和存储，以较少的指令执行开销访问更大的内存块。本章第 06.3 节已经在向量加法中介绍了这种优化。它可以应用于本书讨论的大多数计算。由于这种优化很简单，我们不会在全书中逐章应用，只在它特别相关时简要提及。</p>
+<p>提高内存利用率的第五种优化，是避免共享内存 bank 冲突。本章第 06.4 节已经在转角上下文中介绍了这种优化。避免 bank 冲突的主要策略，是重新安排线程到数据的映射，或重新安排数据布局，通常会加入填充元素。第 11 章介绍前缀和、第 15 章介绍矩阵乘法高级优化时，会再次看到这种优化；在这些例子中，线程加载输入数据各自负责的部分时，会以跨步方式访问共享内存。</p>
+<p>提高内存利用率的第六种优化，是<strong>私有化（privatization）</strong>。本章还没有正式介绍这种优化，这里为了完整性先提及。私有化用于多个线程或线程块需要更新同一个公共输出的情况。为避免并发更新同一数据的开销，可以创建数据的私有副本，先对私有副本执行部分更新，完成后再从私有副本对公共副本执行最终更新。第 9 章介绍直方图模式时，会看到多个线程更新同一组直方图计数器的私有化例子；第 12 章介绍过滤模式、第 18 章介绍图遍历时，也会看到多个线程向同一个输出列表插入条目时的私有化例子。</p>
+<p>图 6.13 中的同步延迟类包含两种主要优化。第一种是使用 warp 级原语来减少同步延迟。第四章曾简要提到，warp 级原语能够让同一 warp 中的线程彼此同步并共享数据，而不必执行开销更高的线程块范围屏障同步，也不必访问共享内存。使用 warp 级原语降低同步开销的主要策略，是把线程块范围的计算分解到多个 warp 中：先在 warp 级别执行需要屏障同步的操作，再在线程块级别汇总 warp 级结果。第 10、 11、12 章分别介绍归约、前缀和和过滤模式时，会看到使用 warp 级原语优化频繁同步的计算。第 15 章介绍矩阵乘法高级优化时，也会使用 warp 级原语辅助寄存器分块。</p>
+<p>降低同步延迟的第二种优化是双缓冲。双缓冲在本章第 06.7 节首次介绍；它通过为写入和之前的读取使用不同缓冲区，消除假（写后读）依赖，从而可以删除强制这些假依赖的屏障同步。第 11 章介绍前缀和、第 15 章介绍矩阵乘法高级优化时，会在真实上下文中应用双缓冲。</p>
+<p>图 6.13 中的最后一种优化是线程粗化。这是一种一般优化，其性能目标取决于具体计算。本章第 06.5 节首次介绍线程粗化：如果硬件最终会把线程串行执行，就把多个并行工作单元分配给同一线程，以降低并行化开销。在本书第二、第三部分中，会在不同上下文中看到线程粗化，每次要降低的并行化开销也不同。</p>
+<p>第 8 章介绍模板模式、第 15 章介绍矩阵乘法高级优化时，线程粗化用于增大输出瓦片尺寸，从而重用已从内存加载、用于计算更多输出值的输入数据。在这种情况下，使用更小输出瓦片、暴露更细粒度并行性所带来的开销，是更多线程块重复加载输入数据。第 9 章介绍直方图模式时，线程粗化有助于减少私有化优化中需要提交到公共副本的私有副本数量。第 10 章介绍归约模式、第 11 章介绍前缀和模式时，线程粗化用于减少同步和控制流分歧开销；第 11 章还会用线程粗化减少并行算法相对于顺序算法所执行的重复工作。第 12 章介绍过滤模式、第 14 章介绍排序模式时，线程粗化有助于改善内存访问合并。</p>
+<p>再次强调，图 6.13 的检查清单并不穷尽所有优化；它包含了不同计算模式中常见的主要优化类型。这些优化会在第二、第三部分的多个章节中出现。我们还会看到只在特定章节出现的其他优化。例如，第 7 章介绍卷积模式时，会介绍常量内存的使用。</p>
+<h2 id="sec-6-9">6.9 优化策略<a class="td-heading-self-link" href="#sec-6-9" aria-label="标题锚点"></a>
+</h2>
+<p>第 06.8 节说明，不同优化针对性能的不同方面。因此，决定对某个内核应用哪种优化时，首先必须理解究竟是哪种资源限制了该内核的性能。限制内核性能的资源通常称为<strong>性能瓶颈（performance bottleneck）</strong>。优化通常会增加一种资源的使用，以减轻另一种资源的负担。如果应用的优化没有针对瓶颈资源，可能看不到任何收益；更糟的是，如果该优化增加了瓶颈资源的使用，性能甚至可能下降。</p>
+<p>例如，共享内存分块会增加共享内存的使用，以减轻全局内存带宽压力。当内核的瓶颈资源是全局内存带宽时，这种优化非常有效。然而，如果内核性能受占用率限制，并且占用率已经受过多共享内存使用限制，那么应用共享内存分块很可能使情况更糟。</p>
+<p>性能优化是一个迭代过程：识别内核的性能瓶颈，应用优化缓解该瓶颈；然后识别新的瓶颈，继续缓解它，如此反复。GPU 计算平台通常提供各种性能分析工具，用于识别内核的性能瓶颈。关于如何使用性能分析工具，读者可以参考 CUDA 文档 <a href="/pmpp5-zh/book/06-ch6/#bib-1">[1]</a>。性能瓶颈可能与硬件有关，也就是说，同一个内核在不同设备上可能遇到不同瓶颈。因此，识别性能瓶颈并应用性能优化，需要深入理解 GPU 架构，以及不同 GPU 设备之间的架构差异。</p>
+<p>一项重要技能，是知道何时停止迭代优化，因为内核性能可能已经无法进一步改善。第五章把 Roofline 模型作为评估内核距离硬件上限还有多远的工具。通过估计内核执行的计算量和从内存访问的数据量，可以得到内核的计算强度，并据此判断内核是计算受限还是内存受限。随后，可以使用 Roofline 模型，把性能分析器报告的内核实际资源利用率与硬件上限进行比较。接近硬件上限的内核，进一步优化的空间很小；尚未达到硬件上限的内核，则很可能仍然可以继续优化。</p>
+<h2 id="sec-6-10">6.10 小结<a class="td-heading-self-link" href="#sec-6-10" aria-label="标题锚点"></a>
+</h2>
+<p>本章介绍了 GPU 的片外内存（DRAM）架构，并讨论了相关性能考量，例如全局内存访问合并，以及利用内存并行性隐藏内存延迟。随后，我们介绍了几种重要优化：线程粒度粗化、循环展开和双缓冲。结合本章和前几章的知识，读者应当能够分析所遇到的任意内核代码的性能行为。最后，我们给出了一份广泛用于优化各种计算的常见性能优化检查清单。在本书接下来的两部分中，我们将继续研究这些优化在并行计算模式和应用案例中的实际运用。</p>
+<h2 id="sec-6-11">6.11 练习<a class="td-heading-self-link" href="#sec-6-11" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li>
+<p><a id="bib-1"></a> 考虑下面的 CUDA 内核：</p>
+ <div class="minipage">
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-18" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="14"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-18" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-18-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">__global__</span> <span class="kt">void</span> <span class="nf">foo_kernel</span><span class="p">(</span><span class="kt">float</span><span class="o">*</span> <span class="n">a</span><span class="p">,</span> <span class="kt">float</span><span class="o">*</span> <span class="n">b</span><span class="p">,</span> <span class="kt">float</span><span class="o">*</span> <span class="n">c</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                           <span class="kt">float</span><span class="o">*</span> <span class="n">d</span><span class="p">,</span> <span class="kt">float</span><span class="o">*</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">blockIdx</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">blockDim</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__shared__</span> <span class="kt">float</span> <span class="n">a_s</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__shared__</span> <span class="kt">float</span> <span class="n">bc_s</span><span class="p">[</span><span class="mi">4</span><span class="o">*</span><span class="mi">256</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">a_s</span><span class="p">[</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">bc_s</span><span class="p">[</span><span class="n">j</span><span class="o">*</span><span class="mi">256</span> <span class="o">+</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">            <span class="n">b</span><span class="p">[</span><span class="n">j</span><span class="o">*</span><span class="n">blockDim</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">gridDim</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">4</span> <span class="o">+</span> <span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__syncthreads</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">d</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_s</span><span class="p">[</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">e</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_s</span><span class="p">[</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+ </div>
+<p>对下面每个内存访问，说明它是合并的、未合并的，还是不适用合并概念：</p>
+<ol>
+<li>
+<p>第 05 行对数组 <code>a</code> 的访问；</p>
+</li>
+<li>
+<p>第 05 行对数组 <code>a_s</code> 的访问；</p>
+</li>
+<li>
+<p>第 07 行对数组 <code>b</code> 的访问；</p>
+</li>
+<li>
+<p>第 07 行对数组 <code>c</code> 的访问；</p>
+</li>
+<li>
+<p>第 07 行对数组 <code>bc_s</code> 的访问；</p>
+</li>
+<li>
+<p>第 10 行对数组 <code>a_s</code> 的访问；</p>
+</li>
+<li>
+<p>第 10 行对数组 <code>d</code> 的访问；</p>
+</li>
+<li>
+<p>第 11 行对数组 <code>bc_s</code> 的访问；</p>
+</li>
+<li>
+<p>第 11 行对数组 <code>e</code> 的访问。</p>
+</li>
+</ol>
+</li>
+<li>
+<p><a id="bib-2"></a> 编写一个使用转角的矩阵乘法内核函数，设计应对应图 6.4。</p>
+</li>
+<li>
+<p><a id="bib-3"></a> 对第五章的分块矩阵乘法，在 <code>BLOCK_SIZE</code> 的可能取值范围内，哪些 <code>BLOCK_SIZE</code> 值能让内核完全避免对全局内存的未合并访问？（只需考虑正方形线程块。）</p>
+</li>
+<li>
+<p><a id="bib-4"></a> 实现一个使用向量加载的向量加法内核，并正确处理边界条件。</p>
+</li>
+<li>
+<p><a id="bib-5"></a> 考虑下面的共享内存数组，以及一个包含一个 warp（32 个线程）的线程块对该数组的访问：</p>
+<div class="td-code td-code--untitled" id="td-code-d1baf1d2-fence-19" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-d1baf1d2-fence-19" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-d1baf1d2-fence-19-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">__shared__</span> <span class="kt">float</span> <span class="n">a</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="n">a</span><span class="p">[</span><span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">stride</span><span class="p">]</span> <span class="o">=</span> <span class="p">...;</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>假设 <code>a[0]</code> 位于 bank 0。对于下面每个 <code>stride</code> 值，指出该 warp 访问了哪些 bank，以及每个 bank 上的 bank 冲突数量（如果有）：</p>
+<ol>
+<li>
+<p><code>stride = 32</code>；</p>
+</li>
+<li>
+<p><code>stride = 31</code>；</p>
+</li>
+<li>
+<p><code>stride = 24</code>；</p>
+</li>
+<li>
+<p><code>stride = 16</code>；</p>
+</li>
+<li>
+<p><code>stride = 12</code>；</p>
+</li>
+<li>
+<p><code>stride = 8</code>；</p>
+</li>
+<li>
+<p><code>stride = 7</code>。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="sec-refs">本章参考文献<a class="td-heading-self-link" href="#sec-refs" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li><a id="bib-1"></a>NVIDIA, <em>Nsight Compute</em>, 2023. <a href="https://docs.nvidia.com/nsight-compute/index.html">https://docs.nvidia.com/nsight-compute/index.html</a>.</li>
+</ol>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/book/05-ch5/"
+    aria-label="上一页 - 第5章 内存架构与数据局部性" title="第5章 内存架构与数据局部性" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">第5章 内存架构与数据局部性</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/book/07-ch7/"
+    aria-label="下一页 - 第7章 卷积" title="第7章 卷积" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">第7章 卷积</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-6-1">6.1 全局内存访问合并</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#sec-6-2">6.2 隐藏内存延迟</a></li>
+    <li><a href="#sec-6-3">6.3 向量加载与存储</a></li>
+    <li><a href="#sec-6-4">6.4 共享内存 bank 冲突</a></li>
+    <li><a href="#sec-6-5">6.5 线程粗化</a></li>
+    <li><a href="#sec-6-6">6.6 循环展开</a></li>
+    <li><a href="#sec-6-7">6.7 双缓冲</a></li>
+    <li><a href="#sec-6-8">6.8 优化检查清单</a></li>
+    <li><a href="#sec-6-9">6.9 优化策略</a></li>
+    <li><a href="#sec-6-10">6.10 小结</a></li>
+    <li><a href="#sec-6-11">6.11 练习</a></li>
+    <li><a href="#sec-refs">本章参考文献</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/06-ch6/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/06-ch6/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>双列视图</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>切换语言</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"复制 Markdown 文本","disabledReason":"复制 Markdown 文本: 暂不可用","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":""},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://codingpracticegroup.github.io/pmpp5-zh/book/06-ch6/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":false,"description":"查阅 Markdown 源码","disabledReason":"查阅 Markdown 源码: 暂不可用","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":""},{"available":true,"description":"查阅编辑历史","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/06-ch6.md"},{"available":true,"description":"编辑当前页面","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/06-ch6.md"},{"available":true,"description":"添加子页面","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"提交文档议题","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC6%E7%AB%A0+%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F"},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"切换语言","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/06-ch6/"},{"active":false,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/06-ch6/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":false,"description":"外观","disabledReason":"暂不可用","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"打开双列视图","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["双列视图","打开双列视图","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"双列视图","url":""}],"commands":[],"language":"zh","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/pmpp5-zh/third_party/katex/katex.min.180c2d77d434d7da51d6625c50a964d4fd6fdbdb9bc8796a0a016c30c49931fb.css" integrity="sha256-GAwtd9Q019pR1mJcUKlk1P1v29ubyHlqCgFsMMSZMfs=" crossorigin="anonymous">
+<script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/code-block.min.a5fdd6bd7e2db7deab97320e3847549321a1f44938f2dd382d876850511d95b2.js" integrity="sha256-pf3WvX4tt96rlzIOOEdUkyGh9Ek48t04LYdoUFEdlbI=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"简体中文","url":"/pmpp5-zh/book/06-ch6/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"两页的部分标题不同，匹配标题之间的位置为估算结果。","close":"关闭","error":"无法加载此页面。","language":"选择语言","loading":"正在加载……","open":"打开","progress":"没有可用于对齐两页的共同标题，将按全文阅读进度同步。","retry":"重试","sync":"同步滚动","title":"双列视图","unavailable":"标题重复或顺序不一致，无法同步。"},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"en-US","direction":"ltr","label":"English","url":"/pmpp5-zh/en/book/06-ch6/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

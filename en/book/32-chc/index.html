@@ -1,0 +1,767 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/32-chc/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/31-chb/"><meta name="robots" content="index, follow">
+
+<title>Appendix C CUDA memories, address spaces, and pointers | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/32-chc/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/32-chc/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/32-chc/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/32-chc/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Appendix C CUDA memories, address spaces, and pointers">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Appendix C CUDA memories, address spaces, and pointers">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="6068">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Appendix C CUDA memories, address spaces, and pointers">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/32-chc/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/32-chc/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/32-chc/" aria-current="page" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Appendix C CUDA memories, address spaces, and pointers</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/32-chc.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/32-chc.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Appendix&#43;C&#43;CUDA&#43;memories%2C&#43;address&#43;spaces%2C&#43;and&#43;pointers" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Appendix C CUDA memories, address spaces, and pointers</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="cC">Appendix C CUDA memories, address spaces, and pointers<a class="td-heading-self-link" href="#cC" aria-label="Link to this heading"></a>
+</h1>
+<p>APPENDIX</p>
+<p>CUDA memories, address spaces, and pointers C With special contributions from Isaac Gelado and Mark Harris Throughout this book, we have mostly assumed a fairly simple model of interaction between the host and the device in a heterogeneous computing system. In this simple model, as presented in Chapter 2, each device has a device memory (CUDA global memory) that is separate from the host memory, or the system memory. The data to be processed by a kernel running on a device need to be transferred from the host memory to the device memory by calling the cudaMemcpy() function. The data produced by the device also need to be transferred from the device memory to the host by calling the cudaMemcpy() function before it can be utilized by the host. Early GPU generations only supported this simple host/device interaction model. Although the model is simple and easy to understand, it has resulted in several problems at the application level. First, I/O devices such as disk controllers and network interface cards are designed to operate efficiently on the host memory. Since the device memory is separate from the host memory, input data need to be transferred from the host memory to the device memory and output data need to be transferred from the device memory to the host memory for use by I/O devices. Such additional transfers increase the I/O latency and reduce the achievable I/O throughput. For many applications, the ability of I/O devices to operate directly on the device memory would improve overall application performance and simplify the application code. Second, traditional programming systems such as Python place their application data structures in the host memory. Some of the data structures are large. The device memory in CUDA-enabled GPUs tends to offer higher bandwidth but smaller capacity compared to the host memory, which forces application developers to partition their large data structures into chunks that each fit into the device memory. For example, in Chapter 21, the 3D electrostatic energy grid array was partitioned into 2D slices that are transferred between the host memory and the device memory. For many applications, it would be much better if entire data structures can reside in the device memory. For some applications, there may not even be a good way to partition the data structure into smaller chunks. For these applications, it would be best if the GPU can directly access the data in the host memory or have the CUDA runtime system software to migrate the data that are used during kernel execution. As more applications adopted GPU computing, their needs motivated CUDA system software developers and GPU hardware designers to provide a better solution. Researchers have been aware of these needs and have proposed solutions since the early days of CUDA [1]. The rest of this section will go over a brief history of advancements that address these limitations.</p>
+<p>Throughout this book, we have mostly assumed a fairly simple model of interaction between the host and the device in a heterogeneous computing system. In this simple model, as presented in Chapter 2, each device has a device memory (CUDA global memory) that is separate from the host memory, or the system memory. The data to be processed by a kernel running on a device need to be transferred from the host memory to the device memory by calling the cudaMemcpy() function. The data produced by the device also need to be transferred from the device memory to the host by calling the cudaMemcpy() function before it can be utilized by the host. Early GPU generations only supported this simple host/device interaction model. Although the model is simple and easy to understand, it has resulted in several problems at the application level.</p>
+<p>First, I/O devices such as disk controllers and network interface cards are designed to operate efficiently on the host memory. Since the device memory is separate from the host memory, input data need to be transferred from the host memory to the device memory and output data need to be transferred from the device memory to the host memory for use by I/O devices. Such additional transfers increase the I/O latency and reduce the achievable I/O throughput. For many applications, the ability of I/O devices to operate directly on the device memory would improve overall application performance and simplify the application code.</p>
+<p>Second, traditional programming systems such as Python place their application data structures in the host memory. Some of the data structures are large. The device memory in CUDA-enabled GPUs tends to offer higher bandwidth but smaller capacity compared to the host memory, which forces application developers to partition their large data structures into chunks that each fit into the device memory. For example, in Chapter 21, the 3D electrostatic energy grid array was partitioned into 2D slices that are transferred between the host memory and the device memory. For many applications, it would be much better if entire data structures can reside in the device memory. For some applications, there may not even be a good way to partition the data structure into smaller chunks. For these applications, it would be best if the GPU can directly access the data in the host memory or have the CUDA runtime system software to migrate the data that are used during kernel execution.</p>
+<p>As more applications adopted GPU computing, their needs motivated CUDA system software developers and GPU hardware designers to provide a better solution. Researchers have been aware of these needs and have proposed solutions since the early days of CUDA [1]. The rest of this section will go over a brief history of advancements that address these limitations.</p>
+<h2 id="sec-C-1">C.1 Unified device memory address space<a class="td-heading-self-link" href="#sec-C-1" aria-label="Link to this heading"></a>
+</h2>
+<p>In early CUDA-enabled GPUs, shared, memory, local memory, and global memory formed their own separate address spaces. The developer could use pointers into the global memory but not others. Starting with the Fermi Architecture introduced in 2009, these memories became parts of a unified address space. This unified address space enabled a single set of load/store instructions and pointer addresses to access any of the GPU memory spaces (global, local, or shared memory), rather than different instructions and pointers for each. This made it easier to abstract away which memory contains a particular operand, allowing the programmer to deal with this only during allocation, and making it simpler to pass CUDA data objects to other procedures and functions, irrespective of which memory area they come from. The unified device memory address space support made CUDA code modules much more ``composable&rsquo;&rsquo;. That is, a CUDA device function can accept a pointer that may point to any of these memories. For example, without a unified GPU address space, a device function needs to have one implementation for each type of memory that one of its arguments can reside in. Unified GPU address space allows variables in all main types of GPU memories to be accessed the same way, and thus allowing one device function to accept arguments that can reside in different types of GPU memory. The code would run faster if a function argument pointer points to a shared memory location and slower if it points to a global memory location. The programmer can still perform manual data placement and transfers as a performance optimization. This capability significantly reduced the cost of building production quality CUDA libraries. It also enabled full C and C++ pointer support for CUDA kernel and device functions.</p>
+<h2 id="sec-C-2">C.2 Zero-copy access to host memory<a class="td-heading-self-link" href="#sec-C-2" aria-label="Link to this heading"></a>
+</h2>
+<p>In 2009, CUDA 2.2 introduced zero-copy access to the host memory. This enables the host code to supply to a kernel a special device data pointer to host memory. The CUDA kernel code running on the GPU can use this pointer to directly access the host memory through the system interconnect such as the PCIe bus without calling cudaMemcpy(). Zero-copy memory is pinned host memory (see Chapter 23) and is allocated by calling cudaHostAlloc() with cudaHostAllocMapped as the value of the flag argument. We mentioned that the other values of the flag argument are for more advanced usage. The data pointer returned by cudaHostAlloc() cannot be directly passed to the kernel. The host code has to obtain a valid device data pointer using cudaHostGetDevicePointer() first, and pass the device data pointer returned by this function to the kernel. This means that different data pointers for host and device codes are used to access the same data in the host memory. As we explained in Chapter 23, the host memory pages allocated for zero-copy access by the GPU must be pinned to prevent the operating system from accidentally paging out the data while the GPU is accessing them. Obviously, the access will suffer from the long latency and limited bandwidth of the system interconnect. Thebandwidth of the system interconnect is typically less than 10% of the global memory bandwidth. As we have learned in Chapter 5, a kernel’s performance is typically limited by the global memory bandwidth unless we use tiling techniques to drastically reduce the number of global memory accesses performed per floating-point operation. If most of the memory accesses of a kernel are to zero-copy memory, the kernel’s execution speed can be even more severely limited by the bandwidth of the system interconnect. Therefore, one should only use zero-copy memory for application data structures that are occasionally and sparsely accessed by a kernel running on a GPU.</p>
+<h2 id="sec-C-3">C.3 Unified virtual address space<a class="td-heading-self-link" href="#sec-C-3" aria-label="Link to this heading"></a>
+</h2>
+<p>In 2011, CUDA 4 introduced the Unified Virtual Address Space (UVAS) which originated from the GMAC library [1]. Until this CUDA release, the host and the device had their own virtual address spaces, each of them mapping host or device data pointers to physical host or device memory locations. These disjoint virtual address spaces imply that the same physical memory location could be accessed by different virtual addresses in the host and the device, which happens when using zero-copy memory. UVAS specifies a single virtual address space shared by the host and the device. The UVAS guarantees that each physical memory address is only mapped to one virtual memory location. This enables the CUDA runtime to determine whether a data pointer is referencing host or device memory by just inspecting its virtual memory address. This feature removes the need to specify the data copy direction on cudaMemcpy() calls. Instead, the programmer can simply specify cudaMemcpyDefault and the direction of transfer is inferred from the values of the pointers. It is important to note that the UVAS in CUDA 4 does not guarantee the accessibility of the data referenced by a pointer. For example, the host code cannot use a device pointer returned by cudaMalloc() to directly access the device memory and vice versa. Zero-copy access to the host memory is the exception: the host code can pass a pointer to zero-copy memory (allocated through cudaHostAlloc()) to the device as a kernel parameter. When the kernel code dereferences this zero-copy pointer, the pointer value is translated to a physical system memory location, and used to access the system memory directly through the PCIe bus. Note that this approach does not necessarily allow the kernel code to dereference a pointer value read from a memory location, such as following a chain of pointers while traversing a linked data structure, unless all pointers reference memory that has been allocated using cudaHostAlloc(). The limitations in both the types of data structures that can be supported and the bandwidth of data accesses of zero-copy memory motivate further improvements in the memory model of GPU architectures beyond UVAS.</p>
+<h2 id="sec-C-4">C.4 Large virtual and physical GPU address spaces<a class="td-heading-self-link" href="#sec-C-4" aria-label="Link to this heading"></a>
+</h2>
+<p>One fundamental limitation of early CUDA-enabled GPUs is the size of their virtual and physical addresses. These early devices support 32-bit virtual addresses and up to 32-bit physical addresses. For these devices, the size of the device memory is limited to 4 GB, the maximal amount of memory that can be addressed with 32 physical address bits. Furthermore, CUDA kernels could only operate on data sets whose sizes were less than 4 GB, the maximal number of virtual memory locations that can be accessed through 32-bit pointers, regardless of whether the data set resides in the host memory or the device memory. Furthermore, modern CPUs are based on 64-bit virtual addresses with 48 bits actually utilized. These host virtual addresses could not be accommodated by the 32-bit virtual addresses used by GPUs, which contributed to the limitation of the types of data structures supported by and the memory allocation mechanism (cudaHostAlloc()) required for zero-copy memory access. To remove this limitation, GPU generations starting with the Kepler GPU architecture introduced in 2013 have adopted modern virtual memory architecture with 64-bit virtual addresses and physical addresses of at least 40 bits. The obvious benefit is that these GPUs can incorporate more than 4 GB of DRAM and that CUDA kernels can now operate on large data sets. While the enlarged virtual and physical address spaces obviously enable the use of large device memories, they also open the door for much better host/device interaction models. For example, the host and the device can now use exactly the same pointer value to access a piece of data, regardless of whether it is in the host memory or the device memory.</p>
+<h2 id="sec-C-5">C.5 Unified physical address space<a class="td-heading-self-link" href="#sec-C-5" aria-label="Link to this heading"></a>
+</h2>
+<p>The large GPU physical address space allows the CUDA system software to place device memory of different GPUs in the system into a unified physical address space. The benefit is that one GPU can directly access the memory of any other GPU attached to the same PCIe bus and/or NVLink domain by simply dereferencing a data pointer mapped to the physical address of the other GPU. Prior to the Kepler GPU architecture, communication among different GPUs (e.g., halo exchange in the stencil example in Chapter 23) was only possible through device-to-device memory copies triggered by the host code. This resulted in extra memory consumed to store the data being copied from other GPUs and extra performance overheads due to host-device synchronization and the setup operations needed for the memory copies. Direct access to the memory of other devices in the system enables just passing a device pointer as a kernel call parameter so that the kernel code can use it to load and/or store the data that reside in the other GPU’s device memory.</p>
+<h2 id="sec-C-6">C.6 Unified memory<a class="td-heading-self-link" href="#sec-C-6" aria-label="Link to this heading"></a>
+</h2>
+<p>In 2013, CUDA 6 introduced Unified Memory, which creates a pool of managed virtual memory pages that are shared between the CPU and GPU, bridging the CPUGPU divide. The managed memory is accessible by both the CPU and GPU using a single pointer. Variables in the managed memory can reside in the CPU physical FIGURE C.1 Unified Memory simplifies porting of CPU code (left) to CUDA code (right).</p>
+<p>memory, the GPU physical memory, or even both. The CUDA runtime software and hardware implement data migration and coherence support. The net effect is that the managed memory looks like CPU memory to code running on the CPU, and like GPU memory to code running on the GPU. Of course, the application must perform appropriate synchronization operations such as barriers or atomic operations to coordinate any concurrent accesses to the managed memory locations. A shared global virtual address space allows all variables in an application to be accessed with the same virtual address from the CPU code or the GPU code. Such a memory architecture, when exposed by programming tools and run-time systems to applications, can result in several major benefits. One benefit is the reduced amount of effort required for porting CPU code to CUDA. In Fig. C.1, we show a simple CPU code example on the left side. With Unified Memory, the code can be ported to CUDA with two simple changes. The first change is to use cudaMallocManaged() and cudaFree() in place of malloc() and free(). The second change is to launch a kernel and perform device synchronization rather than calling the qsort() function. Obviously, one still needs to write or have access to a parallel qsort kernel. What we are showing is that the change to the host code is straightforward and easy to maintain. The performance of the CUDA 6 Unified Memory was limited by the hardware capabilities of the Kepler and Maxwell GPU architectures. The contents of all managed memory locations modified by the CPU had to be flushed out to the GPU device memory before any grid launch. The CPU and GPU could not simultaneously access a managed memory allocation and the Unified Memory address space was limited to the size of the GPU physical memory. These limitations are due to the fact that these GPU architectures lacked the ability to support coherence between the host and device memories and that the data migration was mostly performed by software.</p>
+<h2 id="sec-C-7">C.7 Access to full host virtual address space<a class="td-heading-self-link" href="#sec-C-7" aria-label="Link to this heading"></a>
+</h2>
+<p>In 2016, the Pascal GPU architecture extended GPU address translation capabilities to accommodate 49-bit virtual addressing. This extension is large enough to cover the 48-bit virtual address spaces of modern CPUs, as well as the GPU’s own memory. It allows Unified Memory programs to access the full address spaces of all CPUs and GPUs in the system as a single virtual address space, rather than be limited by the number of virtual address bits that can be handled by the GPU’s address translation mechanism. As a result, the CPUs and GPUs can truly share the pointer values, enabling the GPUs to traverse pointer-based data structures in the host memory.</p>
+<h2 id="sec-C-8">C.8 Page fault handling<a class="td-heading-self-link" href="#sec-C-8" aria-label="Link to this heading"></a>
+</h2>
+<p>Memory page fault handling support starting with the Pascal GPU architecture is a crucial feature that provides more seamless Unified Memory functionality. Combined with the system-wide virtual address space, the ability to handle page faults eliminates the need for the CUDA system software to synchronize (flush) all managed memory contents to the GPU before each grid launch. The CUDA runtime can implement a coherence mechanism by allowing the host and the device to invalidate each other’s copies of data when they modify that data in the managed memory. The invalidation can be done using the page mapping and protection mechanisms. When launching a grid, the CUDA system software no longer has to bring all GPU copies of the managed memory data up to date. If the grid accesses a piece of data whose copy in the device memory has been invalidated by the host, the GPU will handle a page fault to bring the data up to date and resume execution. If a thread grid running on the GPU accesses a page that is not resident in its device memory, it also experiences a page fault, allowing the page to be automatically migrated to the GPU memory on-demand. Alternatively, the page may be mapped into the GPU address space for access over the system interconnects if the data is expected to be accessed only occasionally (mapping on access can sometimes be faster than migration). This support generalizes zero-copy access to a limited part of the host memory access to zero-copy access to the entire host memory as well as other GPU’s memory in the system. Note that Unified Memory is system-wide: GPUs (and CPUs) can fault and migrate memory pages either from CPU memory or from the memory of other GPUs in the system. If a CPU function dereferences a pointer and accesses a variable mapped to the GPU physical memory, the data access would still be serviced, but perhaps at a longer latency. Such capability allows the CUDA programs to more easily call legacy libraries that have not been ported to GPUs. In the prior CUDA memory architecture, the developer must manually transfer data from the device memory to the host memory in order to use legacy library functions to process them on the CPU. The Unified Memory with the page fault handling capability enables a much more general CPU/GPU interaction mechanism than the original zero-copy access. It allows the GPU to traverse large data structures in the host memory. Starting with the Pascal architecture, a GPU device can traverse a linked data structure even if the data structure does not reside in zero-copy memory. This is because the same pointer value is used in the host code and device code to refer to the same variable. Thus, References the embedded pointer values of a linked data structure built by the host can be traversed by the device, and vice versa. In some application areas such as CAD, the host physical memory system may have hundreds of gigabytes of capacity. These physical memory systems are needed because the applications require the entire data set to be “in core&rsquo;&rsquo;. With the ability to directly access very large CPU physical memories, it becomes feasible for GPUs to accelerate these applications.</p>
+<h2 id="sec-C-9">C.9 Virtual address space control<a class="td-heading-self-link" href="#sec-C-9" aria-label="Link to this heading"></a>
+</h2>
+<p>CUDA 11 introduced a set of low level APIs to provide programmers more flexibility regarding memory allocation. The new API allows reserving a range of the virtual address space using cuMemAddressReserve(). Later on, the programmer can allocate physical memory on any device using cuMemCreate(), and map it to any position in the reserved range using cuMemMap(). These APIs enable building custom layouts of data structures across multiple devices. For instance, it would be possible to allocate a 3D volume across multiple devices while using a single pointer to reference it.</p>
+<p>References [1] I. Gelado, J.E. Stone, J. Cabezas, S. Patel, N. Navarro, W.-m.W. Hwu, An asymmetric distributed shared memory model for heterogeneous parallel systems, in: Proceedings of the Fifteenth International Conference on Architectural Support for Programming Languages and Operating Systems, 2010, pp. 347&ndash;358.</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] I. Gelado, J.E. Stone, J. Cabezas, S. Patel, N. Navarro, W.-m.W. Hwu, An asymmetric distributed shared memory model for heterogeneous parallel systems, in: Proceedings of the Fifteenth International Conference on Architectural Support for Programming Languages and Operating Systems, 2010, pp. 347&ndash;358. memory, 4, 114, 128, 176, 208, 230, 258, 314, Activation function, 602, 613, 614 Adjacent memory locations, 314, 413 optimization, 16, 64, 111, 149, 151&ndash;153, 349, Allocated memory, 29, 30, 41, 253 Application Programming Interface (API) functions, Arithmetic and logic unit (ALU), 100 Arithmetic intensity (AI), 94, 115, 167, 171, 189, 272, 351, 352, 491, 492, 497, 504, 506, 539 Atomic operation, 12, 16, 201, 203, 204, 244, 245, 278, 279, 289, 291, 333, 405&ndash;407, 434, Automatic variable, 37, 86, 102, 108, 520 Bank conflict, 123, 135, 139&ndash;141, 151, 152, 272, Barrier synchronization, 14, 16, 69, 71, 111, 118, 146, 174, 191, 213, 240, 241, 244, 247, 257, 296, 297, 316, 353, 364, 366, 493, 499 Basic Linear Algebra Subprogram (BLAS), 59 dimensions, 46, 89, 106, 165, 177, 193, 268, 525 index, 41, 45, 165, 215, 244, 245, 269, 277, 278, segment, 215, 216, 268&ndash;270, 273, 275, 277 size, 37, 46, 62, 74, 81, 85, 177, 179, 192, 193, thread, 24, 33, 63, 99, 124, 165, 168, 188, 191, 207, 208, 230, 237, 256, 257, 296, 315, 333, 350, 351, 379, 381, 442, 443, 459, Boundary condition control divergence, 82 edge-centric parallelization, 436 vertex-centric parallelization, 431 Central processing unit (CPU), 1 Circular-buffer merge kernel, 321 Co-rank function, 306, 308, 309 atomic operations, 291&ndash;293, 295, 442 memory access patterns, 415, 416 atomic operations, 290, 291, 294, 442 memory, 123, 124, 129, 193, 216, 234, 298, 299, 314, 339, 340, 369, 410, 413, 521, 527 factor, 141&ndash;143, 198, 215, 248, 267&ndash;269, 528 thread, 73, 141, 142, 152, 190, 193, 194, 214, 246, 252, 267, 268, 298, 299, 327, 344, 345, 352, 488, 519, 521, 530, 535, 543 examples, 9, 40, 142, 146, 164, 369, 438, 542 kernel, 26, 35, 50, 52, 67, 69, 114, 117, 118, 169, 213, 230, 260, 266, 338, 352, 354, 376, 394, 432, 434, 436, 487, 496, 519, 521 parallel, 12, 21, 123, 204, 539, 577 sequential, 4, 37, 207, 249, 266 Compressed Sparse Column (CSC) format, 418, 419 parallel, 16, 26, 201, 251, 285, 401 pattern, 16, 153, 187, 221, 460 stencil, 183, 189, 198, 352, 396, 542, 543, 548 complexity, 11, 203, 253, 258, 309, 329, 523, Compute-to-global-memory-access ratio, 94, 96 Computer aided design (CAD), 430, 435 threads, 127&ndash;129, 239, 297, 299, 345, 395, 412 access consecutive data elements, 413 access consecutive elements, 129, 406 Consolidating block segments, 273 memory, 16, 98, 103, 118, 153, 168, 169, 171, Control divergence, 16, 77, 79, 80, 149, 230, 416 Conventional vector addition, 26 filter, 159, 160, 165, 167, 457 kernel, 159, 160, 165, 167, 168, 191 memory bandwidth bottleneck, 172 pattern, 56, 151, 153, 463, 474 layer, 454&ndash;460, 463, 464, 467, 470, 473, 474, Convolutional neural network (CNN), 17, 59, 179, Cooperating parallel workers, 4 Cooperative group, 70, 276, 277, 293, 398, 445, convolutional layer kernel, 460 device, 36, 69, 74, 98, 99, 101, 124, 171, 266, implementation, 454, 474, 484, 486, 493 kernel, 34, 37, 39, 65, 86, 90, 93, 119, 120, 154, 160, 207, 379, 386, 392, 459, 474, 486, occupancy calculation functions, 445 programmer, 13, 91, 98, 103, 118, 147 model, 6, 14, 15, 552, 555, 575 programs, 7, 36, 39, 40, 55, 89 runtime, 88, 169, 172, 558, 563, 628 streams, 555, 563, 564, 566, 575 tiled matrix multiplication kernel, 470 CUDA matrix multiplication kernels, 486 parallelism, 7, 15, 21, 23, 24, 248 CUDA, 36, 69, 74, 98, 99, 101, 124, 171, 266, function, 36, 40, 42, 103, 239, 263, 264, 269, 278, 353, 354, 361, 388, 389, 440, 441, block, 46, 89, 106, 165, 177, 193, 268, 525 Direct Coulomb Summation (DCS), 514, 530 Direct Memory Access (DMA), 563 Direction-optimized implementation, 436 Distributed shared memory, 70, 102 Double-buffering, 146, 147, 152, 258, 366 Dynamic Random-Access Memory (DRAM), 5, 28, bandwidth, 10, 166, 170, 171, 179 burst, 125, 126, 132, 135, 137, 150, 209 memory access, 303, 314, 404&ndash;406, 409, 412, Electrostatic potential map computation, 17 tile, 109, 110, 130, 319&ndash;321, 498, 500, 503 Embarrassingly parallel applications, 12 Error correcting code (ECC), 130 Exclusive scan, 253, 300, 337&ndash;341, 343&ndash;345 operation, 253, 298, 339, 342, 343, 345, 347 Extracting parallelism, 333, 449 False dependence, 110, 146, 147, 258, 366 Field Programmable Gate Array (FPGA), 7 Filtering pattern, 150, 152, 153 Fine-grained multithreading, 83 operations, 119, 167, 351, 366, 506, 507, 519, Floyd-Warshall algorithm, 377, 378 Formulating convolutional layers, 463, 474 Full host virtual address space, 627 Fully connected layer (FC), 605 device, 36, 40, 42, 103, 239, 263, 264, 269, 278, 353, 354, 361, 388, 389, 440, 441, 497, 498 kernel, 15, 28, 30, 32, 35&ndash;37, 45&ndash;47, 50, 98, General Matrix Multiply (GEMM), 350 access, 83, 97, 105, 125, 150, 196, 198, 236, GNU Compiler Collection (gcc), 70 threads, 33, 139, 144, 384, 409, 574 GPU Processing Cluster (GPC), 68 Graphics Double Data Rate (GDDR), 68 Graphics Processing Unit (GPU), 3 points, 21, 184&ndash;187, 189&ndash;191, 514&ndash;521, 531, 533, 536, 542&ndash;545, 548, 549, 551, 554 thread, 27, 33, 35, 37, 69, 379, 517, 519, 556 Grid-wide barrier synchronization, 70, 276, 445 Grouped-query attention (GQA), 508 memory access, 5, 364, 366, 367 resources, 1, 69, 74, 88, 93, 94, 123, 143, 251 Heterogeneous parallel computing, 3 Hiding memory latency, 132, 149, 154 Hierarchical tiling, 352, 359, 360 High-Bandwidth Memory (HBM), 68, 133 High-performance computing (HPC), 13 High-performance parallel programs, 14 kernel, 203, 208, 214, 216, 217, 220 Improved memory coalescing, 235 Improving memory coalescing, 298 threads, 75, 80, 230, 266, 286, 298 Inclusive scan operation, 252, 253 Incomplete tiles, 391, 392, 394 Independent thread scheduling, 80 block, 41, 45, 165, 215, 244, 245, 269, 277, 278, thread, 45, 60, 63, 75, 165, 171, 216, 229, 239, execution overhead, 139, 141, 142, 151, 369 Instruction Register (IR), 78, 79 Interleaving memory access, 367 Intrinsic functions, 70, 294, 295, 500 Irregular access patterns, 150, 151 loop, 62, 81, 142, 144, 146, 147, 167, 171, 216, iterative method, 542, 545, 546, 549, 557, 563, kernel, 548, 549, 555&ndash;557, 559, 561, 562 format, 150, 151, 416&ndash;418, 421 call, 24, 40, 41, 45&ndash;47, 117, 273, 274, 386, 388, 500, 501, 517, 555&ndash;561, 563, 564 code, 26, 35, 50, 52, 67, 69, 114, 117, 118, 169, 213, 230, 260, 266, 338, 352, 354, 376, 394, 432, 434, 436, 487, 496, 519, 521 convolution, 159, 160, 165, 167, 168, 191 CUDA, 34, 37, 39, 65, 86, 90, 93, 119, 120, 154, 160, 207, 379, 386, 392, 459, 474, 486, execution, 40, 64, 103, 137, 168, 169, 171, 213, function, 15, 28, 30, 32, 35&ndash;37, 45&ndash;47, 50, 98, histogram, 203, 208, 214, 216, 217, 220 matrix multiplication, 62, 64, 92, 97, 114, 115, parallel scan, 258, 268, 271, 284 reduction, 227, 237, 257, 270, 275 thread coarsening, 195, 196, 198 performance considerations, 577 algorithm, 254, 255, 260, 266, 282, 284 cache arithmetic intensity, 504 caching, 479, 488, 491, 492, 504 Large Language Model (LLM), 477&ndash;479, 510 memory access, 11, 118, 209, 210, 364 Leader thread, 245, 278, 279, 292&ndash;294 Least-significant bit (LSB), 346 Least-significant digit (LSD), 346 Linear algebraic formulation, 438 Linear algebraic formulation of graph problems, 438 vector, 138, 151, 155, 272, 356, 369, 370 iteration, 62, 81, 142, 144, 146, 147, 167, 171, 216, 219, 257&ndash;259, 261, 265, 366 nest, 111, 167, 171, 175, 176, 359 unrolling, 123, 144&ndash;146, 149, 270, 271, 363, 364 elements, 64, 65, 96, 107, 468, 494, 539 multiplication, 45, 59, 60, 96, 127, 349, 350 example, 63, 104, 105, 117, 128 kernel, 62, 64, 92, 97, 114, 115, 141, 363, operations, 96, 97, 350, 368, 463 access, 4, 114, 128, 176, 208, 230, 258, 314, efficiency, 303, 314, 404&ndash;406, 409, 412, instructions, 364, 366, 368&ndash;370, 519 latency, 11, 118, 209, 210, 364 pattern, 112, 113, 127, 128, 150, 216, 360, throughput, 4, 5, 124, 137, 209 bandwidth, 5, 93, 94, 111, 130, 133, 136, 138, 167, 176, 185, 272, 273, 314, 320, 327, 364, 370, 401, 403, 410, 475, 492, 523, 578 coalescing, 123, 124, 129, 150, 193, 216, 234, 298, 299, 314, 339, 340, 369, 410, 413, constant, 16, 98, 103, 118, 153, 168, 169, 171, copy, 30, 169, 555, 560, 561, 563 location, 111, 113, 131, 147, 150, 204, 206, 209, 210, 235, 293, 298, 300, 333, 340, 360, requirements, 504&ndash;506, 508, 509 operation, 289, 303&ndash;306, 308, 333, 334, 347, parallel, 16, 308, 313, 328, 535 sort, 16, 304, 329, 330, 333, 334, 346, 374, 530, Message Passing Interface (MPI), 12, 541, 545 non-blocking communication, 551 Mixture of Experts (MoE) technique, 510 Model service optimization, 507 Most-significant digit (MSD) radix sort, 346 Multi-GPU stencil, 545, 563, 568 Multi-layer perceptron (MLP), 604 Multi-query attention (MQA), 508 Multiple-Instruction-Multiple-Data (MIMD), 79 Multiple-Instruction-Single-Data (MISD), 79 National Institute of Health (NIH), 6 Natural language processing (NLP), 477 Necessitating optimizations, 251 grid points, 187, 188, 521, 542 Nested loops, 58, 59, 354, 378, 499, 501, 511, 518 NVIDIA Collective Communications Library NVIDIA CUDA Compiler (NVCC), 39, 369 NVIDIA OpenSHMEM Library (NVSHMEM), Occupancy, 85, 90, 135, 144, 149, 363 thread, 115, 138, 144, 149, 363 Odd-even transposition sort, 331 One-sided communication, 569, 570, 575 Open Compute Language (OpenCL), 13 merge, 289, 303&ndash;306, 308, 333, 334, 347, 499, reduction, 221, 223, 224, 240, 280, 543, 545, scan, 252, 261, 262, 265, 267, 270, 272, 273, stable filter, 289, 297, 301, 336 Optical character recognition (OCR), 454, 612 techniques, 11, 15, 176, 201, 219, 223, 249, 254, Optimizing parallel patterns, 286, 347 parallelization, 141, 152, 153, 193, 246, 267 synchronization, 12, 141, 146, 152, 237, 241, Overlapping computation, 541, 553, 554, 559, 563, Padding elements, 362, 410&ndash;413, 415 algorithms, 11, 16, 17, 102, 153, 159, 179, 226, 251, 253, 265, 266, 401, 529, 530 application, 3, 9, 15, 118, 422 code, 12, 21, 123, 204, 539, 577 computation, 16, 26, 201, 251, 285, 401 computation patterns, 12, 154, 159, 179, 308, computing, 7, 14, 40, 159, 164, 211, 401, 532, execution, 7, 9, 12, 13, 24, 55, 124, 137, 216, 249, 266, 329, 374, 518, 523, 524, 530&ndash;532 hardware execution resources, 248 implementations, 9, 266, 270, 282, 289, 302, patterns, 7, 12, 14, 15, 64, 123, 151, 221, 286, 303, 396, 401, 421, 422, 529, 577, 579 program, 2, 3, 11, 12, 21, 111, 123, 254, 539, programmer, 13, 21, 110, 401, 523, 529, 530 programming, 2, 3, 7, 11, 14, 118, 529, 531, 578 reduction, 221, 223, 224, 246, 249 scan, 251, 254, 256, 259, 261, 267, 270, 280, sorting algorithms, 16, 329, 331, 347 approach, 306, 337, 405, 408, 419 overhead, 141, 152, 153, 193, 246, 267 Parameter values, 32, 209, 453, 454 Partial differential equation (PDE), 179 computation, 16, 153, 187, 221, 460 convolution, 56, 151, 153, 463, 474 memory access, 112, 113, 127, 128, 150, 216, stable filter, 329, 336, 534, 535 computational throughput, 94, 118 performance, 3, 4, 111, 272, 274, 276 considerations, 16, 123, 154, 166, 540 optimization techniques, 140, 331, 529 Periodic boundary condition technique, 551 Point-to-point communication, 549 Pointer variable, 26, 29, 30, 50 Private copy, 102, 152, 211&ndash;213, 442 Privatization, 152, 211, 295, 442 Privatized histogram kernel, 213 Processing element (PE), 570, 574 parallel, 13, 21, 110, 401, 523, 529, 530 Provisioned access throughput, 132 Public copy, 152, 153, 211, 213, 214, 442 Race condition, 205, 257, 331, 332, 433 sort, 251, 329, 330, 334&ndash;336, 340, 342, Read-after-write dependence, 110, 146, 147 Read-modify-write race condition, 205 Reduce-scan-scan decomposition, 275, 276, 280 kernel, 227, 228, 237, 257, 270, 275 operation, 221, 223, 224, 240, 280, 543, 545, parallel, 221, 223, 224, 246, 249 tree, 223, 225&ndash;228, 238, 244, 246, 255, 258, global memory accesses, 273, 285, 539 tiling, 112, 123, 149, 151, 190, 196, 252, 270, Resource utilization efficiency, 231 Retrieval-augmented generation (RAG), 481 Return value, 29, 209, 240, 293, 308, 442 Returned value, 42, 209, 293, 320 Scalable parallel execution, 21 kernel, 257, 270, 272, 273, 285 operation, 252, 261, 262, 265, 267, 270, 272, 273, 276, 277, 298, 299, 301, 535 parallel, 251, 254, 256, 259, 261, 267, 270, 280, Scan-scan-add decomposition, 261, 276, 280 block segment, 263, 268, 269, 281 block, 215, 216, 268&ndash;270, 273, 275, 277 Shared memory, 69, 99, 139, 151, 152, 236 tiling, 104, 123, 151, 153, 168, 171&ndash;173, 189, Single Instruction, Multiple Thread (SIMT), 76, 77 Single Program Multiple Data (SPMD), 15 Single-block reduction kernel code, 245 Single-Instruction-Multiple-Data (SIMD), 79 Single-Instruction-Single-Data (SISD), 79 Single-Program Multiple-Data (SPMD), 32, 33 Small dynamic programming problems, 398 Smith-Waterman algorithm, 382, 384 Softmax function, 478, 484, 490 Source code, 36, 38, 52, 60, 552 Space efficiency, 403, 410, 414, 416 Speculative decoding, 492, 504, 507 Static Random Access Memory (SRAM), 69 Statically allocated arrays, 50, 98 computation, 183, 189, 198, 352, 396, 542, 543, patterns, 55, 151, 153, 183, 193, 196, 198 Stochastic gradient descent, 607 instructions, 138, 142, 360, 361 Streaming Multiprocessor (SM), 68, 69, 89, 93 Stride value, 232, 233, 257, 263 Symmetric memory allocation, 570 overhead, 12, 141, 146, 152, 237, 241, 258, 261, Synchronous Dynamic Random Access Memory Tensor Memory Accelerator (TMA), 369, 504 Terra floating-point operations per second block, 24, 33, 63, 99, 124, 165, 168, 188, 191, 207, 208, 230, 237, 256, 257, 296, 315, 333, 350, 351, 379, 381, 442, 443, 459, size, 38, 41, 81, 91, 176, 195, 246, 328, 363, coarsening, 73, 141, 142, 152, 190, 193, 194, 214, 246, 252, 267, 268, 298, 299, 327, 344, 345, 352, 488, 519, 521, 530, 535, 543 granularity coarsening, 123, 154, 246 grid, 27, 33, 35, 37, 69, 379, 517, 519, 556 indices, 45, 60, 63, 75, 165, 171, 216, 229, 239, occupancy, 115, 138, 144, 149, 363 organization, 34, 48, 173, 174, 177, 460, 461 subsegments, 268, 271, 272, 281 atomic operations, 209&ndash;211, 213 matrix multiplication, 112, 368, 369 memory access, 4, 5, 124, 137, 209 elements, 109, 110, 130, 319&ndash;321, 498, 500, 503 size, 107, 130, 180, 192, 193, 195, 320, 352, 472 convolution kernel, 173, 176, 177, 191 matrix multiplication, 112, 116, 155, 173, 351, matrix multiplication kernel, 108, 112, 114, 142, parallel convolution implementation, 179, 180 registers, 112, 123, 149, 151, 190, 196, 252, techniques, 112, 119, 124, 183, 185, 303, 327, Training multi-layer classifiers, 611 Transparent scalability, 70, 74 True dependence, 110, 146, 147, 258, 366 Two-sided communication, 549, 568 Unidirectional synchronization, 277 device memory address space, 624 Unified Virtual Address Space (UVAS), 625 Unified Virtual Address (UVA), 35 Unoptimized sequential code, 518 addition, 26, 28, 31, 41, 96, 151 addition kernel, 37, 96, 138, 142, 155 loads, 138, 151, 155, 272, 356, 369, 370 specialization, 367, 368, 370, 504 Warp Group Matrix Multiply Accumulate Warp-level primitives, 77, 152, 237, 261 parallelization performance, 389 Write-after-read dependence, 110, 146, 147 Zero-overhead thread scheduling, 84</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/31-chb/"
+    aria-label="Previous - Appendix B Deep learning basics" title="Appendix B Deep learning basics" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Appendix B Deep learning basics</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-C-1">C.1 Unified device memory address space</a></li>
+    <li><a href="#sec-C-2">C.2 Zero-copy access to host memory</a></li>
+    <li><a href="#sec-C-3">C.3 Unified virtual address space</a></li>
+    <li><a href="#sec-C-4">C.4 Large virtual and physical GPU address spaces</a></li>
+    <li><a href="#sec-C-5">C.5 Unified physical address space</a></li>
+    <li><a href="#sec-C-6">C.6 Unified memory</a></li>
+    <li><a href="#sec-C-7">C.7 Access to full host virtual address space</a></li>
+    <li><a href="#sec-C-8">C.8 Page fault handling</a></li>
+    <li><a href="#sec-C-9">C.9 Virtual address space control</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/32-chc/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/32-chc/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/32-chc/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/32-chc.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/32-chc.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Appendix+C+CUDA+memories%2C+address+spaces%2C+and+pointers"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/32-chc/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/32-chc/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/32-chc/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/32-chc/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

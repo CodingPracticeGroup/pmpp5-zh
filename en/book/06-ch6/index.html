@@ -1,0 +1,818 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/06-ch6/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/05-ch5/">
+<link rel="next" href="/pmpp5-zh/en/book/07-ch7/"><meta name="robots" content="index, follow">
+
+<title>Chapter 6 Performance considerations | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/06-ch6/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/06-ch6/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/06-ch6/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/06-ch6/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 6 Performance considerations">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 6 Performance considerations">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="15189">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 6 Performance considerations">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/06-ch6/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/06-ch6/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/06-ch6/" aria-current="page" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 6 Performance considerations</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/06-ch6.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/06-ch6.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;6&#43;Performance&#43;considerations" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 6 Performance considerations</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c6">Chapter 6 Performance considerations<a class="td-heading-self-link" href="#c6" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>Performance considerations</p>
+<p>CONTENTS 6.1 Global memory access coalescing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 124 6.2 Hiding memory latency . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 132 6.3 Vector loads and stores . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 138 6.4 Shared memory bank conflicts . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 139 6.5 Thread coarsening . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 141 6.6 Loop unrolling. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 144 6.7 Double buffering . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 146 6.8 A checklist of optimizations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 147 6.9 Optimization strategy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 153 6.10 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 154 6.11 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 154 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 155 The execution speed of a parallel program can vary greatly depending on the interactions between the resource demands of the program and the resource constraints of the hardware. Managing the interaction between parallel code and hardware resource constraints is important for achieving high performance in virtually all parallel programming models. It is a practical skill that requires deep understanding of the hardware architecture and is best learned with hands-on exercises in a parallel programming model designed for high-performance. So far, we have learned about the basic aspects of the GPU architecture and their implications on performance. In Chapter 4, we learned about the compute architecture of the GPU and related performance considerations such as control divergence and occupancy. In Chapter 5, we learned about the on-chip memory architecture of the GPU and the use of shared memory tiling and register tiling to alleviate global memory bandwidth limitations. In this chapter, we will learn more about the off-chip memory (DRAM) architecture and discuss related performance considerations such as memory coalescing, memory latency hiding, and vector loads and stores. We also introduce additional important optimizations such as avoiding shared memory bank conflicts, thread granularity coarsening, loop unrolling, and double-buffering. Finally, we wrap up this part of the textbook with a checklist of common performance optimizations that will serve as a guide for optimizing the performance of the parallel patterns discussed in the second and third parts of the book. Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00015-9">https://doi.org/10.1016/B978-0-44-343900-1.00015-9</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<p>Since different applications impose different demands on architectural resources, different architecture constraints may dominate and become the limiting factors of performance, commonly referred to as bottlenecks. One can often dramatically improve the performance of an application on a particular CUDA device, by trading one resource usage for another. This strategy works well if the resource constraint thus alleviated was the dominating constraint before the strategy was applied and the one thus exacerbated does not have negative effects on parallel execution. Without such understanding, performance tuning would be a guess work; plausible strategies may or may not lead to performance enhancements.</p>
+<p>The execution speed of a parallel program can vary greatly depending on the interactions between the resource demands of the program and the resource constraints of the hardware. Managing the interaction between parallel code and hardware resource constraints is important for achieving high performance in virtually all parallel programming models. It is a practical skill that requires deep understanding of the hardware architecture and is best learned with hands-on exercises in a parallel programming model designed for high-performance.</p>
+<p>So far, we have learned about the basic aspects of the GPU architecture and their implications on performance. In Chapter 4, we learned about the compute architecture of the GPU and related performance considerations such as control divergence and occupancy. In Chapter 5, we learned about the on-chip memory architecture of the GPU and the use of shared memory tiling and register tiling to alleviate global memory bandwidth limitations. In this chapter, we will learn more about the off-chip memory (DRAM) architecture and discuss related performance considerations such as memory coalescing, memory latency hiding, and vector loads and stores. We also introduce additional important optimizations such as avoiding shared memory bank conflicts, thread granularity coarsening, loop unrolling, and double-buffering. Finally, we wrap up this part of the textbook with a checklist of common performance optimizations that will serve as a guide for optimizing the performance of the parallel patterns discussed in the second and third parts of the book.</p>
+<p>Since different applications impose different demands on architectural resources, different architecture constraints may dominate and become the limiting factors of performance, commonly referred to as bottlenecks. One can often dramatically improve the performance of an application on a particular CUDA device, by trading one resource usage for another. This strategy works well if the resource constraint thus alleviated was the dominating constraint before the strategy was applied and the one thus exacerbated does not have negative effects on parallel execution. Without such understanding, performance tuning would be a guess work; plausible strategies may or may not lead to performance enhancements.</p>
+<h2 id="sec-6-1">6.1 Global memory access coalescing<a class="td-heading-self-link" href="#sec-6-1" aria-label="Link to this heading"></a>
+</h2>
+<p>One of the most important factors of CUDA kernel performance is accessing data in the global memory whose limited bandwidth can become the bottleneck. CUDA applications exploit massive data parallelism. Naturally, CUDA applications tend to process a massive amount of data from the global memory within a short period of time. In Chapter 5, we studied tiling techniques that leverage the shared memory to reduce the total amount of data that must be accessed from the global memory by a collection of threads in each thread block. In this chapter, we will further discuss memory coalescing techniques for moving data between global memory and shared memories or registers in an efficient manner. Memory coalescing techniques are often used in conjunction with tiling techniques to allow CUDA devices to reach their performance potential by efficiently utilizing the global memory bandwidth. The global memory of a CUDA device is implemented with DRAM as we saw in Chapter 5. In DRAM, data bits are stored in DRAM cells that are small capacitors, where the presence or absence of a tiny amount of electrical charge distinguishes between a 1 and a 0 value. Reading data from a DRAM cell requires the small capacitor to use its tiny electrical charge to drive a highly capacitive line leading to a sensor and to set off the sensor’s detection mechanism that determines whether a sufficient amount of charge is present in the capacitor to qualify as a <code>1''. This process takes tens of nanoseconds in modern DRAM chips (see </code>Why is DRAM so slow?&rsquo;&rsquo; sidebar). This is in sharp contrast with the sub-nanosecond clock cycle time of modern computing devices. Because this process is very slow relative to the desired data access speed (sub-nanosecond access per byte), modern DRAM designs use parallelism to increase their rate of data access, commonly referred to as memory access throughput. Why are DRAMs so slow? The following figure shows a DRAM cell and the path for accessing its content.</p>
+<p>The decoder is an electronic circuit that drives a horizontal line connected to the outlet transistor gates of thousands of cells. It can take a long time for the horizontal line to be fully charged or discharged to the desired level to activate the outlet gate. A more formidable challenge is for the cell, once its outlet gate is activated, to drive the vertical line to the sense amplifiers and allow the sense amplifier to detect its content. This is based on electrical charge sharing. The gate lets out the tiny amount of electrical charge stored in the cell. The tiny amount of charge must cause sufficient change to the electrical potential of the large capacitance of the long bit line in order to trigger the detection mechanism of the sense amplifier. A good analogy would be for someone to hold a small cup of coffee at one end of a long hallway connecting many offices for another person to smell the aroma propagated through the hallway to determine the flavor of the coffee. One could speed up the process by using a larger, stronger capacitor in each cell. However, the DRAMs have been going in the opposite direction. The capacitors in each cell have been steadily reduced in size and thus reduced in their strength over time so that more bits can be stored in each chip. This is why the access latency of DRAMs has not decreased over time. Each time a DRAM location is accessed, a range of consecutive locations that include the requested location are accessed as well. Many sensors are provided in each DRAM chip and they all work in parallel. Each sensor senses the content of a bit within these consecutive locations. Once detected by the sensors, the data from all these consecutive locations can be transferred at high speed to the processor. These consecutive locations accessed and delivered are referred to as DRAM bursts. If an application makes focused use of data from a burst, the DRAM can supply the data at a much higher rate than if an application accesses a truly random sequence of locations scattered across many bursts. Modern GPUs also use SRAM-based L1 and L2 on-chip caches to help reduce the latencies and increase the throughput of global memory accesses. Since these caches are not a prominent part of the CUDA programming model, we have not covered these caches. However, their presence and behavior impact the observed performance of CUDA applications. Regarding the global memory access pattern, even when data has already been fetched from the DRAM and placed in the SRAM caches, making focused access to consecutive memory locations is still beneficial. When data in the L2 cache is accessed, a range of consecutive locations are moved from the L2 cache FIGURE 6.1 Placing matrix elements into a linear array based on row major order.</p>
+<p>to the L1 cache. This granularity at which data is moved between different levels of cache is known as the cache block or cache line. If an application makes focused use of data from within a cache line, the caches can supply the data at a faster rate because fewer cache lines need to be moved. Recognizing the burst organization of modern DRAMs and the cache line organization of modern cache hierarchies, current CUDA devices employ a technique that allows programmers to achieve high global memory access efficiency by organizing memory accesses of threads into favorable patterns. This technique takes advantage of the fact that threads in a warp execute the same instruction at any given point in time. When all threads in a warp execute a load instruction, the hardware detects whether they access consecutive global memory locations. The most favorable access pattern is achieved when all threads in a warp access consecutive global memory locations in the same DRAM burst and/or cache line. In this case, the hardware combines, or coalesces, all these accesses into a consolidated access. For example, for a given load instruction of a warp, if thread 0 accesses global memory location X, thread 1 accesses location X + 1, thread 2 accesses location X + 2, and so on, all these accesses will be coalesced, or combined into a larger request for consecutive locations when accessing the DRAM or caches. Besides ensuring that threads in a warp access consecutive global memory locations, another consideration is the alignment of these accesses in global memory. When the starting address of these consecutive global memory locations is aligned to the beginning of a burst or cache line, this alignment ensures that the smallest number of memory transactions are needed to perform the coalesced access. On the other hand, if the starting address is not aligned, the unaligned access could result in additional memory traffic because the accesses data wall span a larger number of bursts or cache lines. To understand how to effectively use the coalescing hardware, we need to review how the memory addresses are formed in accessing C multi-dimensional array elements. Recall from Chapter 3 (Fig. 3.3, replicated as Fig. 6.1 for convenience) that multi-dimensional array elements in C and CUDA are placed into the linearly addressed memory space according to the row major convention. Recall that row major FIGURE 6.2 A coalesced access pattern.</p>
+<p>refers to the fact that the placement of data preserves the structure of rows: all adjacent elements in a row are placed into consecutive locations in the address space. In Fig. 6.1, the four elements of row 0 are first placed in their order of appearance in the row. Elements in row 1 are then placed, followed by elements of row 2, followed by elements of row 3. It should be clear that M0,0 and M1,0 , though appear to be consecutive in the two-dimensional matrix, are placed four locations away in the linearly addressed memory. Let’s assume that a multi-dimensional array N similar to the array M in Fig. 6.1 is used as the second input matrix in matrix multiplication. In this case, consecutive threads in a warp that are assigned to consecutive output elements and will iterate through consecutive columns of this input matrix. The top-left part of Fig. 6.2 shows the code for this computation and the top-right part shows the logical view of the access pattern: consecutive threads iterating through consecutive columns. One can tell by inspecting the code that the accesses to N can be coalesced. The index of the array N is k*Width + col. The variables k and Width have the same value across all threads in the warp. The variable col is defined as blockIdx.x*blockDim.x+threadIdx.x, which means that consecutive threads (with consecutive threadIdx.x values) will have consecutive values of col, and will therefore access consecutive elements of N. The bottom part of Fig. 6.2 shows the physical view of the access pattern. In iteration 0, consecutive threads will access consecutive elements in row 0 which are adjacent in memory, shown as <code>Loads for iteration 0'' in Fig. 6.2. In iteration 1, consecutive threads will access consecutive elements in row 1 which are also adjacent in memory, shown as </code>Loads for iteration 1&rsquo;&rsquo; in Fig. 6.2. This process continues for all rows. As we can see, the memory access pattern formed by the threads during this FIGURE 6.3 An un-coalesced access pattern.</p>
+<p>process is a favorable one that can be coalesced. Indeed, in all the kernels we have implemented in the book so far, our memory accesses have been naturally coalesced. Now, assume that the matrix was stored in column-major order instead of rowmajor order. There could be various reasons why this might be the case. For example, we might be accessing the transpose of a matrix that is stored in row-major order. In linear algebra, we often need to use both the original and transposed forms of a matrix. It would be better to avoid creating and storing both forms. A common practice is to create the matrix in one form, say the original form. When the transposed form is needed, its elements can be accessed by accessing the original form and switching the roles of the row and column indices. This is equivalent to viewing the transposed matrix as being in the column-major layout. Regardless of the reason, let’s observe the memory access pattern achieved when the second input matrix to our matrix multiplication example is stored in column-major order. Fig. 6.3 illustrates how consecutive threads iterate through consecutive columns when the matrix is stored in column-major order. The top-left part of Fig. 6.3 shows the code and the top-right part shows the logical view of the memory accesses. The program is still trying to have each thread to access a column of matrix N. However, the index calculation for accessing N in the for-loop is adjusted to reflect the assumed column-major layout. One can tell by inspecting the code that the accesses to N are not favorable for coalescing. The index of the array N is col*Width+k. As before, col is defined as blockIdx.x*blockDim.x+threadIdx.x, which means that consecutive threads (with consecutive threadIdx.x values) will have consecutive values of col. However, in the index to N, col is multiplied by Width, which means that consecutive threads will access elements of N that are Width apart. Therefore, the accesses are not favorable for coalescing. In the bottom portion of Fig. 6.3, we can see that the physical view of the memory accesses is quite different from that in Fig. 6.2. In iteration 0, consecutive threads will logically access consecutive elements in row 0, but this time they are not adjacent in memory because of the column major layout. These loads are shown as ``Loads for iteration 0&rsquo;&rsquo; in Fig. 6.3. Similarly, in iteration 1, consecutive threads will access consecutive elements in row 1 which are also not adjacent in memory. For a realistic matrix, there are typically hundreds or even thousands of elements in each dimension. The elements of N accessed in each iteration by neighboring threads can be hundreds or even thousands of elements apart. The hardware will determine that accesses to these elements are far away from each other and cannot be coalesced. There are various strategies for optimizing code to achieve memory coalescing when the computation is not naturally amenable to it. One strategy is to rearrange how threads are mapped to the data and another strategy is to rearrange the layout of the data itself. We will discuss these strategies in Section 6.8 and see examples of how they can be applied throughout this book. Yet another strategy is to transfer the data between global memory and shared memory in a coalesced manner and carry out the unfavorable access pattern in shared memory which is less sensitive to the data layout and provides faster access latency. We will also see example optimizations that use this strategy throughout this textbook, including an optimization that we will apply now to matrix-matrix multiplication where the second input matrix is in column-major layout. This optimization is called corner turning. Fig. 6.4 illustrates an example of how corner turning can be applied. In this example, M is an input matrix stored in row-major layout in global memory and N is an input matrix stored in column-major layout in global memory. They are multiplied to produce an output matrix P which is stored in row-major layout in global memory. The example illustrates how four threads that are responsible for the four consecutive elements at the top edge of the output tile load the input tile elements. The access to the input tile in matrix M is similar to that in Chapter 5. The four threads load the four elements at the top edge of the input tile. Each thread loads an input element whose local row and column indices within the input tile are the same as that of the thread’s output element within the output tile. These accesses are coalesced because consecutive threads access consecutive elements in the same row of M which are adjacent in memory according to the row major layout. On the other hand, the access to the input tile in matrix N needs to be different from that in Chapter 5. Fig. 6.4(a) shows what the access pattern would be like if we use the same arrangement as in Chapter 5. Even though the first four threads in the block are logically loading the four consecutive elements at the top edge of the input tile, the elements loaded by consecutive threads are far away from each other in the memory because of the column major layout of the N elements. In other words, consecutive threads that are responsible for consecutive elements in the same row of the output FIGURE 6.4 Applying corner turning to coalesce accesses to matrix N which is stored in column-major layout.</p>
+<p>tile load non-consecutive locations in memory, which results in uncoalesced memory accesses. This problem can be solved by assigning the first four consecutive threads of the block to load the four consecutive elements at the left edge (the same column) in the input tile, as shown in Fig. 6.4(b). Intuitively, we are exchanging the roles of threadIdx.x and threadIdx.y when each thread calculates the linearized index for loading the N input tile. Since N is in column-major layout, consecutive elements in the same column are adjacent in memory. Hence, consecutive threads load input elements that are adjacent in memory, which ensures that the memory accesses are coalesced. The code can be written to place the tile of N elements into the shared memory in either column-major layout or row-major layout. Either way, after the input tile has been loaded, each thread can access its inputs with little performance penalty. This is because shared memory is implemented with SRAM technology and does not require coalescing. Note that we have been using a toy example illustrating the first four threads in the block when accessing 4 × 4 tiles. In reality, the tile size for corner turning will be the warp size of 32, so the first 32 threads in the block will access 32 consecutive elements on the left edge of the tile. While our example focuses on enabling the coalescing of global memory load operations, coalescing is also important for global memory store operations. In fact, the impact of uncoalesced stores can be more severe than the impact of uncoalesced loads. The reason is that uncoalesced stores generate partial store operations that perform read-modify-write accesses, which could require more memory bandwidth on GPUs with error correcting code (ECC) enabled. The main advantage of coalescing memory accesses is that it reduces global memory traffic by combining multiple memory accesses into a single access. Accesses FIGURE 6.5 Reducing traffic congestion in highway systems.</p>
+<p>can be combined when they take place at the same time and access adjacent memory locations. Traffic congestion does not only arise in computing. Most of us have experienced traffic congestion in highway systems, as illustrated in Fig. 6.5. The root cause of highway traffic congestion is that there are too many cars all squeezing through a road that is designed for a much smaller number of vehicles. When congestion occurs, the travel time for each vehicle is greatly increased. Commute time to work can easily double or triple during traffic congestion. Most solutions for reduced traffic congestion involve reduction of cars on the road. Assuming that the number of commuters is constant, people need to share rides in order to reduce the number of cars on the road. A common way to share rides is carpooling, where a group of commuters take turns to drive the group to work in one vehicle. Governments usually have policies to encourage carpooling. In some countries, the government simply disallows certain classes of cars to be on the road on a daily basis. For example, cars with odd license plates may not be allowed on the road on Monday, Wednesday, or Friday. This encourages people whose cars are allowed on different days to form a carpool group. In other countries, the government may provide incentives for behavior that reduces the number of cars on the road. For example, in certain countries, some lanes of congested highways are designated as carpool lanes; only cars with more than two or three people are allowed to use these lanes. There are also countries where the government makes gasoline so expensive that people form carpools to save money. All these measures for encouraging carpooling are designed to overcome the fact that carpooling requires extra effort, as we show in Fig. 6.6. Carpooling requires workers who wish to carpool to compromise and agree on a common commute schedule. The top half of Fig. 6.6 shows a good schedule pattern for carpooling. Time goes from left to right. Worker A and Worker B have similar schedule for sleep, work, and dinner. This allows these two workers to easily go to work and return home in one car. Their similar schedules allow them to more easily agree on a common departure time and return time. This is however, not the case of the schedules shown in the bottom half of Fig. 6.6. Worker A and Worker B have very different habit in this case. Worker A parties until sunrise, sleeps during the day, and goes to work in the evening. Worker B sleeps at night, goes to work in the morning, FIGURE 6.6 Carpooling requires synchronization among people.</p>
+<p>and returns home for dinner at 6 pm. The schedules are so wildly different that there is no way these two workers can coordinate a common time to drive to work and return home in one car. Memory coalescing is very similar to carpooling arrangements. We can think of the data as the commuters and the DRAM access requests as the vehicles. When the rate of DRAM requests exceeds the provisioned access throughput of the DRAM system, traffic congestion rises, and the arithmetic units become idle. If multiple threads access data from the same DRAM location, they can potentially form a ``carpool&rsquo;&rsquo; and combine their accesses into one DRAM request. This, however, requires the threads to have similar execution schedule so that their data accesses can be combined into one. Threads in the same warp are the perfect candidates because they all execute a load instruction simultaneously by virtue of SIMD execution. Note that modern CPUs also recognize the DRAM burst organization in their cache memory design. A CPU cache line typically maps to a fraction of, one, or even multiple DRAM bursts. Applications that make full use of bytes in each cache line they touch tend to achieve much higher performance than those that randomly access memory locations. The techniques presented in this chapter can be adapted to help CPU programs achieve higher speed by reducing the congestion in accessing DRAM.</p>
+<h2 id="sec-6-2">6.2 Hiding memory latency<a class="td-heading-self-link" href="#sec-6-2" aria-label="Link to this heading"></a>
+</h2>
+<p>As we explained in Section 6.1, DRAM bursting is a form of parallel organization: multiple locations are accessed in the DRAM core array in parallel. However, bursting alone is not sufficient to realize the level of DRAM access bandwidth required by modern processors. DRAM systems typically employ two more forms of parallel organization &ndash; banks and channels. At the highest level, a processor contains one or more channels. Each channel is a memory controller with a bus that connects a set of DRAM banks to the processor. Fig. 6.7 illustrates a processor that contains four FIGURE 6.7 Channels and banks in DRAM systems.</p>
+<p>channels, each with a bus that connects four DRAM banks to the processor. In real systems, a processor typically has one to eight channels and each channel is connected a large number of banks. The data transfer bandwidth of a bus is defined by its width and clock frequency. Modern double data rate (DDR) buses perform two data transfers per clock cycle, one at the rising edge and one at the falling edge of each clock cycle. For example, a 64-bit DDR5-6400 bus with a clock frequency of 3.2 GHz has a bandwidth of 8 B × 2 × 3.2 GHz = 51.2 GB/sec. This seems to be a large number, but is often too small for modern CPUs and GPUs. For example, a modern CPU might require a memory bandwidth of at least 200 GB/s whereas a GPU might require more than 1000 GB/s, which would translate into four buses for the CPU and 20 buses for the GPU. Such large numbers of buses consume too much power when the processor needs to drive the wires on traditional circuit boards and have motivated the adoption of High Bandwidth Memory (HBM) technology. HBM co-packages the processors with DRAM to drastically reduce the size and capacity of connections between the two and enhance the clock frequency as well as the number of buses that connect the processor and the DRAM. For example, HBM3E supports a bus clock frequency of 4.9 GHz/s and 16 64-bit buses, resulting in 1 TB/s memory bandwidth. For each channel, the number of banks connected to it is determined by the number of banks required to fully utilize the data transfer bandwidth of the bus. This is illustrated in Fig. 6.8. Each bank contains an array of DRAM cells, the sensing amplifiers for accessing these cells, and the interface for delivering bursts of data to the bus (Section 6.1). Fig. 6.8(a) illustrates the data transfer timing when a single bank is connected to a channel. It shows the timing of two consecutive memory read accesses to the DRAM cells in the bank. Recall from Section 6.1 that each access involves long latency for the decoder to enable the cells and for the cells to share their stored charge with the sensing amplifier. This latency is shown as the light gray section at the left end of the time frame. Once the sensing amplifier completes its work, the burst data is delivered through the bus. The time for transferring the burst data through the bus is shown as the left dark section of the time frame in Fig. 6.8(a). The second memory read access FIGURE 6.8 Banking improves the utilization of data transfer bandwidth of a channel.</p>
+<p>will incur a similar long access latency (light section between the dark sections of the time frame) before its burst data can be transferred (right dark section). In reality, the access latency (light gray sections) is much longer than the data transfer time (dark section). It should be apparent that the access-transfer timing of a one-bank organization would grossly underutilize the data transfer bandwidth of the channel bus. For example, if the ratio of DRAM cell array access latency to the data transfer time is 20:1, the maximal utilization of the channel bus would be 1/21 = 4.8%. That is a 16 GB/s channel would deliver data to the processor at a rate no more than 0.76 GB/s. This would be totally unacceptable. This problem is solved by connecting multiple banks to a channel bus. When two banks are connected to a channel bus, an access can be initiated in the second bank while the first bank is serving another access. Therefore, one can overlap the latency for accessing the DRAM cell arrays. Fig. 6.8(b) shows the timing of a two-bank organization. We assume that the bank 0 started at a time earlier than the window shown in Fig. 6.8. Shortly after the first bank starts accessing its cell array, the second bank also starts access its cell array. When the access in bank 0 is complete, it transfers the burst data (leftmost dark section of the time frame). Once bank 0 completes its data transfer, bank 1 can transfer its burst data (second dark section). This pattern repeats for the next accesses. From Fig. 6.8(b), we can see that by having two banks, we can potentially double the utilization of the data transfer bandwidth of the channel bus. In general, if the ratio of the cell array access latency and data transfer time is R, we need to have at least R + 1 banks if we hope to fully utilize the data transfer bandwidth of the channel bus. For example, if the ratio is 20, we will need at least 21 banks connected to each channel bus. In general, the number of banks connected to each channel bus needs to be larger than R for two reasons. One is that having more banks reduces FIGURE 6.9 Distributing array elements into channels and banks.</p>
+<p>the probability of multiple simultaneous accesses targeting the same bank, a situation referred to as a bank conflict. Since each bank can serve only one access at a time, the cell array access latency can no longer be overlapped for these conflicting accesses. Having a larger number of banks increases the probability that these accesses will be spread out among multiple banks. The second reason is that the size of each cell array is set to achieve reasonable latency and manufacturability. This limits the number of cells that each bank can provide. One may need many banks just to be able to support the memory capacity required. Fig. 6.9 shows a toy example of distributing the elements of an array M to channels and banks. We assume a small burst size of two elements (eight bytes). The distribution is done by hardware design. The addressing of the channels and banks are such that the first eight bytes of the array (M[0] and M[1]) are stored in Bank 0 of Channel 0, the next eight bytes (M[2] and M[3]) in Bank 0 of Channel 1, the next eight bytes (M[4] and M[5]) in Bank 0 of Channel 2, and the next eight bytes (M[6] and M[7]) in Bank 0 of Channel 3. At this point, the distribution wraps back to Channel 0 but will use Bank 1 for the next eight bytes (M[8] and M[9]). This way, elements M[10] and M[11] will be in Bank 1 of Channel 1, M[12] and M[13] in Bank 1 of Channel 2, and M[14] and M[15] in Bank 1 of Channel 3. Although not shown in the figure, any additional elements will be wrapped around and start with Bank 0 of Channel 0. For example, M[16] and M[17] will be stored in Bank 0 of Channel 0, M[18] and M[19] will be in Bank 0 or Channel 1, and so on. The distribution scheme illustrated in Fig. 6.9, often referred to as interleaved data distribution, spreads the elements across the banks and channels in the system. This scheme ensures that even relatively small arrays are spread out nicely. That is, we only assign enough elements to fully utilize the DRAM burst of Bank 0 of Channel 0 before moving on to Bank 0 of Channel 1. In our toy example, as long as we have at least 16 elements, the distribution will involve all the channels and banks for storing the elements. There is an important connection between the parallel execution of threads and the parallel organization of the DRAM system. In order to achieve the memory access bandwidth specified for device, there must be a sufficient number of threads FIGURE 6.10 A small example of matrix multiplication (replicated from Fig. 5.5).</p>
+<p>making simultaneous memory accesses. This observation reflects another benefit of maximizing occupancy. Recall that in Chapter 4, we saw that maximizing occupancy ensures that there are enough threads resident on the SMs to hide core pipeline latency, thereby utilizing the instruction throughput efficiently. As we see now, maximizing occupancy also has the additional benefit of ensuring that there are enough memory access requests made to hide DRAM access latency, thereby utilizing the memory bandwidth efficiently. Of course, to achieve the best bandwidth utilization, these memory accesses must be evenly distributed across channels and banks, and each access to a bank must also be a coalesced access. We now illustrate the interaction between parallel thread execution and the parallel memory organization. We will use the example in Fig. 5.5, replicated as Fig. 6.10. We assume that the matrix multiplication will be performed with 2 × 2 thread blocks and 2 × 2 tiles. During phase 0 of the kernel’s execution, all four thread blocks load their first tile. The M elements involved in each tile are shown in Fig. 6.11. Row 2 shows the M elements accessed in Phase 0, with their 2D indices. Row 3 shows the same M elements with their linearized indices. Assume that all thread blocks are executed in parallel. We see that each block will make two coalesced accesses. According to the distribution in Fig. 6.9, these coalesced accesses in Phase 0 by all thread blocks will be made to the banks on Channel 0 and the banks on Channel 2. These accesses will be done in parallel to take advantage of two channels as well as improving the utilization of the data transfer bandwidth of each channel. We also see that Block0,0 and Block0,1 will load the same M elements. Most of the modern devices are equipped with caches that will combine these accesses into FIGURE 6.11 M elements loaded by thread blocks in each phase.</p>
+<p>one as long as the execution timings of these blocks are sufficiently close to each other. In fact, the cache memories in GPU devices are mainly designed to combine such accesses and reduce the number of accesses to the DRAM system. Rows 4 and 5 of Fig. 6.11 show the M elements loaded during phase 1 of the kernel execution. We see that the accesses are now done to the banks in Channel 1 and Channel 3. Once again, these accesses will be done in parallel. It should be clear to the reader that there is a symbiotic relationship between the parallel execution of the threads and the parallel structure of the DRAM system. On one hand, good utilization of the potential access bandwidth of the DRAM system requires that many threads simultaneously access data in the DRAM. On the other hand, the execution throughput of the device relies on good utilization of the parallel structure of the DRAM system, i.e., banks and channels. For example, if the simultaneously executing threads all access data in the same channel, the memory access throughput and the overall device execution speed will be greatly reduced. The reader is invited to verify that multiplying two larger matrices, such as 8 × 8 with the same 2 × 2 thread block configuration, will make use all the four channels in Fig. 6.9. On the other hand, an increased DRAM burst size would require multiplication of even larger matrices to fully utilize the data transfer bandwidth of all the channels.</p>
+<img src="/pmpp5-zh/figs/orig/fig-6-12.png" alt="Figure 6.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 6.12.</strong> A vector addition kernel that uses vector loads.</p>
+<h2 id="sec-6-3">6.3 Vector loads and stores<a class="td-heading-self-link" href="#sec-6-3" aria-label="Link to this heading"></a>
+</h2>
+<p>We have seen in Section 6.2 that maximizing the occupancy of threads on the GPU allows these threads to issue enough memory accesses simultaneously to utilize the memory bandwidth efficiently. We can further increase the amount of memory that is accessed simultaneously by having each thread access a larger amount of continuous data in a single instruction. Such load and store instructions that access large amounts of continuous data per thread are referred to as vector loads and vector stores. For example, consider the vector addition kernel presented in Fig. 2.10 of Chapter 2. In this kernel, each thread loads two 4 B (i.e., 4-byte) floating point values and stores one 4 B floating point value. Since adjacent threads access adjacent elements in memory with each access, the memory accesses are coalesced. Moreover, since the kernel does not overutilize any resources, it achieves maximum occupancy and issues enough memory loads and stores simultaneously to utilize the memory bandwidth efficiently. However, the memory bandwidth utilization of this kernel can still be further improved. As is, each thread in the kernel executes one load or store instruction for every 4 B of memory that it accesses. Instead, we can use vector loads and stores to have each thread access 16 B of memory with each instruction. The code that embodies this optimization is shown in Fig. 6.12. In this example, each thread identifies its global index as before (line 02). However, the number of threads launched is only one quarter of the number of elements being added, and the index i refers to a chunk of four floating point values, not just a single one. To load a chunk of four floating point values, the pointers to the x and y arrays are cast to the float4 datatype before being dereferenced (lines 03-04). The float4 datatype represents four floating point values as one combined 16 B object. When a pointer to a float4 datatype is dereferenced, the compiler converts the access to a vector load or store that accesses the entire 16 B object. The loaded objects, x4 and y4, consist of four floating point values each that can be accessed via the fields .x, .y, .z, and .w. These fields are added individually and the results are placed in another float4 object z4 (lines 05-09). Finally, the pointer to the z array is cast to the float4 datatype while storing z4 (line 10). This cast ensures that the store is performed as a vector store. In the case where the total number of elements in the x and y arrays is not divisible by four, a boundary condition is needed to make sure that the boundary threadperforms scalar loads and stores instead of vector loads and stores to avoid accessing data that is out of bounds. A boundary condition is also needed to make sure that the out of bounds threads in the last thread block are not active. We leave these boundary conditions as an exercise to the reader. Using vector loads and stores reduces the instruction execution overhead associated with accessing global memory, allowing the memory bandwidth to be utilized more efficiently. In Fig. 6.12, two vector load instructions (lines 03-04) replace eight scalar load instructions, reducing the instruction execution overhead for loading the same amount of data by 75%. Vector loads and stores are also important in situations where kernels cannot execute at full occupancy, allowing such kernels to still be able to issue enough concurrent memory accesses to tolerate memory latency and fully utilize the memory bandwidth. We will see an example of such a situation in Chapter 15.</p>
+<h2 id="sec-6-4">6.4 Shared memory bank conflicts<a class="td-heading-self-link" href="#sec-6-4" aria-label="Link to this heading"></a>
+</h2>
+<p>Unlike the global memory which is made from DRAM technology, the shared memory in GPUs is made from SRAM technology which has much shorter access latency. The shorter access latency allows the shared memory to avoid using the DRAM bursting technique and thus keep the banks narrow. For example, a typical shared memory structure on GPUs has an access latency of a few clock cycles and consists of 32 banks, with each bank being 32 bits (4 bytes) wide. Hence, when a GPU thread accesses a 32 bit integer or floating point value from shared memory, the thread alone utilizes the output of an entire bank. When the threads in the same warp access different values from shared memory, it is desirable for each thread to access a different memory bank so that the values can be served in parallel. For this reason, the shared memory is organized such that consecutive 4 B chunks are placed in different banks in an interleaved fashion, similar to the placement of data in DRAM banks and channels described in Section 6.2. For example, the first 4 B are placed in bank 0, the next 4 B in bank 1, the next 4 B in bank 2, etc. When the 32 banks are exhausted, the placement restarts at bank 0. Accordingly, if the 32 threads in the warp access 32 consecutive 4 B integer of floating point values, each thread will be served by a different bank in parallel. Unfortunately, if the accesses by threads in the same warp are less adjacent to each other, these accesses may hit the same bank at the same time, which results in a bank conflict. When a shared memory bank conflict occurs, the bank cannot serve multiple threads simultaneously. Instead, accesses to the same bank need to be served one at a time. The hardware detects when the shared memory accesses by threads in the same warp exhibit a bank conflict and divides these accesses into multiple conflict-free accesses. For example, consider the corner turning optimization in Fig. 6.4(b) in Section 6.1. Although the threads load from global memory in a coalesced manner, their stores to shared memory have a strided pattern. The code for writing to the shared memory looks as follows:</p>
+<p><strong>shared</strong> float a[TILE_DIM][TILE_DIM]; // TILE_DIM = 32 a[threadIdx.x][threadIdx.y] = &hellip;;</p>
+<p>Assuming a block dimension of 32 × 32, threads in the same warp have the same threadIdx.y value and consecutive threadIdx.x values. Accordingly, these threads write to consecutive elements in the same column. Thread 0 writes to a[0][0], thread 1 writes to a[1][0], thread 2 writes to a[2][0], etc. Since array a is stored in row major order, the linear index of a[i][j] is i × 32 + j . Hence, the linear indices of a[0][0], a[1][0], a[2][0], etc. are 0, 32, 64, etc. That is, the threads in the same warp access elements that are 32 positions (128 B) apart. Now assume that the element at index 0 is located in bank 0. In this case, the elements at indices 1 to 31 are located in banks 1 to 31. After reaching the last bank, the order restarts and the subsequent element at index 32 is located in bank 0. Hence, threads 0 and 1 both write to bank 0. Similarly, the element at index 64 written to by thread 2 is also located at bank 0 (64 mod 32). In fact, all threads in the same warp write to the same bank causing a 32-way bank conflict! The hardware serializes these writes, performing 32 successive accesses to the same bank, while the other banks are not used. To avoid bank conflicts, we need to rearrange the data such that elements accessed by threads in the same warp are placed in different banks. Such a rearrangement can be done adding an extra column to the tile, which effectively adds extra elements between consecutive rows. These extra unused elements that are added to modify the data layout are referred to as padding. The following code shows how padding can be added to the corner turning example: <strong>shared</strong> float a[TILE_DIM][TILE_DIM + 1]; // TILE_DIM = 32 a[threadIdx.x][threadIdx.y] = &hellip;;</p>
+<p>The key change is that the number of columns in a is now TILE_DIM + 1 instead of TILE_DIM. Let us observe the impact of this change on how the shared memory banks are accessed. Since array a now has 33 columns, the linear index of a[i][j] is now i × 33 + j . Accordingly, thread 0 accesses a[0][0] at linear index 0, which is placed in bank 0. Thread 1 accesses a[1][0] at linear index 1 × 33 + 0 = 33, which is placed in bank 1 (33 mod 32). Thread 2 accesses a[2][0] at linear index 2 × 33 + 0 = 66, which is placed in bank 2 (66 mod 32). It is clear that the bank conflicts are eliminated. Each of the 32 threads in the warp accesses a different bank. These accesses are served by the banks in parallel without the need for the hardware to serialize the accesses. As is the case with many performance optimization techniques, padding comes with cost and limitations. The most obvious cost is that it consumes additional shared memory resources. Another important cost of padding is that the calculation of the linearized index for accessing a padded array can become more expensive than when the original dimensions of the array are of power of two. For example, when the number of columns is 32, which is a 25 , the multiplication i × 32 in the linearized index calculation can be simplified into a shift operation i &raquo; 5. However, when thenumber of columns is padded into 33, the multiplication will need to be implemented as i × (32 + 1) = i &raquo; 5 + i. The number of additional operations needed depends on the number of additional columns introduced by padding. The observed benefit of padding an array depends on the access patterns and the original dimension of the array. For example, if the number of columns in the original array were 16 rather than 32, the bank conflicts among threads in the same warp would have spread across two banks, with a 16-way bank conflict on each bank. Thus, the performance benefit of padding would have been lower. This is intuitive as the smaller stride means that the accesses within the same warp are closer to each other.</p>
+<h2 id="sec-6-5">6.5 Thread coarsening<a class="td-heading-self-link" href="#sec-6-5" aria-label="Link to this heading"></a>
+</h2>
+<p>So far, in all the kernels that we have seen, work has been parallelized across threads at the finest granularity. That is, each thread was assigned the smallest possible unit of work. For example, in the vector addition kernel in Chapter 2, each thread was assigned one output element. In the RGB to grayscale conversion and the image blur kernels in Chapter 3, each thread was assigned one pixel in the output image. In the matrix multiplication kernels in Chapter 3 and Chapter 5, each thread was assigned one element in the output matrix. The advantage of parallelizing work across threads at the finest granularity is that it enhances transparent scalability, as discussed in Chapter 4. If the hardware has enough resources to perform all the work in parallel, then the application has exposed enough parallelism to fully utilize the hardware. Otherwise, if the hardware does not have enough resources to perform all the work in parallel, the hardware can simply serialize the work by executing it in multiple waves, delaying the execution of some of the thread blocks until sufficient resources become available due to the completion of the ones that are currently running. The disadvantage of parallelizing work at the finest granularity comes when there is an overhead associated with parallelizing that work. This overhead can take many forms such as redundant loading of data by different thread blocks, redundant work, synchronization overhead, instruction execution overhead, and others. When the threads are executed in parallel by the hardware, this parallelization overhead is often worth incurring. However, if the hardware ends up serializing the work due to insufficient resources, then the overhead has been incurred unnecessarily. In this case, it is better for the programmer to partially serialize the work and reduce the overhead of parallelization. This can be done by assigning each thread multiple units of work, which is often referred to as thread coarsening. For example, consider the following code where each thread in the kernel is responsible for performing some computation foo on different data distinguished by index i: unsigned int i = blockIdx.x*blockDim.x + threadIdx.x; foo(i);</p>
+<p>Here, each thread performs foo only once for one value of i. Alternatively, thread coarsening could be applied where each thread could be assigned to perform foo multiple times for multiple values of i. We refer to the number of units of work that the thread is assigned to perform as the coarsening factor. The following code shows how thread coarsening could be applied to the previous code example with a coarsening factor of 4: unsigned int iStart = 4*(blockIdx.x*blockDim.x + threadIdx.x); for(unsigned int c = 0; c &lt; 4; ++c) { unsigned int i = iStart + c; foo(i); } Here, the global thread index is multiplied by 4 such that each thread receives the starting value of 4 consecutive integers. For example, thread 0 starts at an iStart of 0 and is responsible for integers 0, 1, 2, and 3; thread 1 starts at an iStart of 4 and is responsible for integers 4, 5, 6, and 7; etc. Next, each thread executes a loop that iterates over its 4 assigned values. This loop is referred to as a coarsening loop. Finally, in each loop iteration, the thread calculates the index i corresponding to the unit of work that iteration is responsible for and calls foo. While we introduce thread coarsening using a toy example in this chapter, we will see more realistic examples of how to apply thread coarsening to real kernels throughout this book. We have already seen an example of thread coarsening in Section 6.3 where each thread of the vector addition kernel is assigned to add four pairs of elements instead of one pair to benefit from vector loads and stores. Here, the overhead of parallelizing vector addition across more threads is the instruction execution overhead associated with the load and store instructions. If the threads actually run in parallel, this overhead may be worth paying. However, if there are excess threads and the hardware serializes them, then it is preferable to serialize the additions ourselves within the threads as we have done in Fig. 6.12. Serializing multiple additions in a single thread enables us to combine the memory accesses into vector loads and stores, thereby reducing the instruction execution overhead associated with accessing memory. Another example where thread coarsening could be beneficial is the tiled matrix multiplication kernel in Chapter 5. In this example, parallelizing the computation across many thread blocks means that the same input tiles are redundantly loaded by different thread blocks. Using fewer thread blocks and having each block process larger output tiles enables each input tile to be loaded fewer times. We will visit this example in depth in Chapter 15 where we apply thread coarsening to matrix multiplication to improve data reuse. Thread coarsening is a powerful optimization that can result in substantial performance improvement for many applications. It is an optimization that is commonly applied, and that we will see recur in many chapters. However, there are several pitfalls to avoid when applying thread coarsening. The first pitfall is that one must becareful not to apply the optimization when it is unnecessary. Recall that thread coarsening is beneficial if there is an overhead incurred when parallelizing a computation. Not all computations exhibit such an overhead. For some computations, threads operate completely independently without any coordination or sharing of data. Applying thread coarsening to such computations is not expected to make a substantial performance difference. The second pitfall to avoid when applying thread coarsening is not to apply too much coarsening such that the hardware resources become underutilized. Recall that exposing as much parallelism as possible to the hardware enables transparent scalability. It provides the hardware with the flexibility of parallelizing or serializing work depending on the amount of execution resources it has. When programmers coarsen threads, they reduce the amount of parallelism exposed to the hardware. If the coarsening factor is too high, not enough parallelism will be exposed to the hardware resulting in some parallel execution resources being unutilized. For example, if a kernel that has 1056 blocks runs on a GPU that can execute 264 blocks simultaneously, the kernel would have 4 waves that fully utilize the GPU. However, if the threads in this kernel are coarsening by a factor of 8, then the kernel would only have 132 blocks or 0.5 waves. In this case, half the GPU resources would be unutilized, which would likely negatively impact performance. Programmers should also be careful to pick a coarsening factor that does not result in partial waves. For example, if an uncoarsened kernel that has 1584 blocks runs on a GPU that can execute 264 blocks simultaneously, the kernel would have 6 waves that fully utilize the GPU. If the threads in this kernel are coarsening by a factor of 4, then the kernel would have 396 blocks or 1.5 waves. Hence, after the first full wave completes, the second partial wave underutilizes the GPU resources and has a tail effect as discussed in Chapter 4. In practice, different devices have different amounts of execution resources, so the best coarsening factor is usually device-specific and dataset-specific and needs to be retuned for different devices and datasets. Hence, when thread coarsening is applied, scalability becomes less transparent. That is, the kernel may need to be recompiled from one generation of GPU to another generation using a different coarsening factor to achieve the best possible level of performance. The third pitfall to avoid when applying thread coarsening is not to increase resource consumption to the extent that it substantially reduces occupancy and hurts performance. Depending on the kernel, thread coarsening may require using more registers per thread or more shared memory per thread block because the thread and thread block are responsible for performing more work. In such cases, if programmers use too many registers or too much shared memory, the occupancy can be reduced. The programmer must be careful that the performance penalty from reducing occupancy is not more detrimental than the performance benefit that thread coarsening may offer.</p>
+<h2 id="sec-6-6">6.6 Loop unrolling<a class="td-heading-self-link" href="#sec-6-6" aria-label="Link to this heading"></a>
+</h2>
+<p>Recall from Chapter 1 that GPUs follow throughput-oriented design as opposed to latency-oriented design, which means that GPU cores are optimized to execute many threads concurrently at the expense of long latencies experienced by individual threads. In Chapter 4, we discussed an important optimization for tolerating latency by maximizing the occupancy of threads on an SM. Maximizing occupancy ensures that when a warp encounters a stall while waiting for the output of a long-latency instruction, there is a high probability of finding another warp that is ready to execute and keep the SM cores busy. In this section, we discuss another important optimization for tolerating latency, i.e., loop unrolling. Loop unrolling is an optimization that transforms a loop by replicating the body of the loop by some factor and reducing the number of loop iterations by the same factor. For example, consider the following loop: for(unsigned int i = 0; i &lt; 16; ++i) { A(i) B(i) } where A(i) and B(i) are some operations or instructions performed in loop iteration i. If we apply loop unrolling with an unrolling factor of four, the loop will be transformed as follows: for(unsigned int i = 0; i &lt; 16; i += 4) { A(i) B(i) A(i + 1) B(i + 1) A(i + 2) B(i + 2) A(i + 3) B(i + 3) } There are two advantages of loop unrolling that relate to tolerating latency. The first advantage of loop unrolling is that by reducing the number of loop iterations, the number of branch instructions is reduced. While CPUs have sophisticated branch prediction to reduce the latency of branch instructions, GPUs do not have such sophisticated branch prediction. When a GPU thread encounters a branch instruction, it stalls until the outcome of the branch is resolved. Such stalls are reduced when the number of branch instructions is reduced by loop unrolling. The second advantage of loop unrolling is that it exposes more independent instructions that can be reordered to avoid stalling. In our example, if B(i) depends on A(i), then when a thread executes A(i), it needs to stall and wait for A(i) to complete before it can execute B(i). Alternatively, if we have other operations that we can perform that do not need to wait for A(i), we can place those operations in between A(i) and B(i) to avoid having to stall. In our example, if A(i + 1) is independent of A(i) and B(i), then the body of the unrolled loop can be further transformed as follows:</p>
+<p>for(unsigned int i = 0; i &lt; 16; i += 4) { A(i) A(i + 1) A(i + 2) A(i + 3) B(i) B(i + 1) B(i + 2) B(i + 3) } In this case, moving A(i + 1), A(i + 2), and A(i + 3) in between A(i) and B(i) ensures that the thread has plenty of instructions to execute while waiting for A(i) to finish so it can execute B(i). Reordering instructions in such a way to avoid stalling is part of an important optimization called instruction scheduling. In practice, loop unrolling and instruction scheduling are applied automatically and aggressively by the compiler at the compiler’s discretion, and the programmer does not need to worry about them. In our example, since the loop body is small and the loop bound is constant and small, the compiler will most likely fully unroll the loop, eliminating all branches and exposing the largest number of instructions to schedule. If the programmer would like to have control over loop unrolling, this control can be exerted by placing the directive #pragma unroll N before the loop to instruct the compiler to unroll the loop by a factor of N. For example, the directive can be applied as follows: #pragma unroll 4 for(unsigned int i = 0; i &lt; 16; ++i) { A(i) B(i) } In this code, the loop will only be unrolled by a factor of 4. Setting the unrolling factor to 1 instructs the compiler not to perform any unrolling. Throughout this book, we will not annotate loops with the #pragma unroll directive except where it is particularly important to emphasize that a loop is expected to be unrolled. A common category of loops that benefit from loop unrolling are loops that apply thread coarsening (see Section 6.5). Loop unrolling is essential to making thread coarsening efficient. For example, consider the following code: int x; foo(x);</p>
+<p>In this code, each thread is responsible for processing some variable x which is placed in a register. If we apply thread coarsening to this code, each thread will be responsible for multiple x’s. The code after coarsening can be written as follows (assuming a coarsening factor of four):</p>
+<p>int x[4]; for(unsigned int c = 0; c &lt; 4; ++c) { foo(x[c]); } However, recall from Chapter 5 that local arrays such as x[4] are placed in global memory by default. It is necessary to place arrays in memory so that they can be accessed with a variable index, as is done with the access x[c]. Unfortunately, placing x[4] in global memory can introduce memory access overhead that outweighs the benefits of thread coarsening. However, the thread coarsening loop has a small and constant loop bound (which is typical of thread coarsening loops) so it can be fully unrolled. In this case, the code with the fully unrolled coarsening loop would look as follows: int x[4]; foo(x[0]); foo(x[1]); foo(x[2]); foo(x[3]);</p>
+<p>Since all accesses to the local array x have constant indices after unrolling, as opposed to variable indices, the compiler can promote the local array x from memory to registers. Hence, not only does loop unrolling reduce branches and expose more instructions for scheduling, it also exposes opportunities for propagating constants and promoting variables from memory to registers for more efficient access.</p>
+<h2 id="sec-6-7">6.7 Double buffering<a class="td-heading-self-link" href="#sec-6-7" aria-label="Link to this heading"></a>
+</h2>
+<p>Recall from Chapter 5 that threads in the same thread block use __syncthreads() to perform barrier synchronization in order to coordinate their accesses to shared memory. Consider the following example code where threads in the same block pass data to each other during a computation: for(unsigned int i = 0; i &lt; N; ++i) { &hellip; = buffer[anotherThreadID]; __syncthreads(); buffer[myThreadID] = &hellip;; __syncthreads(); } In this example, in every loop iteration, every thread reads some value in memory from a location that was previously written by another thread, then writes a new value to memory at a location corresponding to its own ID. This new value may itself be read by other threads in future iterations. The code example includes two barrier synchronization calls to ensure that the code executes correctly. The second barrier synchronization ensures that all the threads finish writing their values to memorybefore other threads read them. In other words, the barrier enforces a read-after-write dependence. This dependence is also referred to as a true dependence because it is unavoidable. We must wait for a value to be written before we can read it. On the other hand, the first barrier synchronization ensures that all threads finish reading the values they need before other threads overwrite them on the next iteration. In other words, the barrier enforces a write-after-read dependence. This dependence is also referred to as a false dependence because we do not really need to wait to read a value before writing another value. The only reason we are forced to wait is because the value being read and the value being written occupy the same memory location. If these two values did not occupy the same memory location, the write-after-read or false dependence would be eliminated, and hence, the first barrier synchronization would not be needed. Based on this observation, we can eliminate the second barrier synchronization by using different memory buffers on different loop iterations. One way to do so is to allocate a different buffer for each iteration. However, this approach would require a large amount of memory resources which is undesirable. A better approach is to simply allocate two buffers and alternate between them each iteration. This optimization is referred to as double-buffering because it requires allocating two buffers in total that keep trading places. The following code example shows how double-buffering can be applied to the previous example: for(unsigned int i = 0; i &lt; N; ++i) { &hellip; = inBuffer[anotherThreadID]; outBuffer[myThreadID] = &hellip;; __syncthreads(); swap(inBuffer, outBuffer); } In this example, two different buffers are allocated, one pointed to by inBuffer and another pointed to by outBuffer. Since the read from memory is performed from inBuffer and the write is performed to outBuffer, there is no risk that the write will overwrite a value that another thread is reading. Accordingly, the call to __syncthreads() that separates these two memory accesses can be eliminated. However, after the write, the most up to date data is now located in outBuffer, so this buffer is the one we should read from in the next iteration. Swapping the two buffers at the end of the loop body guarantees that the right buffer is read from on the next iteration. This example is only a toy example, and we will see more concrete examples of how to apply double-buffering to real kernels throughout this book.</p>
+<h2 id="sec-6-8">6.8 A checklist of optimizations<a class="td-heading-self-link" href="#sec-6-8" aria-label="Link to this heading"></a>
+</h2>
+<p>Throughout this first part of the textbook, we have covered various common optimizations that CUDA programmers apply to improve the performance of their code.</p>
+<img src="/pmpp5-zh/figs/orig/fig-6-13.png" alt="Figure 6.13" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 6.13.</strong> A checklist of optimizations.</p>
+<p>We consolidate these optimizations into a single checklist that is shown in Fig. 6.13. This checklist is not an exhaustive one, but it contains many of the universal optimizations that are common across different applications and that programmers should first consider. In the second and third parts of the textbook, we apply the optimizations in this checklist to various parallel patterns and applications to understand how theymanifest in different contexts. In this section, we give a brief overview of each optimization and the strategies for applying it. The optimizations in Fig. 6.13 are categorized into three major categories based on the aspect of performance that they try to improve. The compute utilization category refers to optimizations that aim to reduce idleness in the GPU cores by making sure that cores have useful work to do instead of remaining idle. The memory utilization category refers to optimizations that improve the efficiency of how the memory subsystem is used to access data. The synchronization latency category refers to optimizations that reduce the need for threads to wait on barrier synchronizations. While some optimizations may fall into multiple categories, we place them in the category corresponding to the primary intent of when they are typically used. The final optimization, thread coarsening, is labeled as general because the category it falls into differs based on the context in which it is applied. The compute utilization category consists of three main optimizations. The first optimization is tuning the occupancy of threads on SMs. This optimization was introduced in Chapter 4 where the importance of having many more threads than cores was emphasized as a way for having enough work available to hide long-latency operations in the core pipeline. To maximize occupancy, programmers can tune the resource usage of their kernels to ensure that the maximum number of blocks or registers allowed per SM do not limit the number of threads that can be assigned to the SM simultaneously. In Chapter 5, shared memory was also introduced as another resource whose usage should be carefully tuned so as not to limit occupancy. In Section 6.2 of this chapter, the importance of maximizing occupancy was discussed as a means for also hiding memory latency, not just core pipeline latency. Having many threads executing simultaneously ensures that enough memory accesses are generated to fully utilize the memory bandwidth. Throughout this book, we will apply various optimizations that increase the shared memory or register usage of a kernel, and we will assume that the programmer can adequately tune their usage so as not to adversely affect occupancy. In Chapter 15, we will see an example of where the benefit of using more resources may outweigh the decrease in occupancy, and where other optimizations are used to improve compute utilization that compensate for the reduction in occupancy. The second optimization for improving compute utilization is loop unrolling. In Section 6.6 of this chapter, we saw that loop unrolling reduces the number of long-latency branch instructions, exposes more independent instructions that can be scheduled to reduce stalls, and may convert local array indices to constants which allows them to be promoted to registers. Throughout this book, we will assume that the compiler does an adequate job at unrolling loops where profitable. In Chapter 11, which covers the prefix sum pattern, and Chapter 15, which covers advanced optimizations for matrix multiplication, we will emphasize how loop unrolling is essential to enable register tiling after thread coarsening. In Chapter 15, we will also comment on how loop unrolling is critical for compensating for the kernel executing with low occupancy. The third optimization for improving compute utilization is reducing control divergence. Control divergence was introduced in Chapter 4, where the importance ofthreads in the same warp taking the same control path was emphasized as a means for ensuring that all cores are productively utilized during SIMD execution. So far, the kernels we have looked at in this part of the textbook have not exhibited control divergence, except the inevitable divergence at boundary conditions. However, we will see many examples in the second and third parts of the textbook where control divergence can be a significant detriment to performance. There are multiple strategies that can be employed for reducing control divergence. One strategy is to rearrange how the work and/or data is distributed across the threads to ensure that threads in one warp are all used before using threads in other warps. We will see an example of this strategy in Chapter 10, which covers the reduction pattern. The strategy of rearranging how work and/or data is distributed across threads can also be used to ensure that threads in the same warp have similar workload. We will see an example of this in Chapter 18, which covers graph traversal, where we discuss the tradeoffs between vertex-centric and edge-centric parallelization schemes. Another strategy for reducing control divergence is to rearrange how the data is laid out to ensure that threads in the same warp which process adjacent data have similar workload. We will see an example of this strategy in Chapter 17, which covers sparse matrix computation and storage formats, particularly when discussing the JDS format. The memory utilization category in Fig. 6.13 consists of six main optimizations. The first optimization for improving memory utilization is using coalesced global memory accesses by ensuring that threads in the same warp access adjacent memory locations within the same cache line and/or DRAM burst. This optimization was introduced in Section 6.1 of this chapter, where the hardware’s ability to combine accesses to adjacent memory locations into a single memory request was emphasized as a way for reducing global memory traffic and improving utilization of DRAM bursts and cache lines. So far, the kernels we have looked at in this part of the textbook have exhibited coalesced accesses naturally. However, we will see many examples in the second and third parts of the textbook where memory access patterns are more irregular, thereby requiring more effort to achieve coalescing. There are multiple strategies that can be employed for achieving coalescing in applications with irregular access patterns. One strategy is to load data from global memory to shared memory in a coalesced manner, then perform the irregular accesses on shared memory. We have already seen an example of this strategy in Section 6.1, namely corner turning. We will see another example of this strategy in Chapter 12, which covers the filtering pattern, and Chapter 14, which covers the sorting pattern. In these patterns, threads write out results to an array in a scattered manner. Instead, they can collaborate to perform their scattered accesses in the shared memory, then write the result from the shared memory to the global memory with more coalescing enabled for elements with nearby destinations. This optimization is sometimes referred to as packing. We will also see an example of this strategy in Chapter 13, which covers the merge pattern. In this pattern, threads in the same block need to perform a binary search in the same array, so they collaborate to load that array from global memory to shared memory in a coalesced manner, and then each thread performs the binary search in shared memory.</p>
+<p>Another strategy for achieving coalescing in applications with irregular access patterns is to rearrange how the threads are mapped to the data elements. We will see an example of this strategy in Chapter 10, which covers the reduction pattern, and Chapter 15, which covers advanced optimizations for matrix multiplication. Yet another strategy for achieving coalescing in applications with irregular access patterns is to rearrange how the data itself is laid out. We will see an example of this strategy in Chapter 17, which covers sparse matrix computation and storage formats, particularly when discussing the ELL and JDS formats. Other common examples of rearranging the layout of the data are transposing a matrix or converting an array of structures into a structure of arrays. The second optimization for improving memory utilization is tiling data that is reused within a thread block by placing it in shared memory and accessing it repetitively from there, such that it only needs to be transferred between global memory and the SM once. Shared memory tiling was introduced in Chapter 5 in the context of matrix multiplication, where threads processing the same output tile collaborate to load the corresponding input tiles to the shared memory then access these input tiles repeatedly from the shared memory. We will see shared memory tiling applied again in most of the parallel patterns in the second and third parts of the textbook. We will observe the challenges of applying tiling when the input and output tiles have different dimensions. This challenge arises in Chapter 7, which covers the convolution pattern, and Chapter 8, which covers the stencil pattern. We will also see more sophisticated applications of shared memory tiling to matrix multiplication in Chapter 15 and to sequence alignment using dynamic programming in Chapter 16. The third optimization for improving memory utilization is tiling data that is reused within a warp or thread by placing it in registers and accessing it repetitively from there, such that it only needs to be transferred between global or shared memory and registers once. Register tiling was applied in Chapter 3 and Chapter 5 where each thread used a local variable or register to accumulate a result before writing it to global memory. One can think of the collective set of registers across all threads as jointly forming a tile of the output data. We will see register tiling again in Chapter 8, where a shared memory input tile is temporarily moved from shared memory to registers and back for efficient access and preservation of shared memory capacity. We will also see register tiling in Chapter 11, which covers the prefix sum pattern, and Chapter 15, which covers advanced optimizations for matrix multiplication, where each thread is responsible for multiple output elements with multiple corresponding input elements that it reuses. The fourth optimization for improving memory utilization is using vector loads and stores to access larger chunks of memory with less instruction execution overhead. Vector loads and stores were introduced in Section 6.3 of this chapter and applied in the context of vector addition. The optimization can be applied to most computations discussed in this book. Due to the simplicity of the optimization, we will not apply it throughout the book. We will only mention it briefly where it is particularly relevant. The fifth optimization for improving memory utilization is avoiding shared memory bank conflicts. This optimization was introduced in Section 6.4 of this chapter in the context of corner turning. The main strategies to avoid bank conflicts are to rearrange how the threads are mapped to the data or to rearrange the data layout itself, often by adding padding elements. We will see an example of this optimization again in Chapter 11, which covers the prefix sum pattern, and in Chapter 15, which covers advanced optimizations for matrix multiplication, where threads make strided accesses to shared memory when they load their portions of the input data. The sixth optimization for improving memory utilization is privatization. This optimization has not been introduced yet, but it is mentioned here for completeness. Privatization relates to when multiple threads or blocks need to update a common (public) output. To avoid the overhead of updating the same data concurrently, a private copy of the data can be created and partially updated, then a final update can be made from the private copy to the public copy when done. We will see an example of privatization in Chapter 9, which covers the histogram pattern, where multiple threads need to update the same histogram counters. We will also see examples of privatization in Chapter 12, which covers the filtering pattern, and Chapter 18, which covers graph traversal, where multiple threads need to insert entries into the same output list. The synchronization latency category in Fig. 6.13 consists of two main optimizations. The first optimization for reducing synchronization latency is using warp-level primitives. Warp-level primitives were briefly mentioned in Chapter 4 as a means for threads within the same warp to synchronize and share data together without performing the more expensive block-wide barrier synchronization and accessing shared memory. The main strategy for reducing synchronization overhead with warplevel primitives is to decompose a block-wide computation across warps such that operations requiring barrier synchronization are first performed at the warp-level, then the warp-level results are consolidated at the block-level. We will see examples of using warp-level primitives to optimize computations that perform frequent synchronization in Chapter 10, Chapter 11, and Chapter 12 which cover the reduction, prefix sum, and filter patterns, respectively. We will also visit warp-level primitives in Chapter 15, which covers advanced optimizations for matrix multiplication, where warp-level primitives will be used to assist with register tiling. The second optimization for reducing synchronization latency is double-buffering. Double buffering was first introduced in Section 6.7 of this chapter. Double-buffering eliminates false (write-after-read) dependences by using different buffers for the writes and the preceding reads, thereby allowing the barrier synchronizations that enforce the false dependences to be removed. We will see double-buffering applied in real contexts in Chapter 11, which covers the prefix sum pattern, and Chapter 15, which covers advanced optimizations for matrix multiplication. The final optimization in Fig. 6.13 is thread coarsening, which is a general optimization whose performance objective depends on the computation at hand. Thread coarsening was first introduced in Section 6.5 of this chapter, where multiple units of parallel work are assigned to each thread to reduce the overhead of parallelization if the hardware is going to serialize the threads anyways. In the second and third parts of this textbook, we will see thread coarsening applied in different contexts with adifferent overhead of parallelization each time. In Chapter 8, which covers the stencil pattern, and Chapter 15, which covers advanced optimizations for matrix multiplication, thread coarsening is applied to increase the size of the output tile, thereby reusing input data loaded from memory to compute more output values. In this case, the overhead of having finer-grain parallelism with smaller output tiles is needing to load the input data redundantly by more thread blocks. In Chapter 9, which covers the histogram pattern, thread coarsening helps reduce the number of private copies that need to be committed to the public copy in the context of the privatization optimization. In Chapter 10, which covers the reduction pattern, and Chapter 11, which covers the prefix sum pattern, thread coarsening is applied to reduce the overhead from synchronization and control divergence. Also in Chapter 11, which covers the prefix sum pattern, thread coarsening helps reduce the redundant work performed by the parallel algorithm compared to the sequential algorithm. In Chapter 12, which covers the filtering pattern, and Chapter 14, which covers the sorting pattern, thread coarsening helps improve memory coalescing. Again, the checklist in Fig. 6.13 is not intended to be an exhaustive one, but it contains the major types of optimizations that are common across different computation patterns. These optimizations appear in multiple chapters in the second and third parts of the textbook. We will also see other optimizations that appear in specific chapters. For example, in Chapter 7, which covers the convolution pattern, we introduce the use of constant memory.</p>
+<h2 id="sec-6-9">6.9 Optimization strategy<a class="td-heading-self-link" href="#sec-6-9" aria-label="Link to this heading"></a>
+</h2>
+<p>We have seen in Section 6.8 that different optimizations target different aspects of performance. Hence, when deciding which optimization to apply to a specific kernel, it is important to first understand what resource is limiting the performance of that kernel. The resource that limits the performance of a kernel is often referred to as a performance bottleneck. Optimizations typically use more of one resource to reduce the burden on another resource. If the optimization applied does not target the bottleneck resource, one may not see any benefit from the optimization. Worse yet, if the optimization applied uses more of the bottleneck resource, the optimization may even hurt performance. For example, shared memory tiling increases the use of shared memory to reduce the pressure on the global memory bandwidth. This optimization is great when the bottleneck resource of a kernel is the global memory bandwidth. However, if the performance of a kernel is limited by occupancy and occupancy is already constrained by the use of too much shared memory, then applying shared memory tiling is likely to make things worse. Performance optimization is an iterative process whereby one identifies the performance bottleneck of a kernel, applies an optimization to alleviate that bottleneck, identifies the new bottleneck, alleviates it, and keeps repeating. To identify the performance bottleneck of a kernel, GPU computing platforms typically provide variousprofiling tools. We refer readers to the CUDA documentation for more information on how to use profiling tools to identify the performance bottlenecks of their kernels [1]. Performance bottlenecks may be hardware-specific, meaning that the same kernel may encounter different bottlenecks on different devices. For this reason, the process of identifying performance bottlenecks and applying performance optimizations requires a good understanding of the GPU architecture and the architectural differences across different GPU devices. An important skill is knowing when to stop the iterative optimization process because the kernel’s performance can no longer be further improved. In Chapter 5, the roofline model was discussed as means for assessing how far a kernel’s performance is from the hardware limit. By estimating how many computations a kernel performs and how much data it accesses from memory, the kernel’s computational intensity can be derived to infer whether the kernel is compute-bound or memory-bound. After that, the kernel’s actual resource utilization reported by the profiler can be compared to the hardware’s limit using the roofline model. A kernel that is close to the hardware limit has little room for further optimization. On the other hand, a kernel that has not reached the hardware limit can likely be further optimized.</p>
+<h2 id="sec-6-10">6.10 Summary<a class="td-heading-self-link" href="#sec-6-10" aria-label="Link to this heading"></a>
+</h2>
+<p>In this chapter, we covered the off-chip memory (DRAM) architecture of a GPU and discussed related performance considerations such as global memory access coalescing and hiding memory latency with memory parallelism. We then presented a few more important optimizations, which are thread granularity coarsening, loop unrolling, and double-buffering. With the insights presented in this chapter and earlier chapters, readers should be able to reason about the performance of any kernel code they come across. We concluded this part of the textbook by presenting a checklist of common performance optimizations that are widely used to optimize many computations. We will continue to study practical applications of these optimizations in the parallel computation patterns and application case studies in the next two parts of the book.</p>
+<h2 id="sec-6-11">6.11 Exercises<a class="td-heading-self-link" href="#sec-6-11" aria-label="Link to this heading"></a>
+</h2>
+<p><strong>global</strong> void foo_kernel(float* a, float* b, float* c, float* d, float* e) { unsigned int i = blockIdx.x*blockDim.x + threadIdx.x;</p>
+<p><strong>shared</strong> float a_s[256];</p>
+<p><strong>shared</strong> float bc_s[4*256];</p>
+<p>a_s[threadIdx.x] = a[i];</p>
+<p>for(unsigned int j = 0; j &lt; 4; ++j) {</p>
+<p>References</p>
+<p>bc_s[j*256 + threadIdx.x] = b[j*blockDim.x*gridDim.x + i] + c[i*4 + j];</p>
+<p>}</p>
+<p>__syncthreads();</p>
+<p>d[i + 8] = a_s[threadIdx.x];</p>
+<p>e[i*8] = bc_s[threadIdx.x*4]; }</p>
+<p>For each of the following memory accesses, specify whether they are coalesced, uncoalesced, or if coalescing is not applicable. a. The access to array a of line 05 b. The access to array a_s of line 05 c. The access to array b of line 07 d. The access to array c of line 07 e. The access to array bc_s of line 07 f. The access to array a_s of line 10 g. The access to array d of line 10 h. The access to array bc_s of line 11 i. The access to array e of line 11 2. Write a matrix multiplication kernel function that uses corner turning, corresponding to the design illustrated in Fig. 6.4. 3. For tiled matrix multiplication in Chapter 5, out of the possible range of values for BLOCK_SIZE, for what values of BLOCK_SIZE will the kernel completely avoid uncoalesced accesses to global memory? (You need to consider only square blocks.) 4. Implement a vector addition kernel that uses vector loads and handles the boundary conditions correctly. 5. Consider the following shared memory array and access to the array by a block with one warp (32 threads): <strong>shared</strong> float a[1024]; a[threadIdx.x*stride] = &hellip;;</p>
+<p>Assume that a[0] is placed in bank 0. For each of the following values of stride, specify the banks accessed by the warp and the number of bank conflicts on each bank (if any): a. stride = 32 b. stride = 31 c. stride = 24 d. stride = 16 e. stride = 12 f. stride = 8 g. stride = 7 References [1] NVIDIA, Nsight compute, <a href="https://docs.nvidia.com/nsight-compute/index.html">https://docs.nvidia.com/nsight-compute/index.html</a>, 2023.</p>
+<p>Part 2: Parallel patterns</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] NVIDIA, Nsight compute, <a href="https://docs.nvidia.com/nsight-compute/index.html">https://docs.nvidia.com/nsight-compute/index.html</a>, 2023. Chapter 15. Advanced optimizations for matrix multiplication</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/05-ch5/"
+    aria-label="Previous - Chapter 5 Memory architecture and data locality" title="Chapter 5 Memory architecture and data locality" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 5 Memory architecture and data locality</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/07-ch7/"
+    aria-label="Next - Chapter 7 Convolution" title="Chapter 7 Convolution" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 7 Convolution</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-6-1">6.1 Global memory access coalescing</a></li>
+    <li><a href="#sec-6-2">6.2 Hiding memory latency</a></li>
+    <li><a href="#sec-6-3">6.3 Vector loads and stores</a></li>
+    <li><a href="#sec-6-4">6.4 Shared memory bank conflicts</a></li>
+    <li><a href="#sec-6-5">6.5 Thread coarsening</a></li>
+    <li><a href="#sec-6-6">6.6 Loop unrolling</a></li>
+    <li><a href="#sec-6-7">6.7 Double buffering</a></li>
+    <li><a href="#sec-6-8">6.8 A checklist of optimizations</a></li>
+    <li><a href="#sec-6-9">6.9 Optimization strategy</a></li>
+    <li><a href="#sec-6-10">6.10 Summary</a></li>
+    <li><a href="#sec-6-11">6.11 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/06-ch6/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/06-ch6/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/06-ch6/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/06-ch6.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/06-ch6.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+6+Performance+considerations"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/06-ch6/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/06-ch6/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/06-ch6/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/06-ch6/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

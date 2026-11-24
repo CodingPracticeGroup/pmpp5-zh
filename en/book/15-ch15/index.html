@@ -1,0 +1,810 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/15-ch15/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/14-ch14/">
+<link rel="next" href="/pmpp5-zh/en/book/16-ch16/"><meta name="robots" content="index, follow">
+
+<title>Chapter 15 Advanced optimizations for matrix multiplication | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/15-ch15/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/15-ch15/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/15-ch15/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/15-ch15/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 15 Advanced optimizations for matrix multiplication">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 15 Advanced optimizations for matrix multiplication">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="9814">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 15 Advanced optimizations for matrix multiplication">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/15-ch15/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/15-ch15/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/15-ch15/" aria-current="page" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 15 Advanced optimizations for matrix multiplication</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/15-ch15.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/15-ch15.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;15&#43;Advanced&#43;optimizations&#43;for&#43;matrix&#43;multiplication" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 15 Advanced optimizations for matrix multiplication</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c15">Chapter 15 Advanced optimizations for matrix multiplication<a class="td-heading-self-link" href="#c15" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>Advanced optimizations for matrix multiplication CONTENTS 15.1 Background . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 349 15.2 Data reuse analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 350 15.3 Using larger tiles with thread coarsening . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 352 15.4 Register tiling of the input tiles . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 357 15.5 Coalesced storing of the output tile . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 360 15.6 Eliminating bank conflicts. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 361 15.7 Occupancy considerations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 363 15.8 Software pipelining. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 364 15.9 Specialized software and hardware support . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 368 15.10 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 370 15.11 Exercises. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 370 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 370 Matrix multiplication is an important operation in science, engineering, and graphics applications. Due to its high computation complexity, it exhibits a high degree of data reuse and thus significant optimization opportunities. In Chapter 3, we used matrix multiplication as an example of mapping multi-dimensional grids to data. Subsequently, in Chapter 5, we used matrix multiplication as an example of using shared memory tiling to reduce global memory accesses. In this chapter, we will dive more deeply into matrix multiplication and the advanced optimizations for this important computation on the GPU architecture.</p>
+<p>Matrix multiplication is an important operation in science, engineering, and graphics applications. Due to its high computation complexity, it exhibits a high degree of data reuse and thus significant optimization opportunities. In Chapter 3, we used matrix multiplication as an example of mapping multi-dimensional grids to data. Subsequently, in Chapter 5, we used matrix multiplication as an example of using shared memory tiling to reduce global memory accesses. In this chapter, we will dive more deeply into matrix multiplication and the advanced optimizations for this important computation on the GPU architecture.</p>
+<h2 id="sec-15-1">15.1 Background<a class="td-heading-self-link" href="#sec-15-1" aria-label="Link to this heading"></a>
+</h2>
+<p>Matrix-matrix multiplication, or matrix multiplication in short, is widely used in mathematical formulations of science and engineering problems. Conceptually, it is more intuitive to start with vector-matrix multiplication, a special case of matrix multiplication, where the first matrix operand has only one row and thus can be viewed as a vector v. By multiplying a vector v with a matrix B to generate a vector u, i.e., u = v × B, one linearly transforms v into u. That is, each element of u is a linear combination of all elements of v. Column j of B defines the coefficients used for linearly Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00025-1">https://doi.org/10.1016/B978-0-44-343900-1.00025-1</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<p>combining all elements of v into element j of u. For example, in graphics applications, one can perform a coordinate rotational transformation by multiplying the 3D vector coordinate of a point in space with a 3 × 3 matrix, along with a vector addition if shifting is needed and/or multiplying all elements with a scaling factor, to derive its coordinate vector according to a new vantage point along with new orientation and scale. To perform the same linear transformation on multiple vectors, one can collect these vectors into a matrix A, where each row is one of the vectors, and perform a matrix multiplication D = A × B. After multiplication, each row of D contains one of the transformed vectors. Going back to the coordinate transformation example, one may need to scale the matrix multiplication result and perhaps add a (scaled) matrix C, where each row of C is a vector to be added to the corresponding transformed row vector of A. Thus, we have a general form D = αA × B + βC, which is referred to as General Matrix Multiply (GEMM) in linear algebra and high-performance computing communities. It should be clear that the matrix multiplication step A × B is likely the most compute intensive step of GEMM. Thus, we focus on the matrix multiplication step of GEMM in this chapter. Depending on the context of the computation, the matrices involved in the matrix multiplication operation may each be stored in row major or column major order. The particular storage format may be a result of operating on the original matrix or its transpose, as discussed in Chapter 6. Throughout this chapter, we assume that the two matrices involved in the matrix multiplication are both in row major order. However, the optimization techniques we describe can also be applied to other combinations of storage formats. In fact, libraries that support GEMM operations typically support these different combinations. The applicability and benefit of optimizations for matrix multiplication depend on the dimensions of the matrices involved. Before the rise of deep learning, matrix multiplications in applications typically involve matrices of modest dimensions. This is because these applications typically apply linear transformations to vectors with modest numbers of elements. As we will see in Chapter 19 and Chapter 20, one can formulate the training of Convolutional Layers of the Convolutional Neural Networks and the Attention Layers of Large Language Models into multiplications using large matrices. These large-scale matrix multiplications motivate optimizations that were less profitable when applied to smaller-scale multiplications. Many optimizations covered in this chapter are designed to benefit large-scale matrix multiplications.</p>
+<h2 id="sec-15-2">15.2 Data reuse analysis<a class="td-heading-self-link" href="#sec-15-2" aria-label="Link to this heading"></a>
+</h2>
+<p>Fig. 15.1 reviews tiled matrix multiplication which was covered in Chapter 5, using more general tile dimensions. In this example, a thread block is assigned to compute an output tile of matrix C of size m × n. The threads in the thread block collaboratively iterate over the input tiles of matrices A and B, loading a m × k tile of matrix A and the corresponding k × n input tile of matrix B from global memory to shared FIGURE 15.1 Review of tiled matrix multiplication.</p>
+<p>memory. For each pair of input tiles, the threads compute the partial contribution of the input tiles to each element in the output tile. The output tile is stored collectively in the registers of the threads in the thread block. When the computation is over, the threads in the thread block write the values of the output tile from their registers to the global memory. In Chapter 5, our data reuse analysis assumed that the input and output tiles were square. Let us now analyze the data reuse achieved by tiled matrix multiplication for non-square tiles. For each pair of input tiles, the threads in the thread block collaboratively compute k multiply and k add operations for each of the m × n output elements, making the total number of floating point operations 2 · m · n · k. At the same time, the threads in the thread block will collaboratively load a m × k tile of A and a k × n tile of B where each element loaded is 4 B, making the total number of bytes loaded 4 · k · (m + n). If we take the ratio of these two numbers, we get an arithmetic intensity of 0.5 · m · n/(m + n) operations per byte. As we saw in Chapter 5, a larger arithmetic intensity would allow the computation to better overcome the memory bandwidth bottleneck and achieve better performance. The ratio 0.5 · m · n/(m + n) can be increased by using larger values of m and n, i.e., using larger output tiles. For example, if m = n = 32, the arithmetic intensity would be 8 FLOP/B, which would keep the kernel memory-bound on an H100 GPU (see Chapter 5). On the other hand, if we increase m = n = 128, then the arithmetic intensity would increase to 32 FLOP/B, which would make the kernel compute-bound on an H100 GPU. The intuition behind why increasing m and n improves the arithmetic intensity of the computation is that larger output tiles allow the same input data to be reusedacross more output values. For example, in Fig. 15.1, if we increase n from 32 to 128, we enlarge the output tile by 4× in the horizontal direction. In other words, each thread block would calculate the equivalent of four original output tiles. Calculating these output tiles uses the same input tile of A, as shown on the left part of Fig. 15.1. In the original configuration, the four output tiles were calculated using four different thread blocks, each redundantly loading the same input tile of A. After increasing n by 4×, all four output tiles are calculated by only one thread block and the input tile of A needs to be loaded only once by the thread block. One can further reduce the redundant loading of B input tiles by enlarging the height m. This elimination of redundant loading of A and B input tiles across thread blocks enhances data reuse and thus increases arithmetic intensity. We look at how we can increase the tile sizes for tiled matrix multiplication in Section 15.3.</p>
+<h2 id="sec-15-3">15.3 Using larger tiles with thread coarsening<a class="td-heading-self-link" href="#sec-15-3" aria-label="Link to this heading"></a>
+</h2>
+<p>Using larger tiles in tiled matrix multiplication would necessitate assigning to each thread in the block multiple elements to compute per output tile and multiple elements to load per input tile. Hence, this optimization can be thought of as a thread coarsening optimization, where the overhead of finer-grain parallelization is the need to load the same input value more times by different thread blocks. This optimization is similar to the thread coarsening optimization applied in Chapter 8 on the stencil computation where thread coarsening was also used to increase the output tile size for increased data reuse and arithmetic intensity. Fig. 15.2 illustrates how tiled matrix multiplication can be performed with large tiles. Each thread block computes an output tile of size bM×bN. We refer to the output tile of a thread block as a block-level output tile. When the size of the block-level output tiles is larger than the number of threads in a block, each thread in the block must be responsible for computing multiple elements of the block-level output tile. For example, if each block-level output tile consists of bM×bN = 128 × 128 elements and each thread block has 16 × 16 threads, each block-level output tile can be divided across threads such that each thread takes an output tile of size tM×tN = 8 × 8. We refer to the tM×tN tile taken by a thread as its thread-level output tile. In general, the input and output matrices for matrix multiplication can be logically divided into a hierarchy of tiles. In our example, we have block-level tiles and threadlevel tiles. Each tile in a tile hierarchy can be assigned to a unit of the thread hierarchy. In our example, each block-level tile is assigned to a thread block and each threadlevel tile is assigned to a thread. In this section, we focus on the kernel code that uses only the block-level and the thread-level tiles. As the reader has probably guessed, it can also be useful to reason about tiles at other levels such as warp-level tiles, GPUlevel tiles, and even compute cluster node-level tiles. In fact, we will use warp-level tiles in Section 15.5. Fig. 15.3 shows the kernel code for performing tiled matrix multiplication with large tiles. First, all threads in each block identify the starting row index and column FIGURE 15.2 Tiled matrix multiplication with large tiles.</p>
+<p>index of their block-level output tile within the C output matrix, bRow and bCol, by multiplying its block indices by the dimensions of the block output tile (lines 05-06). Next, each thread identifies the starting row and column of its thread-level output tile within the block-level output tile (tRow and tCol) by multiplying its thread indices by the dimensions of the thread-level output tile (lines 09-13). Each thread declares a tM×tN local array C_r to hold its output tile (line 16) and calls a device function clear() to initialize all its elements to zero. Recall from Chapter 5 and Chapter 6 that a local array is placed in the global memory by default. The compiler can place a local array into registers for faster access if all the accesses to the array have constant indices. To ensure that C_r is placed in registers, we must ensure that all accesses to C_r have constant indices. To do so, we unroll all the loops that iterate over C_r, which we will do in the implementations of the device functions that access C_r. As a result, each thread’s thread-level output tile is placed in the thread’s registers (C_r on line 16). After that, each block of threads proceeds to iteratively load the input tiles and compute their contribution to the output tiles using several device functions along the way. We first explain the main code from Fig. 15.3 and then explain each device function later in this section. As shown in Fig. 15.2, a horizontal bM × K panel of A and a vertical K × bN panel of B are needed to calculate the output tile of a thread block. These panels are divided K input tile pairs. All threads in the same block iterate over the input tile pairs into bK to compute their contributions to the block-level output tile (line 20). We first declare the shared memory arrays A_s and B_s to hold the input tiles (lines 23-24). In each iteration of the for-loop, we use the device function loadTile() to load a pair of input tiles from A and B from global memory into A_s and B_s in shared memory (lines 2526). After loading both input tiles, a barrier synchronization is executed (line 27) to ensure that no thread begins computing before all the data is available.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-3.png" alt="Figure 15.3" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.3.</strong> Code for tiled matrix multiplication with large tiles.</p>
+<p>After the input tiles are available in shared memory, each thread calls a device function mm() (line 30) to multiply its portions of the input tiles and accumulate their contribution to its thread-level output tiles. The threads then perform another barrier synchronization (line 31) to make sure that all threads have finished computing before the next iteration’s input tiles are loaded. When all the input tiles have been processed, the threads exit the loop and call a device function writeTile() to write their threadlevel output tiles from the registers to the global memory (line 39). Let us now turn our attention to the device functions used in the main kernel code in Fig. 15.3. Keep in mind that all these device functions are inlined into the main kernel. Fig. 15.4 shows the implementation of the clear() function that we used to initialize the output tile array C_r to zero. The implementation is quite simple. Two nested loops iterate over the rows (line 04) and columns (line 06) of the array and initialize each array element to zero (line 07). Importantly, the loops are annotated with #pragma unroll to ensure that they are fully unrolled, allowing the C_r array to have constant indices and to be placed in the registers.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-4.png" alt="Figure 15.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.4.</strong> Code for clearing the output tile.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-5.png" alt="Figure 15.5" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.5.</strong> Code for loading the input tiles from global memory to shared memory.</p>
+<p>Fig. 15.5 shows the implementation of the loadTile() function that we used to load the input tiles from the global memory to the shared memory. The function takes as parameters (lines 01-03) the starting address T of the tile in the original matrix in global memory, the leading dimension1 (lda) of the tile, and the boundaries (maxRow and maxCol) of the tile in the original matrix. It also takes the starting address of the tile to be stored in shared memory (T_s), its leading dimension (ldas), and its size (height and width). When the number of threads in the block is smaller than the number of elements in the input tile, each thread needs to load multiple input elements. For example, if the input tile dimension is 128×8 (1024 elements) and each block has 256 threads, each thread needs to load four elements. For this reason, the input tile is logically divided into four sub-tiles and loaded one sub-tile at a time. The code in Fig. 15.5 calculates the number of sub-tiles (line 04-05) and iterates over the sub-tiles (line 07). For each sub-tile, the thread calculates the index of the element that it should load (lines 0809), makes sure the element is within bounds (line 10), and loads the element (line 1 In the row-major layout, the leading dimension of a matrix or tile is the number of elements in memorybetween successive elements of the same column. In our case, the leading dimension of a tile is the width of the larger matrix containing the tile.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-6.png" alt="Figure 15.6" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.6.</strong> Code for performing a matrix multiplication with the input tiles.</p>
+<p>\11) or sets the shared memory value to zero if the element is out of bounds (line 13). One possible optimization to this function is to use vector loads so that each thread would load four elements in a single instruction, as described in Chapter 6. We leave this optimization as an exercise for the reader. Fig. 15.6 shows the implementation of the mm() function that each thread calls to compute the contribution of the current input tiles to its thread-level output tile. As is shown on the right side of Fig. 15.2, the calculation of each thread-level output tile, e.g. the one highlighted for Thread 17, requires contributions from only a tM × bK sub-tile of the block-level tile of A and a bK × tN sub-tile of the block-level tile of B. We will refer to these sub-tiles as the thread-level input tile for the thread calculating the corresponding thread-level output tile. Furthermore, we will refer to the common dimension between the block-level tile of A and the block-level tile of B, i.e., the horizontal dimension of the block-level tile of A and the vertical dimension of the block-level tile of B, as the inner dimension of the block-level matrix multiplication. Since the thread-level subtiles consists of entire rows of the block-level tile of A and entire columns of the block-level tiles of B, the inner dimension of the block-level matrix multiplication is also the inner dimension (bK) of the thread-level multiplication in this design. The function takes as parameters (lines 01-02) the dimensions of the thread-level output tile (m and n), the inner dimension of the thread-level matrix multiplication (k), the starting addresses of the two thread-level input tiles (a and b), their leading dimensions (lda and ldb), and the starting address of the thread-level output tile (c). The leading dimensions are needed to calculate the linearized address of the threadlevel input tile elements. Although we pass an address to the thread-level output tile, the compiler eventually inlines the function and places the array in registers since it will be accessed with constant indices. The code for the mm device function is quite simple. The outer two loops iterate through the thread-level output tile elements (lines 04 and 06). Importantly, the loops are unrolled (lines 03 and 05) to allow the output tile to be placed in registers. For each element of the output tile, the inner loop iterates through the corresponding row and column of the thread-level input tiles (line 08) and performs the multiply and FIGURE 15.7 Code for writing the output tiles to global memory.</p>
+<h2 id="sec-15-4">15.4 Register tiling of the input tiles<a class="td-heading-self-link" href="#sec-15-4" aria-label="Link to this heading"></a>
+</h2>
+<p>add operation (line 09). Note that although the row and column indices are in terms of the thread-level input tiles, the elements are actually fetched from the block-level input tile arrays in the shared memory. Since a and b are set to the starting address of the thread-level input tiles within the block-level input tile arrays (&amp;A_s[tRow*bK] and &amp;B_s[tCol] on line 30 of Fig. 15.3), we simply need to multiply the row indices (row for a and i for b) for the thread-level input tile elements by the leading dimensions lda and ldb (which are equivalent to the width of the block-level input tiles) to skip to the correct place in the block-level input tiles where the thread-level tile elements needed for the current iteration reside. Fig. 15.7 shows the implementation of the writeTile() function that each thread uses to write its thread-level output tile from its registers to global memory. The function takes as parameters (lines 01-02) the starting address of the tile to be stored to global memory (c), its leading dimension (ldc), and its boundaries (maxRow and maxCol). It also takes the starting address of the tile to be accessed from the registers (C_r) and its size (m and n). Note that the starting address for writing the tile into global memory is calculated by the main kernel in line 36 of Fig. 15.3 based on the block-level and thread-level output tile design shown in Fig. 15.2. The two loops in the writeTile function iterate over the output tile and are unrolled to ensure that output tile is placed in registers (lines 03-06). After a boundary check (line 07), elements that are in bounds are stored to global memory. One possible optimization to this function is to use vector stores so that each thread would store four elements in a single instruction, as described in Chapter 6. We leave this optimization as an exercise to the reader. The implementation of tiled matrix multiplication in this section using large block-level and thread-level tiles improves the arithmetic intensity and overall performance of the computation. However, there are still additional optimizations that can be applied to further improve performance. We discuss these optimizations in the rest of this chapter.</p>
+<p>So far we have used shared memory tiling to overcome the global memory bandwidth bottleneck by loading reused data once to shared memory and then accessing FIGURE 15.8 Matrix multiplication with register tiling of input tiles.</p>
+<p>it multiple times from shared memory. Indeed, in the example of tiled matrix multiplication, an element in the input tile is loaded by one thread from global memory to shared memory, and then loaded by multiple threads from shared memory to their registers to perform the computation. While accessing data from shared memory is much faster than accessing it from global memory, it is still slower than accessing it from a register. Hence, after applying shared memory tiling, the shared memory access latency becomes a new bottleneck in the computation. To overcome the shared memory access latency bottleneck, we observe from Fig. 15.2 that a thread uses the same input value to compute multiple output elements. In our implementation in Section 15.3, the same input value is loaded from shared memory multiple times by the same thread, once for each output element that it contributes to. That is, although each thread defines its own logical thread-level input tile, each time a thread uses a thread-level input tile element, the thread still loads the element from the block-level tile array in shared memory. We can avoid these redundant accesses to shared memory by applying register tiling to the input tiles. In other words, a thread can load each input element it needs from shared memory only once and place it in a register, then reuse that value from the register to compute all the corresponding output values. Fig. 15.8 illustrates how register tiling can be applied to the input tiles. In this figure, a tile of matrix A has already been loaded into shared memory along with the corresponding tile of matrix B. Each thread iterates over its sections of the shared memory input tiles one strip at a time. The thread loads the pair of strips from the shared memory to its registers. The thread then computes the contributions of the pair of input strips to all its output tile elements before proceeding to load the next pair. Fig. 15.9 shows the revised mm() device function for applying register tiling to the input tiles. Compared to the previous implementation in Fig. 15.6, this implementation moves the loop over the inner dimensions of the input tiles to be the outermost FIGURE 15.9 Code for register tiling of input tiles.</p>
+<p>loop (line 05). This loop interchange effectively causes the thread to iterate over the input strips one pair of strips at a time. It ensures that the strips are used to contribute to all the output tile elements before the next strips are loaded. With this design, we refine the thread-level input tiles into these strips of A and B. By restricting the threadlevel input tiles to these strips, we keep the thread-level input tiles small enough to fit into the registers of each thread. For each iteration of the new outermost loop (line 05), the thread declares local arrays a_r (line 08) and b_r (line 15) to place the strips (thread-level input tiles). The subsequent loops (lines 10-12 and lines 17-19) load the strips from shared memory to registers. These loops are fully unrolled (lines 09 and 16) to ensure that the arrays a_r and b_r are accessed with constant indices and promoted to registers. With the input data in the registers, the final loop nest iterates through the threadlevel output tile and computes the contribution of the input strips to each element in the thread-level output tile (lines 22-28). These loops are also unrolled to ensure that the input and output tiles are all placed in registers. By reducing the number of times input values are loaded from shared memory to registers, register tiling mitigates the shared memory access latency and instruction execution bottleneck. In fact, shared memory tiling and register tiling are not the only forms of tiling. Tiling is a general optimization can be done at any level in the memoryhierarchy where there is a difference in access latency and throughput between two memory structures. The hierarchical technique, as illustrated in Fig. 15.8, properly integrates block-level tiles in shared memory and the thread-level tiles in registers. For very large matrices, such hierarchical tiling techniques may also be extended to integrate tiles across multiple GPUs or even across multiple nodes in a compute cluster when a large-scale matrix multiplication is performed across multiple GPUs and even multiple nodes.</p>
+<h2 id="sec-15-5">15.5 Coalesced storing of the output tile<a class="td-heading-self-link" href="#sec-15-5" aria-label="Link to this heading"></a>
+</h2>
+<p>In our implementation so far, each thread has been responsible for a large (e.g. 8×8 in Fig. 15.2) thread-level output tile. Using large thread-level output tiles has the advantage of enabling significant data reuse when shared memory tiling and register tiling are applied. However, the large 8×8 thread-level output tile is problematic when we need to store the output tile from the registers to the global memory. In particular, when each thread iterates through its 8×8 thread-level output tile to store it to global memory, threads in the same warp storing adjacent thread-level output tiles issue stores to memory locations that are eight elements apart. The resulting memory access pattern is not coalesced. Using vector store instructions, as mentioned in Section 15.3, partially alleviates this problem because it allows each thread to store four consecutive elements simultaneously. Still, even with vector stores, the four consecutive elements cover only half the width of the thread’s 8×8 output tile. Threads in the same warp storing adjacent output tiles would issue vector store instructions that are four elements apart. The resulting memory access pattern is still not completely coalesced. To address this problem, we would like threads in the same warp to be responsible for adjacent output tiles that are only 4×4 in size. This size would allow each of these threads to issue vector stores of four-element chunks that are all adjacent to each other, resulting in a fully coalesced store transaction. To achieve this goal, we replace each thread’s 8×8 output tile with four different 4×4 output tiles. Fig. 15.10 shows how the thread-level output tiles can be rearranged such that threads in the same warp process adjacent 4×4 output tiles. On the left side of the figure, the encompassing block-level output tile is logically partitioned across the different warps in the block. One can think of each partition as a warp-level output tile. For example, assume that we have a 128×128 block-level output tile and a block of 256 threads or eight warps. The warps of the block are organized into a 2×4 arrangement, and each warp takes a 64×32 sub-tile of the block-level output tile. We will refer to each one of these 64×32 sub-tiles as a warp-level output tile. In the middle of Fig. 15.10, the warp-level output tile is logically partitioned into four quadrants, and each thread in the warp takes a 4 × 4 sub-tile from each quadrant. For example, if the warp-level output tile’s size is 64×32, then each quadrant’s size is 32×16. If we organize the 32 threads in the warp into an 8×4 arrangement, then each thread receives a 4×4 output tile from each quadrant. The right side of Fig. 15.10 FIGURE 15.10 Rearranging thread output tiles for coalesced storing.</p>
+<h2 id="sec-15-6">15.6 Eliminating bank conflicts<a class="td-heading-self-link" href="#sec-15-6" aria-label="Link to this heading"></a>
+</h2>
+<p>shows how the four 4×4 output tiles from each quadrant collectively form a logical 8×8 thread-level output tile. Having divided the thread’s 8×8 logical output tile into four 4×4 physical output sub-tiles, each thread can now store an entire row of its 4×4 output tile in a single vector store instruction. Accordingly, when threads in the same warp store adjacent physical output sub-tiles to global memory, these vector stores will be coalesced. The mm() and writeTile() device functions need to be revised to iterate through these 4 × 4 sub-tiles of the thread-level output tile and load the small input strips in each step. We leave the implementation of this rearrangement of the thread-level output tiles as an exercise for the reader.</p>
+<p>Another challenge with making threads responsible for computing large output tiles is that it causes them to access shared memory in a strided manner. Recall from Chapter 6 that threads accessing shared memory in a strided manner can cause bank conflicts. Let us examine how threads in the same warp access shared memory and how bank conflicts can occur in our running example in Fig. 15.10. Recall that each warp is organized into an 8 × 4 configuration so the first 4 threads will be loading from identical locations of the block-level tile of A in the shared memory. Fig. 15.11(a) shows how the threads in warp 0 access shared memory when loading the first input strip from the tile of the matrix A. Each thread in the warp takes a 4×4 output tile. The first element loaded by threads 0 to 3 is the first element of row 0. This element has a linear index of 0, which we will assume is located in bank 0.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-11.png" alt="Figure 15.11" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.11.</strong> Adding padding to eliminate shared memory bank conflicts.</p>
+<p>The first element loaded by threads 4 to 7 is the first element of row 4. Assuming the block-level input tile in shared memory has a width of 8, the linear index of this element is 4 × 8 + 0 = 32, which is also located in bank 0 (32 mod 32). Similarly, the first element loaded by threads 8 to 11 is the first element of row 8, which has a linear index of 8 × 8 + 0 = 64 and is also located in bank 0 (64 mod 32). Although we have focused only on the first elements loaded by the four-thread groups, the second elements loaded by the four-thread groups in each warp all fall into bank 1. In fact, all the corresponding elements loaded by all the 8 four-thread groups are located in the same bank, causing 8-way bank conflicts for all accesses. As we discussed in Chapter 6, one way to eliminate bank conflicts is to rearrange the layout of the data in shared memory, padding a matrix with additional columns. Fig. 15.11(b) shows what happens when a column of padding elements is added to the shared memory input tile. Although the logical width of the tile is still eight elements, its leading dimension used to calculate the linear index is nine elements. In this case, the first element of row 0 still has a linear index of 0 which is located in bank 0. However, the first element of row 4 has a linear index of 4 × 9 + 0 = 36 which is located in bank 4 (36 mod 32). Similarly, the first element of row 8 has a linear index of 8 × 9 + 0 = 72 which is located in bank 8 (72 mod 32). The same analysis can be applied to the second elements accessed by the four-thread groups, which fall in bank 1, bank 5, bank 9, &hellip;, and bank 29. In other words, the 8-way bank conflicts are eliminated. The reader can complete a general analysis of all the 16 elements accessed by each 4-thread group and verify that with 32 banks, all 8-way bank conflicts are indeed eliminated. The code changes to Fig. 15.3 required to apply this optimization are quite simple. To add a column of padding to the tile A_s, the declaration of A_s should be changed to:</p>
+<h2 id="sec-15-7">15.7 Occupancy considerations<a class="td-heading-self-link" href="#sec-15-7" aria-label="Link to this heading"></a>
+</h2>
+<p><strong>shared</strong> float A_s[bM*(bK + 1)];</p>
+<p>In particular, bk is replaced with bK + 1. To account for this additional column of padding when indexing A_s, the leading dimension of A_s passed to the loadTile() and mm() functions should be changed from bk to bk + 1. Note that the accesses to the second shared memory tile B_s do not exhibit any bank conflicts. The entire strip of B_s loaded by the threads in the same warp consists of 32 elements that are consecutive in shared memory, and therefore fall in 32 distinct memory banks. For this reason, we do not need to make any modifications to how B_s is declared and accessed.</p>
+<p>We have seen that using large tiles increases the arithmetic intensity of the matrix multiplication kernel which improves its performance. However, using large tiles puts pressure on the SM resources, particularly the shared memory used to hold the blocklevel input tiles and the register file used to hold the thread-level input strips and thread-level output tiles. The pressure on these resources has a significant impact on the occupancy of threads on the SM. The pressure on the shared memory resources can easily be alleviated. Recall from Section 15.2 that when the first input tile has dimensions m × k, the second input tile has dimensions k × n, and the output tile has dimensions m × n, the arithmetic intensity is 0.5 · m · n/(m + n). Interestingly, the arithmetic intensity is independent of k. Hence, the pressure on shared memory can be mitigated by using a smaller value of k without affecting the arithmetic intensity. For example, if m = n = 128, we can set k to 8. In this case, A_s and B_s would have sizes of 128 × 8 elements and 8 × 128 elements, respectively, which amounts to 4 KB each. This amount of shared memory usage does not limit occupancy on a modern GPU. On the other hand, the pressure on the register file remains high. For example, if each thread is responsible for an 8 × 8 thread-level output tile, it needs 64 registers to store the output tile alone. If register tiling is applied to the thread-level input tiles, then each thread needs an additional eight registers for each of the input strips, bringing the total to 80 registers. This number does not even include all the other registers needed to store local variables and temporary values used throughout the computation. In fact, loop unrolling, which we have applied aggressively, further exacerbates the register usage because it increases the number of temporary values that need to be stored throughout the computation. This high demand for registers makes the number of registers in the SM the main limiting factor for occupancy. In practice, such matrix multiplication kernels use the maximum number of registers per thread that they are allowed to use, which is 255 registers per thread on a modern GPU. With a typical SM’s register file having a capacity of 64k registers, the number of threads per SM is limited to 256 threads. This limit explains why we chose our thread block size to be 256 threads per block in Section 15.3. Accordingly, each SM executes only a single thread block with 256 threads, which is only 12.5% of the SM’s maximum occupancy of 2048 threads.</p>
+<p>Although executing with such low occupancy is not usually desired, the extreme benefit of register tiling to increase arithmetic intensity makes it worthwhile. However, executing with low occupancy has two major drawbacks that need to be overcome. The first drawback is that the GPU executes fewer threads which are capable of issuing fewer memory access instructions to fully utilize the memory bandwidth. We overcome this drawback by having each thread issue larger memory accesses using vector loads and stores, as we saw in Section 15.3. The second drawback of executing with low occupancy is that the SM has fewer threads available to tolerate long-latency instructions. We overcome this drawback with aggressive loop unrolling, as we saw in Section 15.3. In particular, as mentioned in Chapter 6, loop unrolling eliminates long-latency branch instructions and exposes more independent instructions that the compiler can schedule to increase the distance between long-latency instructions and their users. With proper loop unrolling and instruction scheduling, much of the compiled kernel code becomes a sequence of independent fused-multiply-add instructions that fully-utilize the SM’s cores with little need to stall. The remaining long-latency operations that we need to be concerned with are the memory accesses and barrier synchronizations. Normally, for a compute-bound kernel that has high arithmetic intensity, we do not need to be concerned with the latency of memory accesses because they can be overlapped with the compute instructions. For example, while one thread block on the SM waits for its input tiles to be loaded from global memory to shared memory, another thread block could be fully utilizing the SM cores with its unrolled sequence of independent fused-multiply-add instructions. However, since the occupancy in our case is limited to a single thread block per SM, this overlap does not happen. Instead, a thread block executes on an SM in two phases: a memory-bound phase where the input tiles are loaded while the compute cores are idle, and a compute-bound phase where the computation is performed while the memory access hardware is idle. In the absence of multiple thread blocks to hide the memory access latency, we must resort to software optimizations for overlapping these two phases. One such optimization is software pipelining, which is discussed in Section 15.8.</p>
+<h2 id="sec-15-8">15.8 Software pipelining<a class="td-heading-self-link" href="#sec-15-8" aria-label="Link to this heading"></a>
+</h2>
+<p>We saw in Section 15.7 that in the matrix multiplication kernel we have implemented so far, a single thread block executes on each SM in two phases: a memory-bound phase and a compute-bound phase. In each phase, either the compute resources or the memory resources will be underutilized, so the speed of execution will not reach its full potential. To better utilize the GPU resources, we would like to overlap the memory-bound and compute-bound phases to hide the long latency of the memory instructions behind the execution of the compute instructions. This overlap can be achieved with software pipelining.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-12.png" alt="Figure 15.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.12.</strong> Instruction interleaving before and after double-buffering and software pipelining.</p>
+<img src="/pmpp5-zh/figs/orig/fig-15-13.png" alt="Figure 15.13" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 15.13.</strong> Timing diagram before and after software pipelining.</p>
+<p>Fig. 15.12(a) illustrates the interleaving of instructions when performing tiled matrix multiplication without software pipelining, and Fig. 15.13(a) shows the corresponding timing diagram. First, instructions are executed to load the input tiles A0 and B0 from shared memory. Next, a __syncthreads() is executed to ensure that all threads finish loading their part of the data before any computation is performed. After that, the contribution of A0 and B0 to the output tile, referred to as C0, is computed. Next, another __syncthreads() is executed to ensure that all threads finish using A0 and B0 before loading new input tiles in their place. Following the second synchronization, the process repeats with the next pair of input tiles, A1 and B1, loaded to shared memory. An important observation from Fig. 15.12(a) and Fig. 15.13(a) is that while the input tiles are being loaded from global memory, there are no floating point operations being performed. In other words, the memory access hardware is busy while the floating point ALUs remain idle. On the other hand, when the contribution to the output tile is being computed, there is no data being loaded from global memory. In other words, the floating point ALUs are busy while the memory access hardware remains idle. Ideally, we would like to interleave the instructions that load the data from global memory with those that perform floating point computations. This interleaving would place independent fused-multiply-add instructions after long-latency memory access instructions, making sure that the memory access hardware and the floating point ALUs remain busy all the time. However, the compiler is prevented from interleaving the memory access instructions and the floating point arithmetic instructions together because of the presence of a barrier synchronization operation that separates the data loading and computation stages. Looking back at Fig. 15.12(a), we observe that the barrier synchronizations that separate loading a pair of input tiles from computing those tiles’ contributions enforce a true dependence. That is, we must wait for data to be loaded before we can start using it. On the other hand, the barrier synchronizations that separate computing the contribution of a pair of tiles from loading the next pair of tiles enforces a false dependence. That is, these two activities can execute independently, but they are prevented from doing so because the same memory location that holds the old pair while computing is being used to write the new pair. Recall from Chapter 6 that we can eliminate a barrier synchronization that enforces a false dependence by using the double-buffering optimization. That is, we can use a different memory buffer for loading the next pair of input tiles from the memory buffer holding the current pair of input tiles being used for computation. By doing so, we eliminate the false dependence and no longer need the barrier synchronization, as shown in Fig. 15.12(b). Rather than allocating a different buffer for each iteration, we can reuse buffers such that only two buffers are needed: one for the even iterations and one for the odd iterations. While eliminating the barrier synchronizations paves the way for interleaving the memory access instructions with the floating point arithmetic instructions, an obstacle still exists. The instructions to be interleaved occur in different loop iterations which prevents the compiler from interleaving them. To overcome this obstacle, we apply software pipelining where the code of the loop is rearranged such that the i th loop iteration computes the contribution of the i th pair of tiles while loading the (i + 1)th pair of tiles. Upon rearranging the loop in this way, the compiler is then able to interleave the memory access and floating point arithmetic instructions, as shown in Fig. 15.12(c) and Fig. 15.13(b), thereby increasing the independent instructions scheduled consecutively and reducing the warp’s need to stall. Fig. 15.14 shows the code transformation for performing double-buffering and software pipelining on the loop from Fig. 15.3. The code starts by loading the first FIGURE 15.14 Code with double-buffering and software pipelining.</p>
+<p>pair of input tiles from global memory into the shared memory buffers Acurr_s and Bcurr_s (lines 02-03) and waiting for the loading to complete (line 05). It then iterates over the input tiles (line 08), and for each pair of input tiles, it computes with the pair in Acurr_s and Bcurr_s (line 11) while loading the next pair from the global memory to the shared memory buffers Anext_s and Bnext_s (lines 14-15). Next, a barrier synchronization is performed (line 17) to ensure that all threads finish loading data in the next pair before any of them use that data for computation in the next iteration. After the barrier, the buffers are swapped (line 20-25) so that Anext_s and Bnext_s become Acurr_s and Bcurr_s, respectively, on the next iteration, and Acurr_s and Bcurr_s are recycled for the following iteration. When the loop finishes, the computation for the final pair of tiles is performed (line 30). An important observation in this code is that since different shared memory buffers are used for holding the current pair used for computation (Acurr_s and Bcurr_s) and for loading the next pair (Anext_s and Bnext_s), no barrier synchronization is needed on line 12 between the two operations. The absence of this barrier synchronization allows the compiler to interleave the instructions in the mm() and loadTile() device functions after inlining these functions. This interleaving ensures that both compute and global memory load instructions are overlapped to keep both the floating point ALUs and the memory access hardware busy simultaneously. While software pipelining is effective at interleaving memory access instructions with compute instructions to overlap their execution, it relies on the success of the compiler at estimating the latency of the instructions when applying instruction scheduling. However, the compiler has limited knowledge of the conditions that the code will encounter as it executes. Alternatively, we could delegate the interleaving of memory access instructions with compute instructions to the hardware. One technique for doing so is to program some warps to perform the memory accesses while other warps to perform the computation. In this case, the hardware will automatically interleave these operations as it schedules the warps to execute in a multithreaded manner. This technique is referred to as warp specialization. Yet another way to delegate the interleaving to the hardware is to use specialized hardware support for transferring data between global memory and shared memory in the background. This kind of support is discussed in Section 15.9.</p>
+<h2 id="sec-15-9">15.9 Specialized software and hardware support<a class="td-heading-self-link" href="#sec-15-9" aria-label="Link to this heading"></a>
+</h2>
+<p>Due to the prevalence and importance of matrix multiplication in GPU computing, it is common for hardware vendors to provide specialized libraries with highly optimized matrix multiplication routines that embody the optimizations introduced in this chapter. For example, NVIDIA provides multiple CUDA libraries such as cuBLAS [1], cuDNN [2], and CUTLASS [3] for this purpose. cuBLAS is a library that provides a GPU implementation of the standard BLAS API for basic linear algebra, including matrix multiplication. cuDNN is a library that provides routines for implementing deep neural networks on GPUs, which perform matrix multiplication underneath. CUTLASS is an open source library for implementing matrix multiplication at different levels and scales, which makes it easier to incorporate matrix multiplication as a building block in a larger kernel. More recently, programming interfaces like cuTile allow developers to write array-based code and use the compiler to perform advanced optimizations by taking advantage of the special properties of tensors. With these libraries and programming interfaces, GPU programmers typically do not implement matrix multiplication from scratch. Nevertheless, learning about the advanced optimizations applied to matrix multiplication is a useful exercise in understanding the underlying techniques, which may be applied in other contexts as well. GPUs also provide dedicated hardware support for matrix multiplication that can be used by the compiler, programmed directly with a special API, or more commonly, used by calling routines from libraries such as cuBLAS, cuDNN, or CUTLASS. For example, beginning with the Volta architecture, some NVIDIA GPUs come with tensor cores which are special-purpose cores that each perform a small matrix multiplication operation in a single instruction. Reducing the number of instructions required to perform matrix multiplication eliminates bottlenecks due to limited instruction decoding and processing throughput. Furthermore, tensor cores achieve extremely high matrix multiplication throughput by taking advantage of advanced warp-level hardware features for exchanging register contents, and by using lower-precision floating-point arithmetic units.</p>
+<p>Before the Hopper architecture, tensor cores could be programmed with the Warp Matrix Multiply and Accumulate (WMMA) instructions, which were limited to individual warps. The Hopper architecture introduced a Warp Group Matrix Multiply Accumulate (WGMMA) instruction that enables a group of warps to work together on a larger matrix multiplication using tensor cores. Moreover, WGMMA can take input operands directly from shared memory, alleviating the register pressure. The WGMMA instruction can execute asynchronously with other instructions, reducing the reliance on the compiler to schedule the instructions for overlapping the long latency instructions. Additionally, the Blackwell architecture introduces a new tensor memory (TMEM), which is an on-chip memory for storing the inputs and outputs of tensor core operations, further reducing the register pressure. Interested readers are referred to the literature for details of the design and use of WGMMA and TMEM. As hardware support such as tensor cores elevates the compute throughput for matrix multiplication, the throughput of matrix multiplication can become limited by the rate at which data can be fetched from and stored to shared memory and global memory. While global memory bandwidth and shared memory bandwidth play fundamental roles in moving data to and from the arithmetic units, instruction processing overhead for data movement and the impact of register usage on occupancy significantly affect the rate of data movement. For example, as we saw in Section 15.5, an effective hardware support for higher data throughput is vector stores. Using an appropriate output tile configuration, each thread can store more data using the same number of instructions, reducing instruction processing overhead and improving memory coalescing. However, moving data between global memory and shared memory using vector loads and stores still requires two steps: loading the data from one memory into registers followed by storing the data from registers to the other memory. This two-step process increases the usage of the register, not to mention the instruction execution overhead. Recent NVIDIA GPUs support LDGSTS instructions that load vector data directly from global memory to shared memory without going through registers. Using one instead of two instructions also reduces instruction processing overhead. LDGSTS instructions allow more effective overlap of memory accesses with computations by allowing the hardware to perform the memory access asynchronously in the background, without the need for the compiler to interleave the memory access instructions with compute instructions. The NVCC compiler can automatically detect a code sequence formed by a vector load from global memory into registers followed by vector store to the shared memory in kernel code and generate one single LDGSTS instruction. Programmers can also call the cuda::memcpy_async function in the libcu++ library from their kernel code to use the LDGSTS instruction. Interested readers are referred to the literature for code examples and important details such as data alignment. Beginning with the Hopper architecture, NVIDIA GPUs also come with a Tensor Memory Accelerator (TMA), which supports asynchronous transfer of entire tensors between global memory and shared memory without using intermediate registers. TMA can be viewed as a generalization of the LDGSTS instruction from 1D vectors into multidimensional tenors. TMA can be used via the cuda::memcpy_async API, and also by calling routines from libraries such as cuBLAS, cuDNN, or CUTLASS that use it.</p>
+<h2 id="sec-15-10">15.10 Summary<a class="td-heading-self-link" href="#sec-15-10" aria-label="Link to this heading"></a>
+</h2>
+<p>In this chapter, we have seen how many of the optimizations introduced in Chapter 6 can be applied in the context of matrix multiplication to achieve an advanced and highly optimized matrix multiplication kernel. We observed that using large output tiles increases the arithmetic intensity of the kernel to make it compute bound, and applied thread coarsening to achieve these large output tile sizes. After overcoming the global memory bandwidth bottleneck, we applied register tiling to the input tiles to also overcome the shared memory access latency. We rearranged the mapping of threads to data to ensure coalesced store operations when writing the output tiles from registers to global memory. We also added padding to one of the shared memory input tiles to avoid bank conflicts. We observed that the excessive use of registers results in very low occupancy, and applied mitigations to overcome the drawbacks of low occupancy. Using vector loads and stores ensures that threads issue enough memory accesses to utilize the memory bandwidth. Aggressive loop unrolling ensures that cores have enough independent compute instructions to utilize the floating point ALU throughput. Software pipelining or warp specialization ensure that the memory access and compute instructions are interleaved such that the latency of the memory access instructions can be overlapped with the execution of the compute instructions. The optimizations discussed in this chapter are readily available in libraries such as cuBLAS, cuDNN, and CUTLASS. These libraries also use specialized hardware support such as tensor cores, tensor memory, asynchronous memory copies, and the tensor memory accelerator. Programmers typically use these highly optimized libraries and do not implement matrix multiplication from scratch. Still, matrix multiplication is an excellent use case for demonstrating many of the optimizations we have learned in this book.</p>
+<h2 id="sec-15-11">15.11 Exercises<a class="td-heading-self-link" href="#sec-15-11" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Modify the device function in Fig. 15.5 to use vector loads instead of scalar loads. 2. Modify the device function in Fig. 15.7 to use vector stores instead of scalar stores. 3. Reimplement the tiled matrix multiplication kernel presented in this chapter using the rearrangement of the thread-level output tiles described in Section 15.5.</p>
+<p>References [1] NVIDIA, cuBLAS, <a href="http://docs.nvidia.com/cuda/cublas">http://docs.nvidia.com/cuda/cublas</a>, 2025. [2] S. Chetlur, C. Woolley, P. Vandermersch, J. Cohen, J. Tran, B. Catanzaro, E. Shelhamer, cuDNN: efficient primitives for deep learning, arXiv preprint, arXiv:1410.0759, 2014. [3] NVIDIA, CUTLASS, <a href="https://docs.nvidia.com/cutlass">https://docs.nvidia.com/cutlass</a>, 2025.</p>
+<p>Part 3: Advanced patterns and applications OUTLINE Chapter 16. Dynamic programming and wavefront parallelism Chapter 17. Sparse matrix computation Chapter 18. Graph traversal Chapter 19. Convolutional neural networks Chapter 20. Large language models Chapter 21. Electrostatic potential map Chapter 22. Algorithm selection, problem decomposition, and problem formulation Chapter 23. Multi-GPU programming Chapter 24. Conclusion and future outlook CHAPTER Dynamic programming and wavefront parallelism With special contributions from Juan Gómez-Luna</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] NVIDIA, cuBLAS, <a href="http://docs.nvidia.com/cuda/cublas">http://docs.nvidia.com/cuda/cublas</a>, 2025.</p>
+<p>[2] S. Chetlur, C. Woolley, P. Vandermersch, J. Cohen, J. Tran, B. Catanzaro, E. Shelhamer, cuDNN: efficient primitives for deep learning, arXiv preprint, arXiv:1410.0759, 2014.</p>
+<p>[3] NVIDIA, CUTLASS, <a href="https://docs.nvidia.com/cutlass">https://docs.nvidia.com/cutlass</a>, 2025. Part 3: Advanced patterns and applications Chapter 16. Dynamic programming and wavefront parallelism Chapter 17. Sparse matrix computation Chapter 19. Convolutional neural networks Chapter 20. Large language models Chapter 21. Electrostatic potential map Chapter 22. Algorithm selection, problem decomposition, and problem formulation Chapter 23. Multi-GPU programming Chapter 24. Conclusion and future outlook</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/14-ch14/"
+    aria-label="Previous - Chapter 14 Sorting" title="Chapter 14 Sorting" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 14 Sorting</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/16-ch16/"
+    aria-label="Next - Chapter 16 Dynamic programming and wavefront parallelism" title="Chapter 16 Dynamic programming and wavefront parallelism" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 16 Dynamic programming and wavefront parallelism</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-15-1">15.1 Background</a></li>
+    <li><a href="#sec-15-2">15.2 Data reuse analysis</a></li>
+    <li><a href="#sec-15-3">15.3 Using larger tiles with thread coarsening</a></li>
+    <li><a href="#sec-15-4">15.4 Register tiling of the input tiles</a></li>
+    <li><a href="#sec-15-5">15.5 Coalesced storing of the output tile</a></li>
+    <li><a href="#sec-15-6">15.6 Eliminating bank conflicts</a></li>
+    <li><a href="#sec-15-7">15.7 Occupancy considerations</a></li>
+    <li><a href="#sec-15-8">15.8 Software pipelining</a></li>
+    <li><a href="#sec-15-9">15.9 Specialized software and hardware support</a></li>
+    <li><a href="#sec-15-10">15.10 Summary</a></li>
+    <li><a href="#sec-15-11">15.11 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/15-ch15/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/15-ch15/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/15-ch15/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/15-ch15.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/15-ch15.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+15+Advanced+optimizations+for+matrix+multiplication"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/15-ch15/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/15-ch15/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/15-ch15/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/15-ch15/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

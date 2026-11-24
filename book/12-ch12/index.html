@@ -1,0 +1,891 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/book/12-ch12/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/book/11-ch11/">
+<link rel="next" href="/pmpp5-zh/book/13-ch13/"><meta name="robots" content="index, follow">
+
+<title>第12章 过滤器 | 大规模并行处理器编程（第5版）中文学习译稿</title>
+<meta name="description" content="第12章 过滤器 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/book/12-ch12/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/12-ch12/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/12-ch12/">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/book/12-ch12/">
+	<meta property="og:site_name" content="大规模并行处理器编程（第5版）中文学习译稿">
+	<meta property="og:title" content="第12章 过滤器">
+	<meta property="og:description" content="第12章 过滤器 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="第12章 过滤器">
+	<meta itemprop="description" content="第12章 过滤器 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta itemprop="wordCount" content="561">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="第12章 过滤器">
+	<meta name="twitter:description" content="第12章 过滤器 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="/pmpp5-zh/" class="td-nav-brand" data-td-navbar-route
+         aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/12-ch12/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/12-ch12/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/" aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/book/" title="大规模并行处理器编程（第5版）"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook"><span>全书目录</span></a>
+      
+    </div><div id="m-pmpp5-zhbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/00-preface/" title="前言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook00-preface"><span>前言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/01-ch1/" title="第1章 引言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook01-ch1"><span>第1章 引言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/02-ch2/" title="第2章 异构并行计算与 CUDA"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook02-ch2"><span>第2章 异构并行计算与 CUDA</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/03-ch3/" title="第3章 多维网格与数据"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook03-ch3"><span>第3章 多维网格与数据</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/04-ch4/" title="第4章 计算架构与调度"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook04-ch4"><span>第4章 计算架构与调度</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/05-ch5/" title="第5章 内存架构与数据局部性"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook05-ch5"><span>第5章 内存架构与数据局部性</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/06-ch6/" title="第6章 性能考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook06-ch6"><span>第6章 性能考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/07-ch7/" title="第7章 卷积"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook07-ch7"><span>第7章 卷积</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/08-ch8/" title="第8章 模板计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook08-ch8"><span>第8章 模板计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/09-ch9/" title="第9章 直方图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook09-ch9"><span>第9章 直方图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/10-ch10/" title="第10章 归约"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook10-ch10"><span>第10章 归约</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/11-ch11/" title="第11章 扫描"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook11-ch11"><span>第11章 扫描</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhbook12-ch12-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/book/12-ch12/" aria-current="page" title="第12章 过滤器"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhbook12-ch12"><span>第12章 过滤器</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/13-ch13/" title="第13章 合并"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook13-ch13"><span>第13章 合并</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/14-ch14/" title="第14章 排序"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook14-ch14"><span>第14章 排序</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/15-ch15/" title="第15章 高级矩阵乘法"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook15-ch15"><span>第15章 高级矩阵乘法</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/16-ch16/" title="第16章 动态规划与波纹模式"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook16-ch16"><span>第16章 动态规划与波纹模式</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/17-ch17/" title="第17章 稀疏矩阵计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook17-ch17"><span>第17章 稀疏矩阵计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/18-ch18/" title="第18章 图遍历"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook18-ch18"><span>第18章 图遍历</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/19-ch19/" title="第19章 卷积神经网络"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook19-ch19"><span>第19章 卷积神经网络</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/20-ch20/" title="第20章 大语言模型"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook20-ch20"><span>第20章 大语言模型</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/21-ch21/" title="第21章 静电势图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook21-ch21"><span>第21章 静电势图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/22-ch22/" title="第22章 算法选择、问题分解与问题表述"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook22-ch22"><span>第22章 算法选择、问题分解与问题表述</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/23-ch23/" title="第23章 多 GPU 编程"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook23-ch23"><span>第23章 多 GPU 编程</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/24-ch24/" title="第24章 总结与未来展望"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook24-ch24"><span>第24章 总结与未来展望</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/30-cha/" title="附录A 数值计算考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook30-cha"><span>附录A 数值计算考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/31-chb/" title="附录B 深度学习基础"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook31-chb"><span>附录B 深度学习基础</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/32-chc/" title="附录C CUDA 内存、地址空间与指针"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook32-chc"><span>附录C CUDA 内存、地址空间与指针</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="面包屑导航" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/book/">全书目录</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    第12章 过滤器</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="打开双列视图" aria-label="打开双列视图" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="操作"><span>操作</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/12-ch12.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>查阅编辑历史</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/12-ch12.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>编辑当前页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>添加子页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC12%E7%AB%A0&#43;%E8%BF%87%E6%BB%A4%E5%99%A8" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>提交文档议题</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>第12章 过滤器</h1>
+</div>
+
+	<div class="lead">第12章 过滤器 — 《大规模并行处理器编程(第5版)》学习译稿</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c12">过滤与 warp 投票<a class="td-heading-self-link" href="#c12" aria-label="标题锚点"></a>
+</h1>
+<p>过滤操作会在删除列表中的某些元素之后重新排列数据，从而更有效地利用内存。若把删除的元素和保留的元素看成两个子列表，那么过滤可以看作合并操作的逆过程。本章将说明如何使用称为 **warp 投票（warp voting）**的技术，让多个线程的原子操作得以合并，从而提高并行过滤实现的速度。我们还会讨论就地执行稳定过滤而非异地执行时需要考虑的问题。最后介绍若干实现与优化方式相近的相关模式，例如从有序列表中删除重复项，以及在矩阵中添加或删除行、列。</p>
+<p>过滤（filter）操作在列表中删除某些元素后重新排列数据，以更高效地利用内存。如果我们把被删除的元素和保留的元素看作两个子列表，过滤操作可以看作归并操作的逆运算。在本章中，我们将展示如何利用一种称为 warp 投票（warp voting）的技术，实现跨线程原子操作的合并，提升过滤并行实现的速度。我们还将探讨就地（in place）而非异地（out of place）执行稳定过滤操作的考量。最后，我们讨论其他具有类似实现和优化的相关模式，例如从有序列表中删除重复项，以及从矩阵中添加/删除行和列。</p>
+<h2 id="sec-12-1">12.1 背景<a class="td-heading-self-link" href="#sec-12-1" aria-label="标题锚点"></a>
+</h2>
+<p>过滤（filtering）是指按照给定条件从列表中删除一个或多个指定元素，并压紧列表以消除由此形成的空洞。一种典型应用是垃圾回收。应用释放某些对象并归还它们在堆中占用的内存块后，堆中可能散布着许多小块可用内存。到某个时刻，我们可能希望把堆中剩余对象压紧到连续位置，在堆尾形成一块大得多的可用空间。这样，当应用需要分配大型对象时，就有足够的连续内存可供使用。当列表很大时，最好使用许多线程并行搬移元素，以缩短执行时间。</p>
+<p>过滤可以是<strong>就地的（in-place）</strong>，也可以是<strong>异地的（out-of-place）</strong>。就地过滤在原列表内压紧保留元素，异地过滤则把它们压紧到一个新列表中。在上述内存管理例子中，新建列表意味着必须预留足够容纳整个新堆的内存，这会显著降低内存使用效率。然而，把一个元素移到列表中更靠前的位置，可能会覆盖当前占据该位置、但还在等待向前搬移的元素。因此，当多个线程共同搬移列表元素时，必须同步这些线程，确保任何元素都不会在被读取和搬移之前遭到错误覆盖。</p>
+<p>本章首先学习实现异地过滤。数据搜索与检索应用经常用它删除无关条目，生成相关结果列表。并行化异地过滤的一般方法，是让多个线程同时把保留元素搬到新列表中。随后，我们会介绍建立在第 11 章前缀和模式之上的就地过滤实现技术。</p>
+<figure id="fig:12-1">
+<img src="/pmpp5-zh/figs/orig/fig-12-1.png" alt="图 12.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.1　异地过滤模式的不稳定变体与稳定变体</figcaption>
+</figure>
+<p>图 12.1 展示了过滤操作的两种变体。按照计算机科学的惯例，本章把被过滤列表中的元素称为<strong>键（key）</strong>。概念示意图中以粗体表示保留项，常规字重表示删除项。稳定过滤保留其余各键的原始相对次序，不稳定过滤则不作这一保证。当列表无须保持有序时，可以使用不稳定过滤。下面先从不稳定过滤的并行实现开始。</p>
+<h2 id="sec-12-2">12.2 简单的并行不稳定过滤<a class="td-heading-self-link" href="#sec-12-2" aria-label="标题锚点"></a>
+</h2>
+<p>图 12.2 给出一个简单的不稳定过滤内核。该内核接收大小为 <code>N</code> 的输入数组，并把它过滤到输出数组。参数 <code>outputSize</code> 指向全局内存中的计数器，该计数器用于保存输出数组的大小，调用内核之前必须初始化为 0。每个线程先确定自己负责的输入键下标（第 3 行），检查下标是否越界（第 4 行），再从全局内存加载该下标处的键（第 5 行）。随后，线程检查加载的值是否满足过滤条件 <code>cond()</code>（第 6 行）。若满足，线程就以原子方式递增 <code>outputSize</code> 计数器，在输出数组中为该值分配空间（第 7–9 行）。最后，线程把值存入分配到的位置（第 10 行）。</p>
+<figure id="fig:12-2">
+<img src="/pmpp5-zh/figs/orig/fig-12-2.png" alt="图 12.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.2　简单的不稳定过滤内核代码</figcaption>
+</figure>
+<p>这个实现产生的是不稳定过滤结果，因为硬件可能按任意次序执行各线程对计数器发起的原子操作。因此，每个线程取得的输出数组位置都是任意的，与它的输入键在输入数组中的位置无关。</p>
+<p>该实现的一个明显瓶颈，是全局内存输出计数器上的原子操作争用。由于所有原子操作都作用于同一计数器，硬件会把它们全部串行化，争用因而更加严重。正如第 9 章所学，输出争用可以用私有化优化缓解，第 12.4 节将讨论这种做法。不过，在此之前先介绍另一种降低争用的技术：<strong>合并原子操作（coalesced atomic operations）</strong>。它利用了同一 warp 中的线程对同一个计数器执行原子操作这一事实。</p>
+<h2 id="sec-12-3">12.3 用 warp 级原语合并原子操作<a class="td-heading-self-link" href="#sec-12-3" aria-label="标题锚点"></a>
+</h2>
+<p>图 12.2 的简单不稳定过滤内核中，各原子操作争用同一个输出计数器，造成性能瓶颈。当同一 warp 中的线程同时发出原子操作时，这种争用尤为突出，因为这些操作必然彼此冲突并被硬件串行化。不过，我们可以利用同一 warp 中线程能够快速协作的特性来避免这种情况。与其让 warp 中每个线程独立发出原子操作，不如让这些线程先协作计算它们希望把计数器合计增加多少，再由其中一个线程代表其余线程发出一次原子操作。我们把合并后的操作称为<strong>合并原子操作</strong>。它类似于同一 warp 中各线程的加载和存储由硬件合并的方式（第 5 章）。</p>
+<p>合并原子操作的具体步骤如下。第一，从执行原子操作时处于活动状态的 warp 线程中指定一个首领线程。第二，计算所有线程合计需要增加的数值。第三，由首领线程对全局计数器执行原子操作，并把取得空间的起始位置广播给其他线程。第四，每个线程确定自己应将输出键存入这片空间的哪个偏移位置。这些步骤需要使用特殊的 warp 级原语，其中包括第 10 章介绍的洗牌指令，以及本节将介绍的其他原语。</p>
+<figure id="fig:12-3">
+<img src="/pmpp5-zh/figs/orig/fig-12-3.png" alt="图 12.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.3　使用合并原子操作的不稳定过滤内核代码</figcaption>
+</figure>
+<p>图 12.3 给出了采用合并原子操作的不稳定过滤内核。与图 12.2 的简单实现相比，差异从执行原子操作的第 7 行开始。首先调用 <code>__activemask()</code> 原语确定哪些线程处于活动状态。该原语返回一个 32 位整数；如果 warp 中第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 个线程处于活动状态，其中第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 位就为 1。例如，若进入 <code>if</code> 语句的活动线程为 1、2、4 和 5，则 <code>__activemask()</code> 返回 <code>00000000000000000000000000110110</code>。</p>
+<p>知道哪些线程活动后，需要从中指定首领线程。一种确定性方法，是选取 warp 内下标最小的活动线程。也就是说，需要找出活动掩码中最低有效的置 1 位下标。为此，在活动掩码上调用 <code>__ffs()</code>（Find First Set，查找首个置位）内建函数（第 10 行），它会找到掩码中最低有效的置 1 位。<code>__ffs()</code> 返回的下标额外加 1，因为返回值 0 被保留用于表示掩码中没有任何位置 1，所以代码还要从返回值中减去 1。</p>
+<p>确定首领线程后，它必须知道 warp 中各线程合计希望把计数器增加多少。在原代码中，每个活动线程都把计数器加 1，因此总增量就等于 warp 内活动线程的总数。对活动掩码调用 <code>__popc()</code>（Population Count，置位计数）内建函数，即可统计其中置 1 位的数量（第 13 行）。</p>
+<p>首领线程知道总增量之后，就以该数值递增全局计数器（第 15–17 行）。返回值保存在 <code>j</code> 中，它标志着该 warp 的活动线程将在输出数组中放置各自数值的起始下标。随后用洗牌指令把这个值从首领线程传给该 warp 中其他所有活动线程（第 20 行）。</p>
+<p>每个活动线程知道 warp 在输出数组中的起始下标之后，还要计算自己相对该下标的偏移。第一个活动线程的偏移为 0，第二个为 1，依此类推。换句话说，线程偏移等于 warp 中排在它之前的活动线程数。求这个值等价于在活动掩码上执行二进制前缀和操作 <a href="/pmpp5-zh/book/12-ch12/#bib-1">[1]</a>。为计算偏移，每个线程先生成一个表示 warp 中先前线程的掩码： warp 内线程 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 生成第 0 位到第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 位均为 1 的掩码。计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>i</mi></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2^i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.908em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8247em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 即可得到该掩码（第 22 行）。再将先前线程掩码与活动线程掩码相交，得到排在当前线程之前的活动线程掩码（第 23 行）。最后，对该掩码调用 <code>__popc()</code>，返回先前活动线程的数量（第 24 行），也就是所需偏移。</p>
+<p>偏移确定后，各活动线程把过滤后的值存到起始下标加线程偏移的位置（第 26 行）。这里还能看到合并原子操作的另一项好处：除了减少原子操作数之外，它还让 warp 中的活动线程把过滤值写入相邻内存位置。因此，这些全局内存存储更有可能被硬件合并。</p>
+<p>为了合并原子操作，前面的代码必须执行多项管理 warp 活动线程的操作。为简化这类管理，协作组 API 提供了一种特殊的组，称为<strong>合并组（coalesced group）</strong>。合并组是代表一个 warp 中活动线程的协作组。程序员可以按如下方式取得合并组句柄：</p>
+<div class="td-code td-code--untitled" id="td-code-347c00a7-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="c&#43;&#43;" data-td-line-count="1"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-347c00a7-fence-0" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-347c00a7-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c++" data-lang="c++"><span class="line"><span class="cl"><span class="n">coalesced_group</span> <span class="n">activeThreads</span> <span class="o">=</span> <span class="n">coalesced_threads</span><span class="p">();</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>借助该句柄，可以轻松求出 warp 中的活动线程数，以及某个活动线程相对于其他活动线程的下标。warp 内活动线程数就是组大小，即 <code>activeThreads.size()</code>；活动线程相对其他活动线程的下标就是它在组中的秩，即 <code>activeThreads.thread_rank()</code>。</p>
+<figure id="fig:12-4">
+<img src="/pmpp5-zh/figs/orig/fig-12-4.png" alt="图 12.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.4　使用协作组实现合并原子操作的不稳定过滤内核代码</figcaption>
+</figure>
+<p>图 12.4 展示了如何用协作组 API 简化图 12.3。代码不再调用 <code>__activemask()</code> 寻找活动线程，而是声明并初始化一个协作组（图 12.4 第 7 行）；不再用 <code>__ffs()</code> 指定首领线程，而是把秩为 0 的线程指定为首领（第 10 行）；不再用 <code>__popc()</code> 求活动线程数，而是取得合并组的大小（第 12 行）。洗牌指令也通过合并组执行（第 19 行）。最后，不再用位运算求线程相对于 warp 中其他活动线程的下标，而是直接取得线程在组中的秩（第 21 行）。</p>
+<p>实践中，编译器已经会应用本节讨论的合并原子操作优化，程序员没有必要手动实现它。如果 warp 中只有一个线程执行原子操作，也无须应用该优化；当编译器能确定 warp 中只有一个线程活动时，确实不会应用它。尽管实际编程不必手动完成这种优化，理解其实现仍是很好的练习，因为它自然引出了 warp 投票函数（即 <code>__activemask()</code>）、 <code>__ffs()</code> 和 <code>__popc()</code> 等内建函数，以及协作组 API 中的合并组。程序员还可能遇到其他 warp 投票函数：<code>__all_sync()</code> 检查 warp 中是否所有线程都把某个条件求值为真；<code>__any_sync()</code> 检查是否至少有一个线程求值为真； <code>__ballot_sync()</code> 则返回一个掩码，指明哪些线程把条件求值为真。</p>
+<h2 id="sec-12-4">12.4 私有化<a class="td-heading-self-link" href="#sec-12-4" aria-label="标题锚点"></a>
+</h2>
+<p>第 12.3 节已经看到，合并原子操作能够减少输出列表计数器上的原子操作争用。本节讨论另一种降低计数器争用的优化，即私有化。回忆第 6 章和第 9 章，私有化会创建并更新输出数据的私有副本，以减少公共输出数据上的争用，最后再把私有副本合并到公共版本中。过滤模式也可以应用同样的优化。</p>
+<figure id="fig:12-5">
+<img src="/pmpp5-zh/figs/orig/fig-12-5.png" alt="图 12.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.5　采用私有化的不稳定过滤</figcaption>
+</figure>
+<p>图 12.5 展示了如何把私有化用于过滤模式。我们在共享内存中为每个线程块创建输出数组和输出计数器的私有版本。处理输入键时，线程以原子方式更新所属线程块的私有计数器，并把过滤后的键放入该块的私有输出数组。所有输入键处理完毕后，块内一个线程以原子方式更新公共输出计数器，块内线程再协作把私有输出数组的内容写入公共输出数组。私有计数器和私有输出数组放在共享内存中，既降低原子更新计数器的延迟、提高其吞吐量，也加快向私有输出数组写入的速度。</p>
+<figure id="fig:12-6">
+<img src="/pmpp5-zh/figs/orig/fig-12-6.png" alt="图 12.6" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.6　采用私有化的不稳定过滤内核代码</figcaption>
+</figure>
+<p>图 12.6 给出了采用私有化的不稳定过滤内核。首先，在共享内存中为每个线程块声明私有输出列表（第 5 行）和私有计数器（第 6 行）。随后由块内一个线程把私有计数器初始化为 0（第 7–9 行）。线程再执行一次屏障同步，确保任何线程开始更新计数器之前，初始化已经完成（第 10 行）。</p>
+<p>接下来，线程执行过滤操作，但把过滤值放进私有输出列表而非公共输出列表（第 13–22 行）。这段代码与图 12.2 相似，区别在于它使用私有计数器和私有输出列表，而不是公共版本。此外，共享内存计数器只由同一块内的线程访问，因此原子引用的作用域是 <code>cuda::thread_scope_block</code>，而非 <code>cuda::thread_scope_device</code>。随后再次执行屏障同步，确保所有线程都已经把元素加入私有输出列表，再把该列表提交到公共输出列表（第 23 行）。</p>
+<p>下一步是在公共输出列表中为私有输出列表预留空间。块内一个线程以私有输出列表的键数为增量，原子更新公共计数器（第 26–31 行）。预留空间的起始下标 <code>j</code> 放在共享内存中，以便块内其他线程访问。另一次屏障同步保证其他线程使用 <code>j</code> 之前，它已经写入共享内存（第 32 行）。</p>
+<p>最后一步是把私有输出列表写到公共输出列表。连续线程将写入连续的键，因此代码用线程下标从私有输出列表读取，并从 <code>j</code> 开始写入公共输出列表（第 35–37 行）。与合并原子操作类似，私有化除了减少公共计数器争用，还带来另一项收益：连续线程把键连续写到全局内存，所以这些存储会被合并。</p>
+<h2 id="sec-12-5">12.5 简单的并行稳定过滤<a class="td-heading-self-link" href="#sec-12-5" aria-label="标题锚点"></a>
+</h2>
+<p>现在转向稳定过滤的并行化。在稳定过滤中，过滤后的键在输出列表中保持其输入列表中的相对次序。要保留键的次序，线程就不能通过原子递增计数器，把过滤键放进输出列表中的任意位置；相反，它必须统计在自己之前有多少输入键被保留，从而确定该键在输出列表中的确切位置。当需要从有序列表中删除或提取某些选定元素时，通常使用稳定过滤。</p>
+<figure id="fig:12-7">
+<img src="/pmpp5-zh/figs/orig/fig-12-7.png" alt="图 12.7" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.7　稳定过滤操作的并行化</figcaption>
+</figure>
+<p>图 12.7 展示了稳定过滤如何并行化。为输入列表中的每个键启动一个线程。每个线程对自己的输入值判断过滤条件，并设置一个 “保留” 标志，表示是否应该保留该值。接下来，线程必须统计在其之前将有多少键进入输出列表，从而确定自己的键在输出列表中的偏移。换句话说，线程要计算所有先前线程的 “保留” 值之和。为所有线程求出这一数值，正是第 11 章所学的排他扫描操作。还可以利用扫描输入只有 0 和 1 这一事实，按第 12.3 节的方法用位操作对短区段执行二进制前缀和 <a href="/pmpp5-zh/book/12-ch12/#bib-1">[1]</a>，从而优化前缀和。确定自己的键在输出列表中的偏移后，线程便把该键存入输出列表。</p>
+<figure id="fig:12-8">
+<img src="/pmpp5-zh/figs/orig/fig-12-8.png" alt="图 12.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.8　简单的稳定过滤内核代码</figcaption>
+</figure>
+<p>图 12.8 给出一个简单的稳定过滤内核。首先，每个线程确定自己负责的键下标（第 3 行），并从全局内存加载它（第 4 行）。随后，线程对该值判断过滤条件；条件为真就把整数 <code>keep</code> 设为 1，否则设为 0（第 5 行）。然后，网格中的所有线程对 <code>keep</code> 执行网格范围的排他扫描，取得该键在输出列表中的偏移（第 6 行）。这个网格级排他扫描按照第 11 章介绍的单内核扫描实现，在一个内核内完成。需要保留键的线程把键写到扫描结果给出的输出列表偏移处（第 7–9 行）。最后，网格中的最后一个线程写出结果列表的总大小（第 10–12 行）。</p>
+<p>**译者注：**与底本一致，图 12.8 直接在边界检查之前读取 <code>input[i]</code>，其正确执行隐含要求启动的线程总数恰好为 <code>N</code>，或者调用方已为多余线程提供可安全读取的填充元素。若按通常方式把网格大小向上取整，则应先检查 <code>i &lt; N</code>，同时保证网格级扫描中的所有参与线程遵守相同的同步约定。</p>
+<h2 id="sec-12-6">12.6 用共享内存与线程粗化改进内存合并<a class="td-heading-self-link" href="#sec-12-6" aria-label="标题锚点"></a>
+</h2>
+<p>第 12.5 节给出的简单稳定过滤实现有一项低效之处：向全局内存存储过滤键时，并非块内所有线程都会参与。写入全局内存相邻位置的键可能由不同 warp 中的线程写出，而两个活跃线程之间夹着许多不活动线程，因而错失内存合并机会。可以先在共享内存中收集过滤键，再把它们作为一个连续块从共享内存写入全局内存，从而重新获得这些机会。</p>
+<figure id="fig:12-9">
+<img src="/pmpp5-zh/figs/orig/fig-12-9.png" alt="图 12.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.9　使用共享内存改进内存合并</figcaption>
+</figure>
+<p>图 12.9 展示了这种私有化方式。相邻输出键由连续线程从共享内存写到全局内存，增加了同一 warp 写出的相邻键数，从而增加内存合并机会。</p>
+<p>还可以应用线程粗化进一步改进内存合并。图 12.10 展示了它在稳定过滤中的用法。分给每个线程块过滤的键数多于块内线程数，于是从共享内存写入全局内存的连续输出区段更少、每段更大。更少且更大的区段暴露出更多内存合并机会，进一步提升性能。可以把细粒度并行化的代价理解为：它不得不把输出列表切分成更小的区段，从而影响内存合并。</p>
+<figure id="fig:12-10">
+<img src="/pmpp5-zh/figs/orig/fig-12-10.png" alt="图 12.10" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.10　用线程粗化进一步改进内存合并；本玩具示例采用两个线程块，每块四个线程</figcaption>
+</figure>
+<p>线程粗化可能更重要的收益，是它对扫描操作的影响。扫描是稳定过滤过程中代价最高的部分。回忆第 11 章，扫描能从线程粗化中显著受益，因为粗化提高了工作效率，并减少同步开销。对过滤操作进行粗化，也会自然地粗化其中的扫描操作，从而显著提高整个稳定过滤的性能。</p>
+<p>把排他扫描、私有化和线程粗化结合起来的稳定过滤详细实现，留作练习。</p>
+<h2 id="sec-12-7">12.7 就地稳定过滤<a class="td-heading-self-link" href="#sec-12-7" aria-label="标题锚点"></a>
+</h2>
+<p>许多场合需要就地执行过滤，即让过滤输出占据与输入相同的内存数组，而不是单独的数组。当被过滤数组相对于 GPU 全局内存容量非常大时，往往更适合就地操作。例如，在第 12.1 节的堆对象释放示例中，全局内存可能没有足够空间容纳一个新的过滤后堆，此时就不希望另外分配数组来保存输出键。</p>
+<p>就地过滤时，必须小心：在读取原本占据某个内存位置的键之前，不能先把任何输出键写到这个位置。例如，在图 12.10 中，若输入和输出数组相同，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">k_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 将占据 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">k_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 原来所在的位置。因此，必须保证线程 1 先读完 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">k_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，线程 3 才能写入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">k_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。只要在线程块读取完所有输入值与开始写输出值之间执行一次屏障同步，就能轻松保证这种次序。<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<p>更复杂的情形是，读写同一位置的线程分属不同线程块。例如，若图 12.10 中的过滤就地执行，则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>8</mn></msub></mrow><annotation encoding="application/x-tex">k_8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">8</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 将占据位置 4，也就是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>4</mn></msub></mrow><annotation encoding="application/x-tex">k_4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 原来所在的位置，而读取和写入这些键的线程位于不同线程块。因此，必须确保第二个块在第一个块读完自己的值之前不写任何值。一般而言，需要保证某个块写入任何值之前，所有排在它之前的块都已经读完自己的值。设备范围扫描操作其实已经强制了这一顺序。因此，前面写出的代码在要求就地过滤时同样有效。</p>
+<figure id="fig:12-11">
+<img src="/pmpp5-zh/figs/orig/fig-12-11.png" alt="图 12.11" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 12.11　稳定过滤的依赖关系图</figcaption>
+</figure>
+<p>为说明就地过滤所需次序已经得到保证，图 12.11 展示了稳定过滤实现中不同操作之间的依赖。目标顺序是：对任意满足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&gt;</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j&gt;i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的线程块对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的读取必须先于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span> 的写入。从图中可以看到，该条件成立：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的读取先于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的扫描；由于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&gt;</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j&gt;i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的扫描先于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span> 的扫描；而 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span> 的扫描又先于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span> 的写入。</p>
+<p>把排他扫描的单内核实现改造成就地稳定过滤的单内核实现，留作练习。</p>
+<h2 id="sec-12-8">12.8 相关模式<a class="td-heading-self-link" href="#sec-12-8" aria-label="标题锚点"></a>
+</h2>
+<p>稳定过滤属于一个更一般的模式类别：数据需要沿一个方向移动。本节回顾其中若干模式；需要注意，为稳定过滤讨论的许多优化同样适用于这些相关模式。</p>
+<p>从有序列表删除重复键与稳定过滤很相似。它可以看作过滤模式的一个特例，其中保留某个键的条件是该键不等于前一个键。</p>
+<p>另一个类似模式是从矩阵中删除行和/或列。它与过滤相似，都需要从输入数组删除特定键；区别在于，键是根据下标而非数值删除的。因此，线程可以用解析方式直接确定各键在输出中的位置，无须执行扫描。不过，如果操作就地执行，仍须保证较早的线程块先读完输入值，较晚的线程块才能写输出值。此时，可以采用单遍扫描中的单向同步，只用它保证线程块间的次序，而不必传播部分和。</p>
+<p>还有一种类似模式，是向矩阵添加行和/或列。这种模式经常出现在为了改进内存对齐而调整矩阵布局时。与删除行、列一样，它也能用解析方式确定键应搬到何处，无须执行扫描。不过有一个明显区别：这些键在数组中向外移动，而不是向内移动。若操作为异地执行，这种区别并不重要；若就地执行，它就会影响同步方向。由于键向外移动，较早的线程块会写入先前由较晚线程块所读取的键占据的内存位置。因此，必须确保较晚的线程块先读完其输入值，较早的线程块才能写输出值。此时，单向同步按相反方向执行，即从处理最后一组键的线程块向处理第一组键的线程块推进。</p>
+<p>矩阵和张量转置等更复杂的就地数据移动模式，可以参阅相关文献 <a href="/pmpp5-zh/book/12-ch12/#bib-2">[2]</a>。</p>
+<h2 id="sec-12-9">12.9 小结<a class="td-heading-self-link" href="#sec-12-9" aria-label="标题锚点"></a>
+</h2>
+<p>本章讨论了稳定过滤与不稳定过滤的并行实现和优化。不稳定异地过滤以原子操作为基础，优化重点是尽量减少输出计数器上的原子操作数，并合并对输出的写入。稳定异地过滤以扫描操作为基础，可以建立在第 11 章的单遍扫描内核之上。实践中，Thrust <a href="/pmpp5-zh/book/12-ch12/#bib-3">[3]</a> 和 CUB[4] 库已经提供过滤实现。掌握不同类型过滤的基本原理与优化之后，读者就能为具体应用选择合适的 Thrust 或 CUB API 函数。</p>
+<h2 id="sec-12-10">12.10 练习<a class="td-heading-self-link" href="#sec-12-10" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li>
+<p><a id="bib-1"></a> 使用三个独立内核实现带排他扫描的稳定过滤：条件求值、排他扫描和输出生成。</p>
+</li>
+<li>
+<p><a id="bib-2"></a> 把过滤代码加入单遍扫描内核，以单个内核实现稳定过滤。单内核实现有哪些主要优点？</p>
+</li>
+<li>
+<p><a id="bib-3"></a> 对练习 2 的内核应用私有化。</p>
+</li>
+<li>
+<p><a id="bib-4"></a> 对练习 3 的内核应用线程粗化。</p>
+</li>
+</ol>
+<h2 id="sec-refs">本章参考文献<a class="td-heading-self-link" href="#sec-refs" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li><a id="bib-1"></a>M. Harris, M. Garland, Optimizing parallel prefix operations for the Fermi architecture, in: <em>GPU Computing Gems Jade Edition</em>, Elsevier, 2012, pp. 29–38.</li>
+<li><a id="bib-2"></a>I.-J. Sung, J. Gómez-Luna, J.M. González-Linares, N. Guil, W.-M.W. Hwu, In-place transposition of rectangular matrices on accelerators, <em>ACM SIGPLAN Notices</em> 49 (8) (2014) 207–218.</li>
+<li><a id="bib-3"></a>N. Bell, J. Hoberock, Thrust: a productivity-oriented library for CUDA, in: <em>GPU Computing Gems Jade Edition</em>, Elsevier, 2012, pp. 359–371.</li>
+<li><a id="bib-4"></a>NVIDIA, CUB, 2025. <a href="https://nvidia.github.io/cccl/cub/index.html">https://nvidia.github.io/cccl/cub/index.html</a>.</li>
+</ol>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>底本此处写作“线程 1 读完 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">k_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>”，但根据图中的键与位置关系，应为“线程 1 读完 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">k_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>”；译稿按依赖关系更正。&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/book/11-ch11/"
+    aria-label="上一页 - 第11章 扫描" title="第11章 扫描" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">第11章 扫描</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/book/13-ch13/"
+    aria-label="下一页 - 第13章 合并" title="第13章 合并" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">第13章 合并</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-12-1">12.1 背景</a></li>
+    <li><a href="#sec-12-2">12.2 简单的并行不稳定过滤</a></li>
+    <li><a href="#sec-12-3">12.3 用 warp 级原语合并原子操作</a></li>
+    <li><a href="#sec-12-4">12.4 私有化</a></li>
+    <li><a href="#sec-12-5">12.5 简单的并行稳定过滤</a></li>
+    <li><a href="#sec-12-6">12.6 用共享内存与线程粗化改进内存合并</a></li>
+    <li><a href="#sec-12-7">12.7 就地稳定过滤</a></li>
+    <li><a href="#sec-12-8">12.8 相关模式</a></li>
+    <li><a href="#sec-12-9">12.9 小结</a></li>
+    <li><a href="#sec-12-10">12.10 练习</a></li>
+    <li><a href="#sec-refs">本章参考文献</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/12-ch12/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/12-ch12/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>双列视图</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>切换语言</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"复制 Markdown 文本","disabledReason":"复制 Markdown 文本: 暂不可用","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":""},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://codingpracticegroup.github.io/pmpp5-zh/book/12-ch12/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":false,"description":"查阅 Markdown 源码","disabledReason":"查阅 Markdown 源码: 暂不可用","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":""},{"available":true,"description":"查阅编辑历史","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/12-ch12.md"},{"available":true,"description":"编辑当前页面","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/12-ch12.md"},{"available":true,"description":"添加子页面","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"提交文档议题","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC12%E7%AB%A0+%E8%BF%87%E6%BB%A4%E5%99%A8"},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"切换语言","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/12-ch12/"},{"active":false,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/12-ch12/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":false,"description":"外观","disabledReason":"暂不可用","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"打开双列视图","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["双列视图","打开双列视图","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"双列视图","url":""}],"commands":[],"language":"zh","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/pmpp5-zh/third_party/katex/katex.min.180c2d77d434d7da51d6625c50a964d4fd6fdbdb9bc8796a0a016c30c49931fb.css" integrity="sha256-GAwtd9Q019pR1mJcUKlk1P1v29ubyHlqCgFsMMSZMfs=" crossorigin="anonymous">
+<script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/code-block.min.a5fdd6bd7e2db7deab97320e3847549321a1f44938f2dd382d876850511d95b2.js" integrity="sha256-pf3WvX4tt96rlzIOOEdUkyGh9Ek48t04LYdoUFEdlbI=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"简体中文","url":"/pmpp5-zh/book/12-ch12/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"两页的部分标题不同，匹配标题之间的位置为估算结果。","close":"关闭","error":"无法加载此页面。","language":"选择语言","loading":"正在加载……","open":"打开","progress":"没有可用于对齐两页的共同标题，将按全文阅读进度同步。","retry":"重试","sync":"同步滚动","title":"双列视图","unavailable":"标题重复或顺序不一致，无法同步。"},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"en-US","direction":"ltr","label":"English","url":"/pmpp5-zh/en/book/12-ch12/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

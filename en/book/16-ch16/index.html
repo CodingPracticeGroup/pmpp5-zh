@@ -1,0 +1,820 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/16-ch16/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/15-ch15/">
+<link rel="next" href="/pmpp5-zh/en/book/17-ch17/"><meta name="robots" content="index, follow">
+
+<title>Chapter 16 Dynamic programming and wavefront parallelism | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/16-ch16/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/16-ch16/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/16-ch16/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/16-ch16/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 16 Dynamic programming and wavefront parallelism">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 16 Dynamic programming and wavefront parallelism">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="10159">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 16 Dynamic programming and wavefront parallelism">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/16-ch16/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/16-ch16/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/16-ch16/" aria-current="page" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 16 Dynamic programming and wavefront parallelism</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/16-ch16.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/16-ch16.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;16&#43;Dynamic&#43;programming&#43;and&#43;wavefront&#43;parallelism" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 16 Dynamic programming and wavefront parallelism</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c16">Chapter 16 Dynamic programming and wavefront parallelism<a class="td-heading-self-link" href="#c16" aria-label="Link to this heading"></a>
+</h1>
+<p>Wavefront parallelism is an algorithmic technique for exploiting data parallelism in applications with data dependencies along space and/or time dimensions. In this chapter, we study wavefront parallelism in the context of dynamic programming applications. Dynamic programming represents a class of problems that can be solved by dividing a problem into smaller sub-problems. The solution to the original problem can be found by assembling the solutions found for the sub-problems. Parallelizing dynamic programming algorithms on GPUs entails interesting challenges in terms of hardware utilization and synchronization across threads. In this chapter, we discuss these challenges and present software techniques that address them efficiently.</p>
+<h2 id="sec-16-1">16.1 Dynamic programming<a class="td-heading-self-link" href="#sec-16-1" aria-label="Link to this heading"></a>
+</h2>
+<p>There exist problems, such as all-pair shortest paths in a graph and genomic sequence alignment, whose solutions can be recursively assembled from the solutions to smaller sub-problems. That is, finding optimal solutions to the sub-problems recursively solves the original problem optimally. Dynamic programming is a technique for recursively dividing such problems into smaller sub-problems, deriving and saving the solutions to the sub-problems, and assembling the saved sub-problem solutions into the solution to the original problem. These saved sub-problem solutions are Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00027-5">https://doi.org/10.1016/B978-0-44-343900-1.00027-5</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<p>often used multiple times throughout the process, thus reducing redundant computation. Problems that are amenable to dynamic programming exhibit an optimal substructure with overlapping sub-problems. That is, solutions to sub-problems can be assembled to form the solution to the original problem. Dynamic programming methods differ from divide-and-conquer methods in that the solutions to sub-problems in divide-and-conquer methods do not overlap. For example, in the merge sort algorithm (Chapter 14), the sub-problems are disjoint and they can be solved independently. A notable example of dynamic programming is the Fibonacci series, which is generally represented by the following recursive expression: Fi = Fi−1 + Fi−2 (16.1)</p>
+<p>If Fi were calculated with simple recursion, the same sub-problems would be solved over and over. For example, solving both Fi and Fi−1 would incur the cost of solving Fi−2 . To avoid such undesirable recomputation, dynamic programming algorithms typically store the solutions to the sub-problems in a table, i.e., memoization or tabulation, depending on the specific implementation approach, as we will discuss in Section 16.2. The stored solutions are reused throughout the process to eliminate redundant computation. The execution of dynamic programming algorithms defines wavefronts, which are groups of intermediate solutions that can be calculated in parallel because there are no dependencies between them. Therefore, parallel execution within each wavefront is a natural way of parallelizing the execution of dynamic programming algorithms. Besides the Fibonacci series, other problems that are commonly solved with dynamic programming algorithms encompass shortest path (e.g., Dijkstra algorithm, Bellman-Ford algorithm, and Floyd-Warshall algorithm), chain matrix multiplication, time series (e.g., dynamic time warping algorithm), Hidden Markov models (e.g., Viterbi algorithm), etc. Bioinformatics is another relevant field where dynamic programming algorithms are of key importance, as they are used to accelerate the solution of problems such as sequence alignment (e.g., Smith-Waterman algorithm, Needleman-Wunsch algorithm), protein folding, RNA structure prediction, and protein-DNA binding [1].</p>
+<h2 id="sec-16-2">16.2 Implementation approaches<a class="td-heading-self-link" href="#sec-16-2" aria-label="Link to this heading"></a>
+</h2>
+<p>There are two main implementation approaches for dynamic programming algorithms: top-down and bottom-up. Code snippets in Fig. 16.1 illustrate both approaches when applied to the Fibonacci series. The top-down approach is based on recursive execution, where each invocation of the function to solve a sub-problem calls the function to solve smaller overlapping sub-problems (i.e., each sub-problem is possibly encountered multiple times when solving a larger sub-problem). Line 7 in the upper code snippet of Fig. 16.1 shows FIGURE 16.1 Top-down and bottom-up C++ implementations of Fibonacci series.</p>
+<p>the recursive calls. The top-down approach employs memoization as a way of holding intermediate results that can later be used to avoid redundant computation when the same sub-problems are encountered later. Each intermediate result is stored in an associative array (e.g., in hash_table in line 11). In the beginning of each invocation (line 4), the recursive function checks if the result it needs to calculate is already in the associative array. If so, it reuses the result from the hash table. Otherwise, it proceeds to either invoke the next recursion (line 7) or return the value (line 10) if the end of recursion has been reached, i.e., when n is either 1 or 0. For example, the calculation of F3 recursively invokes F2 (first recursive call in line 7) and F1 (second recursive call in line 7). The calculation of F2 would recursively invoke F1 and F0 . The next level of recursion would find F1 = 1 and F0 = 0 in line 10 and save them into the hash table. When the execution for F3 makes thesecond recursive call to invoke F1 , the called function would find the F1 value in the hash table and return with this value in line 4. Although the top-down approach is conceptually simple and matches with the mathematical formulation, it is unfortunately not efficient on GPUs for two main reasons. First, CUDA-enabled GPUs do not efficiently support deep nesting of function calls in kernel code. Device functions are typically inlined by the compiler for efficient execution. Recursive function calls cannot be inlined indefinitely, so they are typically retained as functions calls and cause significant slowdown. Second, accesses to the associative array, i.e., the hash_table, tend to result in uncoalesced memory accesses across threads in the same warp, which could also cause significant slowdown. The bottom-up approach starts by solving the smaller sub-problems and tabulating their solutions, then progressively solving larger sub-problems until the desired problem is solved. The bottom-up approach is iterative, as the for loop in lines 8-10 of the lower code snippet of Fig. 16.1 shows. Each iteration computes a sub-problem, starting from the smallest sub-problems. The solution to every sub-problem is stored in a table (table in line 5). Since the loop iterates from the smaller sub-problems to the larger problems, each iteration is guaranteed to find the solutions of its sub-problems in the table. The set of sub-problems that are solved (also, table cells that are filled) in each iteration is called a wavefront. For the Fibonacci series, wavefront i is composed of a single sub-problem Fi (stored in table cell table[i]). Unfortunately, having only one sub-problem in the wavefront results in sequential execution for this particular problem. Fortunately, many dynamic programming algorithms solve more complex problems where wavefronts consist of multiple sub-problems (often, the tables have multiple dimensions). Sub-problems in the same wavefront can be computed in parallel, since they do not depend on each other. Due to its parallel nature, wavefront parallelism is suitable for GPU computing, but it requires a careful pre-planning of the execution based on a precise understanding of its dynamic behavior (e.g., the wavefront size may grow or shrink) and the dependencies between sub-problems in different wavefronts. We focus on bottom-up approaches for the remainder of this chapter.</p>
+<h2 id="sec-16-3">16.3 Wavefront patterns<a class="td-heading-self-link" href="#sec-16-3" aria-label="Link to this heading"></a>
+</h2>
+<p>As we have seen in the previous sections, in each iteration of a dynamic programming algorithm, the wavefront is composed of the sub-problems that can be solved in parallel, because they are independent of each other and all their smaller sub-problems have been solved. The execution of consecutive iterations (or waves) is serialized by enforcing data dependencies via synchronization of the parallel compute units (e.g., barriers). Fig. 16.2 depicts four example wavefront patterns. The arrows show the variety of dependence patterns. The number on each cell indicates the wavefront number. The FIGURE 16.2 Example wavefront patterns.</p>
+<h2 id="sec-16-4">16.4 Floyd-Warshall algorithm<a class="td-heading-self-link" href="#sec-16-4" aria-label="Link to this heading"></a>
+</h2>
+<p>wavefront size and the amount of parallelism can be constant (as in examples (a) and (b)) or can change (as in examples (c) and (d)) across iterations. In this chapter, we cover examples of both types of wavefronts. Section 16.4 introduces the Floyd-Warshall algorithm and its bottom-up implementation. FloydWarshall is an example of dynamic programming algorithm where the wavefront has a constant size. It is similar to examples (a) and (b) of Fig. 16.2 but in each iteration, instead of computing one row of a two-dimensional space, it computes one plane of a three-dimensional space. Section 16.5 introduces the Smith-Waterman algorithm, which is widely used in genome sequence alignment. Smith-Waterman’s wavefront pattern is in Fig. 16.2(c). It is an example of wavefront parallelism that grows and shrinks across iterations. Section 16.5 to Section 16.8 cover the CUDA implementation of Smith-Waterman and several optimizations that can be applied. Another important distinction between algorithms is whether or not the entire table of sub-problem solutions needs to be retained. In some algorithms, only a certain number of wavefronts need to be retained during the execution. For example, in the Fibonacci series, when computing Fi , we only need to retain the values of Fi and Fi−1 . The older values can be discarded (they are not discarded in the code in Fig. 16.1, but they can be). Similarly, in the Floyd-Warshall algorithm in Section 16.4, we will see that we only need to retain a single 2D plane of the 3D problem space. Older planes can be discarded because they are usually not needed in the final solution. In contrast, in the Smith-Waterman algorithm introduced in Section 16.5, the results of all iterations (all wavefronts) are saved until the end of the algorithm. The reason is that they are used to back-trace the final alignment.</p>
+<p>The Floyd-Warshall algorithm finds the shortest paths between all pairs of vertices of a directed weighted graph.1 To understand how the problem is divided into subproblems, consider the function d(i, j, k), which represents the shortest distance 1 A graph is a data structure that represents relations between entities. For a detailed introduction tographs, we refer the reader to Chapter 18.</p>
+<p>between vertices i and j in a graph using only the vertices from 0 to k as intermediate vertices. Let us assume that we know d(i, j, k − 1) for all i and j , and for some vertex k. In this case, we can find d(i, j, k) using the following recurrence relation: d(i, j, k) = min(d(i, j, k − 1), d(i, k, k − 1) + d(k, j, k − 1)) In other words, it is the shorter distance between going from i to j using only vertices 0 to k − 1 without passing through k, and going from i to k then from k to j . In this way, we have decomposed the problem of finding d(i, j, k) into three smaller subproblems, namely d(i, j, k − 1), d(i, k, k − 1), and d(k, j, k − 1). In the bottom up implementation of the Floyd-Warshall algorithm, we can start from the smallest sub-problems having the smallest value of k and work our way up by increasing k until we have included all vertices in the graph among the intermediate vertices. We already know the values of d(i, j, −1), i.e., the distance between any two vertices i and j using no intermediate vertices. It is simply the weight of the edges between vertices i and j , or infinity if there is no edge. Using the recurrence relation, we can solve d(i, j, 0) for all i and j . We can then solve for d(i, j, 1) for all i and j . We can keep iterating until we have solved d(i, j, N − 1) for all i and j , where N is the number of vertices in the graph. The solution to d(i, j, N − 1) represents the shortest distance between a vertex i and a vertex j using any vertex in the graph as an intermediate vertex, which is the ultimate shortest distance we are looking for. An important observation is that once we have found the solutions of d(i, j, k) for all i and j and for some k, we no longer need the solutions for d(i, j, k − 1) and we can discard them. Hence, although the space of sub-problems defined by d(i, j, k) is O(N 3 ) in size, the space of sub-problem solutions that we need to store at once is only O(N 2 ) in size. For very large graphs, the difference between O(N 2 ) and O(N 3 ) is quite substantial! As the pseudo-code in Fig. 16.3 shows, the algorithm is formulated as three nested for loops with indices k, i, and j. The outer for loop with index k defines the iterations over the sub-problems of different sizes. The order of visiting the vertices k is irrelevant, as long as we visit all vertices k before we exit the loop. The for loops with indices i and j solve the wavefront of sub-problems and update all cells of the dist table. At the beginning of iteration k, the dist table contains the solutions for d(i, j, k − 1) for all i and j . At the end of the iteration, it contains the solutions for d(i, j, k) for all i and j . All table cells can be computed in parallel, which makes Floyd-Warshall suitable for GPU computing. We assume a straightforward bottom-up GPU parallelization of Floyd-Warshall algorithm that assigns one pair of vertices (i, j) per thread. In each iteration k, if the distance from vertex i to vertex k plus the distance from vertex k to vertex j is smaller than the currently observed shortest distance from vertex i to vertex j, a new shortest path from i to j has been discovered and the corresponding thread updates the value of dist[i][j]. At the end of each iteration, threads synchronize via kernel termination and grid relaunch. This global synchronization across all threads of the grid ensures that the possible new distances due to including a vertex k have been calculated and stored in the table dist before the next iteration begins. This way, FIGURE 16.3 Pseudo-code of bottom-up implementation of Floyd-Warshall algorithm.</p>
+<p>when the algorithm evaluates the distances for the next vertex k, all shortest distances observed so far are up to date. Thus, global synchronization is required to guarantee the correct execution of the algorithm. Fig. 16.4 shows the CUDA kernel based on our bottom-up parallelization and a host code snippet that iteratively calls the kernel. An example of directed weighted graph and distance table is in Fig. 16.5. The distance table is initialized with the distance between adjacent vertices (all other cells equal INFINITY). The host launches the kernel as many times as vertices in the graph (lines 4-5 in the bottom code snippet of Fig. 16.4). In each iteration k, all cells of the distance table are potentially updated by considering vertex k as an additional intermediate vertex. Each thread block covers a row section of the distance table. The thread grid has two dimensions of thread blocks (line 3 of the host code) and each thread block is onedimensional (line 2). We assume that the variable threads in the host code specifies the number of threads in each thread block. The expression for the horizontal (x) dimension of the grid (dimGrid) ensures that there are enough thread blocks in the horizontal dimension to cover all sections of the columns of the distance table. The number of blocks in the vertical (y) dimension of the grid is simply the total number of vertices in the graph (n_vertices) because each block covers only one row of the distance table. We need n_vertices blocks in the vertical direction to cover all rows of the distance table. In iteration k, each thread reads its assigned cell dist[i][j], a cell in row k (dist[k][j]), and a cell in column k (dist[i][k]) before updating its assigned cell. In principle, in each iteration k, all distance table cells can be potentially updated. However, for graphs where all distances are non-negative and the distance of each vertex to itself is always 0 (i.e., dist[k][k] = 0), threads assigned FIGURE 16.4 Bottom-up CUDA implementation of Floyd-Warshall algorithm.</p>
+<p>to row k or column k do not modify their cells. The reason is that threads assigned to update the dist[i][k] and dist[k][j] values compute their new values as, respectively, min(dist[i][k], dist[i][k] + dist[k][k]) and min(dist[k][j], dist[k][k] + dist[k][j]). Since dist[k][k] = 0, the expressions are simplified to min(dist[i][k], dist[i][k]) and min(dist[k][j], dist[k][j]). Therefore, the values of dist[i][k] and dist[k][j] are the same before and after the execution of an iteration. As a result, there is no possible hazard and we can use a single distance table dist. Recall that, in other problems where there is a potential race condition cause by threads updating values that are read by other threads, we would need to use the double buffering approach introduced in Chapter 6. The kernel (upper code of Fig. 16.4) assigns one cell of dist to a thread. Lines 4 and 6 of the kernel obtain the row and column values of the table cell assigned to each FIGURE 16.5 Directed weighted graph (left) and distance table after initialization (right).</p>
+<p>thread. Recall that each thread block covers a row section of the distance table. Thus, all threads in a block use the y component of their common block index (blockIdx.y) as the row index of their assigned elements. As for the column index, each thread uses the familiar linearized index blockIdx.x * blockDim.x + threadIdx.x as the column index of its assigned element, which ensures that every cell in any given row is assigned to a thread. Line 9 computes the one-dimensional index into the table of the cell assigned to each thread, assuming row-major layout. All threads in the same block need to read the same dist cell located in column k and their assigned row, i.e., row = blockIdx.y. In the example of Fig. 16.5, if k corresponds to vertex c, all threads of a block need the value of the cell in their row and column c. Thus, thread 0 reads the value from global memory and writes it in dist_k_col in shared memory (lines 11-15). If the distance value is infinity (line 16), vertex k is not on the shortest path and threads can retire. Otherwise, each thread reads the value of dist located in their column col of row k (line 21), e.g., thread 4 accesses column e in row c in Fig. 16.5, and stores it in dist_k_row. These accesses to global memory are coalesced. If the distance dist_k_row for any of the threads is infinity (line 22), vertex k is not on the shortest path and the thread returns. Finally, each remaining thread computes the new distance (i.e., the distance from vertex row to vertex k plus the distance from vertex k to vertex col) and compares it to the current distance (lines 27-28). If the new distance is shorter than the current distance, the new distance is written to dist (line 29). Floyd-Warshall can be parallelized on GPU in a straightforward way because of its regularity: (1) all vertex pairs are considered in each iteration so the wavefront size remains constant, and (2) dependencies are simple (all cells depend on vertex k, i.e., row k and column k from the previous iteration). However, other dynamic programming problems, when parallelized, may impose more complicated wavefront patterns where the wavefront size changes across iterations. The Smith-Waterman algorithm that we introduce in Section 16.5 is an example of such wavefront patterns.</p>
+<h2 id="sec-16-5">16.5 Genome sequence alignment and Smith-Waterman algorithm<a class="td-heading-self-link" href="#sec-16-5" aria-label="Link to this heading"></a>
+</h2>
+<p>A genome is the complete set of an organism’s genetic instructions. The DNA is a long string of base pairs (characters): A, C, G, T. For example, the human genome contains 3.2 billion base pairs (bp). Genome analysis helps to understand genetic variations, predict the presence and abundance of microbes, monitor disease outbreaks, develop personalized medicine, etc. For these analyses, the DNA needs to be sequenced (obtained from biological samples). But sequencing machines provide only randomized fragments (reads), which need to be mapped to the reference genome. Depending on the sequencing technology, there are short (50-300 bp) and long reads (10 K-100 K bp). A key step in the read mapping process is sequence alignment, which has been traditionally performed by quadratic-time dynamic programming algorithms such as Smith-Waterman and Needleman-Wunsch. The main data structure of the SmithWaterman algorithm is a dynamic programming table H , called the homology score matrix, or scoring matrix for short. The goal of the alignment is to detect if two sequences are homologous or similar in a biological sense (e.g., they have shared ancestors). Assume that the two sequences being aligned, A and B, have LA and LB base pairs, respectively. The scoring matrix would be a (LA + 1) × (LB + 1) matrix. Within each sequence, we number the base pairs from 1 to the length of the sequence. All cells in row 0 and column 0 of the scoring matrix store the boundary value 0. The 0’s in cells in row 0 indicate no desirable alignment has been found between the nonexistent base pair 0 of B to any of the A base pairs. The 0’s in cells in column 0 indicate no desirable alignment has been found between the non-existent base pair 0 of A to any of the B base pairs. Any other cell of the scoring matrix Hi,j represents the homology score of the alignment between a segment of sequence A (from its first base pair to its i-th base pair) and a segment of sequence B (from its first base pair to its j -th base pair). The higher the homology score, the more similar the two sequence segments are. Note that, as i and j grow, computing Hi,j becomes a sub-problem that can be solved by leveraging previously computed sub-problems, i.e., Hi,j for smaller i and/or j . Thus, the purpose of the scoring table is to store the solutions to previous sub-problems. For any two elements of A and B that we compare individually, we can obtain a similarity score Si,j . The similarity score is positive (e.g., +3), if there is a match (i.e., the two elements Ai and Bj are equal), or negative (e.g., −3), if there is a mismatch (i.e., the two elements Ai and Bj are not equal). When there is a deletion or an insertion, we apply a gap penalty (e.g., 2), which we call deletion_penalty or insertion_penalty, respectively. With these parameters, we can calculate every cell of the scoring matrix H as follows: ⎧ Hi−1,j −1 + Si,j ⎪ ⎪ ⎨ Hi−1,j − deletion_penalty Hi,j = max (16.2) − insertion_penalty H ⎪ ⎪ ⎩ i,j −1 FIGURE 16.6 Dependencies in the scoring matrix of the Smith-Waterman algorithm.</p>
+<p>Fig. 16.6 illustrates the dependencies of a cell Hi,j of the scoring matrix. The equation assumes that the mapping process starts at the beginning of both sequences. Cell Hi,j indicates the homology score for base pair Bi to map to Aj . Intuitively, cell Hi,j represents the similarity of the segment of B from its beginning to its i th base pair (Bi ) and the segment of A from its beginning to its j th base pair (Aj ). The homology score for base pair Bi to map to Aj is evaluated for three scenarios. The first scenario is that Bi−1 is mapped to Aj −1 . The homology score for the scenario is previously calculated and stored into Hi−1,j −1 . In this case, the homology score for Bi to map to Aj is higher if the two base pairs are the same (Si,j = +3) and lower if the two base pairs are different (Si,j = −3). Thus, the homology score for mapping Bi to Aj is estimated as Hi−1,j −1 + Si,j in this scenario. The second scenario is that Bi−1 is mapped to Aj . The homology score for this scenario is assumed to have been previously calculated and stored in Hi−1,j . In this scenario, for Bi to also map to Aj , there must be a insertion in sequence B. That is, the Bj was incorrectly inserted by the sequencing process. Since an insertion implies that there is an error in the sequencing process for B, the homology score should be lowered by subtracting an insertion penalty from Hi−1,j . Thus, the homology score for mapping Bi to Aj is Hi,j = Hi−1,j − insertion_penalty. The third scenario is that Bi is mapped to Aj −1 . The homology score for this scenario has been previously calculated and stored in Hi,j −1. In this scenario, for Bi to also map to Aj , there must be a base pair missing in sequence B. That is, a base pair was incorrectly deleted from sequence B by the sequencing process. Since a deletion implies that there is an error in the sequencing process for B, the homology score should be lowered by subtracting a deletion penalty from Hi,j −1 . Thus, the homology score for mapping Bi to Aj is Hi,j = Hi,j −1 − deletion_penalty. If all the three scenarios lead to negative values for Hi,j , we set Hi,j to 0 so that all cells of the scoring matrix remain non-negative. As the figure shows, the computation of each matrix cell is only dependent on the three neighbor cells in the previous two anti-diagonals. All cells in the same anti-diagonal are independent ofeach other and can be computed in parallel. Thus, each anti-diagonal of the scoring matrix is a wavefront. For example, for the first wavefront, we can only calculate H1,1 . It will use H0,1 , H0,0 and H1,0 that are all boundary condition cells initialized to 0. For the second wavefront, we can calculate H2,1 and H1,2 based on H1,1 as well as boundary cells H0,1 , H0,2 , H1,0 , and H2,0 . For the third wavefront, we can calculate H3,1 , H2,2 , and H1,3 . Each wavefront forms an anti-diagonal of the matrix. One can observe that the size of the wavefront first grows and then shrinks from the first to the last anti-diagonal of the scoring matrix. The entire scoring matrix of the Smith-Waterman algorithm is kept until all wavefronts are calculated. The reason is that the entire matrix is needed for the final traceback process, which starts from the cell with the highest homology score and follows the path of predecessor cells (top, top-left, or left) until reaching a score 0 (in the first row or column). The complete path reconstructs the optimal alignment between the two sequences. The traceback is a sequential process, so in this chapter we focus on the computation of wavefronts, which offers interesting parallelization opportunities.</p>
+<h2 id="sec-16-6">16.6 Wavefront parallelization: block-level tiling<a class="td-heading-self-link" href="#sec-16-6" aria-label="Link to this heading"></a>
+</h2>
+<p>A basic GPU parallelization of the Smith-Waterman algorithm launches one kernel for each anti-diagonal wavefront, and each GPU thread computes one anti-diagonal cell. This approach computes all elements of each wavefront in parallel and guarantees that an entire wavefront is completely computed before the next wavefront starts. Fig. 16.7(a) shows the scoring matrix with dashed diagonal lines over the antidiagonals representing successive kernel launches. We leave the implementation of this basic parallelization as an exercise. This implementation does not exploit data locality across adjacent anti-diagonals, wastes reuse opportunities, and has to pay the cost of launching a new kernel per anti-diagonal. A more efficient parallelization strategy uses block-level tiling, as shown in Fig. 16.7(b). We divide the dynamic programming matrix into tiles and assign each tile to a thread block. Inside a tile, threads compute anti-diagonal entries and synchronize locally (i.e., __syncthreads()) before moving to the next anti-diagonal (dashed diagonal lines). As a result, global synchronization (i.e., kernel termination) is only necessary between ``anti-diagonals of tiles&rsquo;&rsquo; (dashed horizontal and vertical lines). An additional advantage of tiling is that we can use the shared memory of each streaming multiprocessor to store the tiles. After a tile is computed, threads can store the tile into global memory in a coalesced manner. Fig. 16.8 shows the host code of a block-level tiling CUDA implementation. We make the simplifying assumption that the input sequences are of the same length (L_seq). Thus, each dimension of the scoring matrix is of length L = L_seq + 1 (line 2), and the scoring matrix is an L × L square matrix (the first row and the first column of the table contain zeros). Each thread block is organized as a one-dimensional array of threads. The host code assumes that the number of threads is specified in the FIGURE 16.7 Basic wavefront parallelization (a), thread-block-level (tile-based) parallelization (b), and thread assignment inside a tile (c). The dashed horizontal and vertical lines represent global synchronization points (i.e., kernel termination). The dashed diagonal lines represent local synchronization points (i.e., __syncthreads()). The first row and the first column of the tables are boundary cells, and they are all zeros.</p>
+<img src="/pmpp5-zh/figs/orig/fig-16-8.png" alt="Figure 16.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.8.</strong> Thread block-level tiling implementation (host code).</p>
+<p>threads variable. The scoring matrix (excluding the first row and first column of zeros) is partitioned into threads × threads tiles, each of which will be computed by a thread block. The number of tiles in the horizontal i.e., (x) dimension is calculated in line 4 and assigned to variable numTiles_x. Since the number of cells in the horizontal dimension that need to be computed is L_seq (column 0 cells are boundary cells that do not need to be computed) which may not be a multiple of the thread block size, the familiar expression (L_seq + threads - 1) / threads in line 4 ensures that there are enough blocks to cover all the tiles. As illustrated in Fig. 16.7(b), the number of tiles in the vertical dimension and the maximal number of blocks in the anti-diagonals are the same as in the horizontal dimension and are therefore also specified by the variable numTiles_x.</p>
+<p>The tiles are further organized as tile anti-diagonals. For example, in Fig. 16.7(b), the first tile anti-diagonal (tile anti-diagonal 0) is the tile at the upper left corner of the matrix. The second tile anti-diagonal (tile anti-diagonal 1) consists of the two lightcolored tiles next to the first anti-diagonal. There are a total of 5 tile anti-diagonals in our example and we can number them from 0 to 4. The kernel is designed to have each thread block to process one tile. The host code loops over tile anti-diagonals (line 8) with successive kernel calls (line 10). For simplicity, we use the maximal number of blocks needed (i.e., numTiles_x) for all kernel calls (line 6). However, not all thread blocks will be active during the execution of the kernel, as we shall see below. The reader is encouraged to explore, as an exercise, how to set numBlocks to the exact number of blocks needed to calculate each tile anti-diagonal. The kernel receives the scoring matrix sw, two input sequences rea and ref, the length of the scoring table side L, and the tile anti-diagonal number d as arguments. A total of 2*numTiles_x-1 kernel calls will be made to process all the tile anti-diagonals. The tile anti-diagonal number used in the kernel calls will range from 0 to 2*numTiles_x-2, e.g., 0 to 4 in Fig. 16.7(b) where numTiles_x is equal to 3. The CUDA kernel is presented in Fig. 16.9. In this kernel, each thread block of tile_width threads (line 3) computes a square tile of tile_width × tile_width cells of the scoring matrix sw. In the beginning of the kernel, each thread computes the total number of tiles in each dimension of the scoring matrix (line 4). We call it numTiles_x because, with equally long sequences, the number of tiles in both horizontal and vertical dimensions as well as the maximal tile anti-diagonal are all the same. This number determines the number of active blocks needed. For example, in Fig. 16.7(b), the total number of tiles is 3 in horizontal, vertical, and anti-diagonal dimensions. Note that, for the calculation of the number of tiles, we only consider (L-1) × (L-1) cells of the table, because row 0 and column 0 of the table are all zeros, which we do not need to compute. In lines 6-7, each thread determines the row and column indices of the antidiagonal tile assigned to its thread block. Note that the thread block index blockIdx.x determines the row of tiles where each thread block works (line 6). That is, the assignment of tiles to thread blocks in a tile anti-diagonal starts with the top tile. We will use the processing of tile anti-diagonal 1 (d=1) in Fig. 16.7(b) as a running example. In this example, tile (0, 1) in tile row 0 is assigned to block 0 (blockIdx.x=0) and tile (1, 0) in tile row 1 is assigned to block 1 (blockIdx.x=1). The row index of the tile is the same as the blockIdx.x. The tile column index is a function of the tile anti-diagonal number d (line 7). Note that the beginning tile of each tile anti-diagonal has a tile column index d. In our running example, the beginning tiles of tile anti-diagonals 0, 1, and 2 are tiles (0, 0), (0, 1), and (0, 2). Within each tile anti-diagonal, the tile column index for each tile decreases as the blockIdx.x of its assigned block increases. That is, for block anti-diagonal 1, block 0 is responsible for tile (0, 1) and block 1 for tile (1, 0). The tile column number for each block is d - blockIdx.x. If the column index for a block is negative or larger than or equal to numTiles_x, the thread block will not be active in the corresponding d iteration (line 8). In this case, the block has been assigned to FIGURE 16.9 Thread block-level tiling implementation (kernel code).</p>
+<p>a non-existent tile because the tile anti-diagonal has fewer than numTiles_x tiles and does not need all the launched thread blocks. For example, in Fig. 16.7, tile antidiagonal 1 (d=1) has only two tiles. Thus, block 2 will have a tile column number −1, which means that it is not needed. For another example, tile anti-diagonal 3 (d=3) also has only 2 tiles. In this case, block 0 will have a column index value 3, which is equal to numTiles_x and thus out of bound. This means that block 0 will not be active; only block 1 and block 2 will be active for tile anti-diagonal 3. The main loop of the kernel (lines 10-29) computes the anti-diagonals of the tile in 2*tile_width-1 iterations. In each iteration, each thread computes one cell of the shared memory tile with row and column indices r_tile (line 12) and q_tile (line 15), which correspond to row and column indices r (line 13) and q in global memory FIGURE 16.10 Thread block-level tiling implementation: device functions to load input values.</p>
+<p>(line 16). Note that in the calculation of r and q we add 1 to these global memory indices, because we do not need to compute the cells in row r=0 and column q=0, which are all zeros. Thread assignment to tile cells, which is represented in Fig. 16.7(c), follows the same pattern as thread block assignment to tiles. For example, in anti-diagonal 1 of the tile in Fig. 16.7(c), thread 0 is mapped to cell (0, 1) and thread 1 is mapped to cell (1, 0). Since not all threads are assigned a cell in an iteration, they need to check that they are within the tile bounds q_tile &gt;= 0 &amp;&amp; q_tile &lt; tile_width. For example, for anti-diagonal 1, thread 2 is inactive since it is out of the tile. They also need to check if they are within the non-boundary part of the scoring matrix r &lt; L &amp;&amp; q &lt; L (line 18). They do not need to check r &gt;= 0 &amp;&amp; q &gt;= 0, because we add 1 when we calculate r and q. Then, each active thread loads the values of three cells in the two previous antidiagonals on which its assigned cell depends (lines 20-22). We use three device functions, load_n, load_w, and load_nw, which Fig. 16.10 shows. With these three device functions, a thread loads the cell values from shared memory, unless its assigned cell is at the top (i.e., r_tile = 0) or the left border of the tile (i.e., q_tile = 0). In such case, they are read from global memory, because they were produced in the previous kernel call (i.e., previous d iteration). n is the value above (i.e., north of) the assigned cell, i.e., in row r_tile-1 (and r-1). w is the value to the left (i.e., west) of the assigned cell, i.e., in column q_tile-1 (and q-1). nw is the value above and to the left (i.e., northwest) of the assigned cell, i.e., in row r_tile-1 (and r-1) and column q_tile-1 (and q-1). With n, w, nw, and the similarity score subs_val (line 24), a thread can compute the value of its assigned cell (line 26). max4() is a device function that returns the maximum of four input values, FIGURE 16.11 An example device function that computes the maximum of four integers.</p>
+<h2 id="sec-16-7">16.7 Hyperplane transformation<a class="td-heading-self-link" href="#sec-16-7" aria-label="Link to this heading"></a>
+</h2>
+<img src="/pmpp5-zh/figs/orig/fig-16-12.png" alt="Figure 16.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.12.</strong> Thread block-level tiling implementation: device function to store a tile in global memory.</p>
+<p>as Fig. 16.11 shows. At the end of each anti-diagonal iteration (line 28), all threads of a block synchronize locally to guarantee that the entire anti-diagonal is in shared memory before starting the next anti-diagonal of the tile. After all anti-diagonals of a tile are computed, the threads call the store_tile device function (line 31) to write the tile into global memory row-by-row. As Fig. 16.12 shows, all threads collaborate on this and perform coalesced memory accesses. This is an example of turning uncoalesced memory accessed into coalesced memory accesses thanks to the use of shared memory. It is similar to the corner-turning technique (Chapter 6) or the packing technique (Chapter 12) that we have seen in previous chapters.</p>
+<p>The thread block-level tiling technique in Fig. 16.7(b) improves the performance of wavefront parallelization by reducing kernel calling overhead and leveraging the fast shared memory. However, using square (or rectangular) tiles has two important drawbacks, as Fig. 16.13 illustrates with two adjacent tiles. First, inside a tile, anti-diagonal lengths are non-uniform. As a result, the number of active threads is different for each anti-diagonal, as the left tile in Fig. 16.13 shows.</p>
+<img src="/pmpp5-zh/figs/orig/fig-16-13.png" alt="Figure 16.13" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.13.</strong> Drawbacks of thread block-level tiling with square tiles.</p>
+<p>In most iterations, the observed parallelism is lower than the maximum, which implies that many threads remain idle (i.e., warps are underutilized). As a result, for a tile of n × n elements, 2 × n − 1 iterations need to be performed. Second, locality between neighboring tiles that are in two different tile antidiagonals is likely lost because only the last anti-diagonals of a tile are likely to remain in the cache (e.g., L2 in a GPU). In Fig. 16.13, the darkly shaded cells at the top right of the left tile are necessary to compute the initial anti-diagonals of the right tile (lightly shaded cells). However, it is more likely that the moderately shaded cells, which belong to the last anti-diagonals of the left tile, are in the cache since they were computed later, while the darkly shaded cells may have been evicted from the cache. Unfortunately, by the time the moderately shaded cells are used by the corresponding anti-diagonals of the right tile, they will likely have been evicted since these anti-diagonals of the right tile are computed later. To alleviate these two drawbacks, we can transform the square (or rectangular) tiles into hypertiles [2&ndash;4]. This is done via an aine transformation, called hyperplane partitioning, which converts rectangular tiles into quadrilaterals. We will limit the transformed tiles to parallelograms that can be formed by shifting the rows of a rectangular tile horizontally so that the cells that correspond to a column in the original tile are aligned with anti-diagonals after the transformation. Such shifting is called shear transformation. For example, in Fig. 16.14, we transform each 3 × 3 square tile in (a) into a 3 × 3 parallelogram hypertile in (b) by shifting its middle row to the left by 1 cell and the bottom row to the left by 2 cells. In these parallelogram hypertiles, each column of the original rectangular tiles is aligned with an anti-diagonal after the transformation. For example, in Fig. 16.14, the three cells from each column of the original tiles in (a) are aligned with an anti-diagonal in the transformed tile in (b). Parallel implementations of the Smith-Waterman algorithm using hypertiles have three advantages over those using rectangular tiles. First, the computation in each tile consists of a sequence of wavefronts of the same length. Thus, each thread block executing the kernel will have the same number of active threads when iterating through these wavefronts, which reduces warp divergence and hardware under-utilization. Fig. 16.14(c) shows that the length of all intra-tile anti-diagonals is fixed, keeping the number of active threads constant. Second, the number of iterations to compute FIGURE 16.14 Hyperplane transformation.</p>
+<p>a tile reduces, given that more work is done per iteration. Fig. 16.14 shows that five iterations are needed for a square tile, while only three for a hypertile. Third, the last anti-diagonal of one tile passes directly to the first anti-diagonal of the next tile. This increases data locality across thread blocks and can increase cache hits. In Fig. 16.14, assume that a cell with tile-level coordinates (r_tile, q_tile) is mapped to score-matrix-level coordinates (r, q) under square tiling. After the shear transformation, the cell with the same tile-level coordinates (r_tile, q_tile) would be mapped to score-matrix-level coordinate (r, q - r_tile). For example, cell (2, 0) of tile (0, 1), i.e., the second tile in the top row, in Fig. 16.14(a) has score-matrix level coordinate (2, 3). After shear transformation, cell (1, 0) in tile (0, 1) has scorematrix-level coordinate (2, 3-2) = (2, 1). In general, with shear transformation, if a cell with tile-level coordinates (r_tile, q_tile) has score-matrix-level coordinate (r, q) under rectangular tiling, the cell with the same tile-level coordinate will have score-matrix-level coordinate (r, q + m × rtile ) after shear transformation, where m is called the shear factor. The example in Fig. 16.14 assumes m = −1, the value that tilts each column of the hypertile sufficiently to align with the antidiagonals, as Fig. 16.14(b) shows. A disadvantage of tilting the tile columns is that each ``wavefront of tiles&rsquo;&rsquo; (i.e., the tiles that can be computed simultaneously in a d iteration, as marked by thick diagonal lines in Fig. 16.14), differ from those in the square tile implementation. For example, in the second iteration (d=1), only tile (1, 1) is in the wavefront. This is because the tilted columns of tile (0, 0) computed in the first wavefront left cells (1, 2), (2, 1), and (2, 2) not covered. Since these cells are needed by tile (1, 0), tile (1, 0) has to wait for the completion of tile (0, 1) in the second iteration to finish and then be computed in the third iteration. The number of d iterations increases with respect to the implementation of the square tile, as the host code in Fig. 16.15 shows, due to incomplete tiles to the left and right of the scoring matrix. In Fig. 16.14, the number of d iterations increase from 5 under square tiling to 8 under hypertiling. A natural consequence of the increase in the number of iterations is that the number of tiles per iteration decreases.</p>
+<img src="/pmpp5-zh/figs/orig/fig-16-15.png" alt="Figure 16.15" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.15.</strong> Hypertile-based implementation (host code).</p>
+<p>Let us reason what the number of wavefronts (iterations) for the hypertile approach is, given numTiles_x. It takes numTiles_x wavefronts for the square tile approach to reach the top-right corner of the table and another numTiles_x - 1 wavefronts to reach the bottom-right corner of the table. If we think about the thread blocks computing the tiles, each thread block is one tile column ahead of the next thread block. Hence, the thread block that computes the first row of tiles needs numTiles_x iterations to finish, and then we need one more iteration for each of the remaining numTiles_x - 1 rows of tiles. Thus, the total number of wavefronts is 2 * numTiles_x - 1. In the case of the hypertiles, it also takes numTiles_x wavefronts to reach the topright corner of the table. However, the effect of the shear transformation is that the tiles tilt. As a result, the cells of the right-most column of the table in the hypertile case belong to twice the number of tiles than in the square tile case. In other words, the tilting causes each thread block to be two columns of tiles ahead of the next thread block. Hence, the thread block that computes the first row of tiles needs numTiles_x + 1 iterations (we add one due to the last incomplete tile), and we need two more iterations for each of the remaining numTiles_x - 1 tile rows. Thus, the total number of wavefronts is 3 * numTiles_x - 1. In Fig. 16.14(a), we can see that the cells of the right-most column belong to three tiles. Hence, the total number of wavefronts is 5. However, in Fig. 16.14(b), we can see that they belong to six tiles. Hence, the total number of iterations is 8. Fig. 16.16 shows the CUDA kernel with hypertiles. It follows the same structure as the square tile implementation. Thus, we focus on explaining the key differences. The tile column index tile_col (line 10) differs from that of the square tile implementation due to the tilted shape of tiles. We take the first row of a tile as the reference for the column index. As we can observe in Fig. 16.14, the shape of tile anti-diagonals, e.g., the third anti-diagonal (d=2), is different in Fig. 16.14(a) and Fig. 16.14(b). For blockIdx.x=0, which works on the first row of tiles (tile_row=0) in both implementations, the tile column index is 2 in both cases (i.e., tile_col=d). However, for blockIdx.x=1 (i.e., tile_row=1), the tile column index is 1 in the square FIGURE 16.16 Hypertile-based implementation (kernel code).</p>
+<p>tile implementation (i.e., tile_col=d-blockIdx.x) but it is 0 in the hypertile implementation (i.e., tile_col=d-2*blockIdx.x). The for loop to iterate over the anti-diagonals of the tile (line 14) has a bound of tile_width instead of 2*tile_width-1. The number of anti-diagonals is the same as the width of the tile because all threads are active during all iterations in the hypertile implementation. The calculation of the column indices (lines 19-20) has to take into account the shear transformation and how cell values are stored in shared memory. In our hyper FIGURE 16.17 Hypertile-based implementation: device functions to load input values.</p>
+<p>tile implementation, for easier indexing, we assume that the shared memory tile is a square. Thus, each thread keeps its assigned value of anti-diagonal d_tile in column q_tile=d_tile of that square. For the column index in global memory, we apply the shear transformation (r, q + m × rtile ), i.e., we shift the column index by as much as the row index value. In the code, the transformation is done with the _shear() macro (line 2). The bound checking (line 22) only needs to check the indices in global memory r and q (for incomplete tiles), since all threads that work on a tile are active in all iterations. The rest of the kernel code looks the same as that of the square tile implementation but the body of the device functions changes. Fig. 16.17 shows load_n, load_w, and load_nw functions. As is the case in the square tile implementation, if one tile cell is at the top or the left border of the tile, the thread needs to read the previous antidiagonal values from the global memory matrix. If these values fall in the shared memory tile, we need to adjust the index calculation by taking into account how cell values are stored in shared memory. For example, load_n needs to read a tile cell that corresponds to a cell (n) directly above its assigned cell in the scoring matrix. If n is in the shared memory tile, its row index in the tile is r_tile-1, as is the case with square tiling. However, because of the sheer transformation, the cell is actually stored in the previous column (q_tile-1) in the tile because each hypertile is stored as a square in shared memory. We encourage the reader to reason about load_w and load_nw in a similar way. Finally, the threads store the tile to global memory by calling store_tile, whose code is in Fig. 16.18. The only difference with respect to the code in Fig. 16.12 is that we apply the shear transformation to compute the column index q (line 4).</p>
+<img src="/pmpp5-zh/figs/orig/fig-16-18.png" alt="Figure 16.18" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.18.</strong> Hypertile-based implementation: device function to store a tile in global memory.</p>
+<img src="/pmpp5-zh/figs/orig/fig-16-19.png" alt="Figure 16.19" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.19.</strong> Hypertile-based implementation: device function to initialize shared memory.</p>
+<p>We have skipped one line (line 12) in our explanation of the code in Fig. 16.16, which is absent from the square tile implementation. This initialize_tile device function initializes the shared memory tile cells to 0, as Fig. 16.19 shows. The reason for this initialization function is that the bound checking (line 22) will make sure that some threads do not write to their shared memory positions because they fall outside of the actual scoring matrix. However, all threads remain active during the kernel execution because their assigned cells fall in the range of the tile so some of the threads would calculate out-of-bound cells in the thread block. They will not be allowed to write to the score matrix at the end of the kernel execution. As a result, these threads could read garbage values via load_n, load_w, and load_nw in later iterations. Initializing all shared memory tile cells to zero prevents these threads from generating exceptions when performing using the garbage values. There is still one challenge to solve in the hypertile implementation due to the way we store the tile in shared memory. As Fig. 16.20 illustrates, the hypertile is stored as a square in shared memory, using a row-major layout. However, if the hypertile width is a multiple or a divisor of the number of shared memory banks, bank conflicts will occur. To avoid the bank conflicts, we can use padding (i.e., one empty memory location after each row of the hypertile) in order to shift the addresses accessed by consecutive threads, thus avoiding the bank conflicts. In our code, we can define a macro pad(x) equal to (x + (x &raquo; LOG_NUM_BANKS)), where x is the shared memory index and LOG_NUM_BANKS is the binary logarithm of the number of banks. Note that FIGURE 16.20 Example of padding a hypertile in shared memory.</p>
+<p>we also need to allocate some extra shared memory space for the tile (i.e., (threads * threads + ((threads * threads) &raquo; LOG_NUM_BANKS)) * sizeof(int)) in line 11 of Fig. 16.15. To complete our comparison of the two tiling approaches, we can do a work analysis to estimate the benefit of the hypertiles over the square tiles. A thread block performing the work of an entire square tile requires 2n − 1 iterations, with n being the size of one tile dimension. In iteration i, the number of computed cells is i before the main anti-diagonal and 2n − i after the main anti-diagonal. Eq. (16.3) shows the total amount of work. Worksquare tile = n ∑ i+ i=1 2n−1 ∑ (2n − i) = n2 (16.3)</p>
+<p>i=n+1</p>
+<p>The computation of one hypertile requires only n iterations and the amount of work per iteration is n. Eq. (16.4) shows the total amount of work to compute a hypertile. W orkhypertile = n ∑ n = n2 (16.4)</p>
+<p>i=1</p>
+<p>We can observe that the total amount of work is the same for both types of tiles. However, the square tile requires 2n − 1 iterations, while the hypertile requires n iterations. As a result, the average work per iteration for the square tile is approximately n 2 , while it is n for the hypertile. That is, the hypertile is twice as efficient as the square tile. We also need to account for the additional iterations in the host code. The host code needs to iterate through up to 1.5× more wavefronts under hypertiling. However, if the scoring matrix is large enough, the iterations may still be able to achieve good occupancy. In this case, the negative impact on performance will be from the kernel call overhead. Kernel calling overhead can be eliminated with the synchronization technique introduced in Section 16.8. The hyperplane transformation can also apply to other parallel patterns. Stencil computation (Chapter 8) is a prominent example, as the following sidebar explains.</p>
+<h2 id="sec-16-8">16.8 More optimizations<a class="td-heading-self-link" href="#sec-16-8" aria-label="Link to this heading"></a>
+</h2>
+<p>Hyperplane Partitioning for Stencil Computation Stencil computation can benefit from the hypertile transformation introduced in this section. An example is Jacobi stencils, where there is an outer sequential loop that represents iterations in the time domain. The inner loop/s update the stencil cells in the spatial domain. As a result, there are intra-tile wavefronts and inter-tile wavefronts in the spatial domain and in the time domain, and it is possible to leverage the parallelism in both types of wavefronts efficiently by using hypertiles. The following code and figures show an example of a toy one-dimensional stencil. As we can see in the code, each element of the stencil A[i] is dependent on its previous value and the value of the upper element (i.e., A[i] and A[i+1] calculated in the previous time iteration). Figure (a) represents the dependencies with arrows. With a straightforward work partitioning, only the elements in the same column (same t) can be calculated in parallel, assuming that all values of the previous t are available. After each t, we need to perform a global synchronization. Figure (b) shows a hypertile partitioning of the time-space domain. The hypertiles define intra-tile wavefronts and inter-tile wavefront, thus exposing more parallelism and reducing the number of global synchronizations.</p>
+<p>for (t=1; t&lt;=T; t++) for (i=1; i&lt;=I; i++) A[i] = 0.5 * (A[i] + A[i+1]);</p>
+<p>Synchronization across anti-diagonals of tiles. In the previous sections, we synchronize anti-diagonals of tiles by terminating the kernel and launching a new kernel.</p>
+<p>This ensures global synchronization. However, this approach has the disadvantage that each thread block has to wait for all the thread blocks that compute the two previous anti-diagonals, although it only depends on three of these thread blocks. This may cause load imbalance and, thus, entail a potential waste of the computing slots available in the streaming multiprocessors. Recently, CUDA provides cooperative groups, which can synchronize all threads in a warp, a block, several blocks, or an entire grid. Chapter 18 provides a detailed introduction to cooperative groups. An example use of cooperative groups is to allow synchronizing all thread blocks within the grid without relaunching the kernel. For grid-level synchronization, the kernel with cooperative groups needs to use persistent thread blocks. The grid size must be equal to (or less than) the maximum number of concurrent thread blocks that can run on the streaming multiprocessors. The grid-level synchronization provided by cooperative groups can be applied to the computation of tile anti-diagonals in our implementation of the Smith-Waterman algorithm. However, such an implementation would still force each thread block to wait for all thread blocks of the previous two anti-diagonals. A more efficient synchronization mechanism can use an array of flags to signal the completion of tiles. This way, one thread block only needs to check two flags (i.e., the ones corresponding to the tile on top and the tile at the left) and can start computing as soon as they are set. Furthermore, if we use persistent thread blocks and assign one per row of tiles, each thread block will only need to check one flag. Fig. 16.21 illustrates this synchronization mechanism, which resembles the unidirectional synchronization that we covered in Chapter 11 (Scan). The left part of the figure shows an array of flags and the dependencies between tiles. The right part of the figure illustrates the waste of computing slots that the global synchronization may cause, and the potential for saving execution cycles of the inter-block synchronization mechanism. The inter-block synchronization mechanism can also be applied to the hypertiles. In their case, the width of the hypertiles determines the amount of synchronization operations (i.e., checking and updating flags) and the waiting time for a block to start computing a tile. A programmer could tune the width in order to find a performance sweet spot. Small dynamic programming problems. In this chapter, we have used the SmithWaterman algorithm as a running example. Note that we assume that multiple thread blocks are needed for the computation of the scoring matrix. This would be useful for alignment of long sequences (thousands of base pairs). However, for short sequences (hundreds of base pairs), one thread block or even one warp per alignment may be enough to compute the scoring matrix. Such implementations can greatly benefit from storing tiles in registers and exchanging intermediate results using shuffle instructions (introduced in Chapter 10). DPX instructions. Since NVIDIA Hopper architecture, CUDA features a new type of SIMD instructions, called DPX, that are intended to accelerate dynamic programming applications. For example, we can replace the max4() device function in the kernel of Fig. 16.10 with the DPX instruction __vimax3_s32_relu(), which takes advantage of special hardware to calculate the maximum of three input values and 0.</p>
+<img src="/pmpp5-zh/figs/orig/fig-16-21.png" alt="Figure 16.21" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 16.21.</strong> Inter-block synchronization (left) and its benefit in terms of utilization of the streaming multiprocessors (right).</p>
+<h2 id="sec-16-9">16.9 Summary<a class="td-heading-self-link" href="#sec-16-9" aria-label="Link to this heading"></a>
+</h2>
+<p>Dynamic programming algorithms divide complex problems into simple subproblems recursively. Bottom-up implementations can memoize intermediate results in tables. The dependencies between table cells define wavefronts, which are sets of sub-problems that can be solved in parallel. This chapter has explained how wavefront parallelism can be efficiently exploited on GPUs. Block-level tiling and hypertile transformations provide ways of optimizing the utilization of compute resources. More advanced optimizations that can provide further performance are inter-block synchronization mechanism and the use of DPX instructions.</p>
+<h2 id="sec-16-10">16.10 Exercises<a class="td-heading-self-link" href="#sec-16-10" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Implement a version of the Floyd-Warshall kernel that uses square thread blocks, instead of linear blocks as in the implementation of Section 16.4. In the square block implementation, the distance table is divided into square tiles that are assigned to the thread blocks. Threads of each block store the relevant parts of the k column and the k row in shared memory for reuse. Compare this implementation and the implementation presented in Section 16.4 in terms of memory accesses, data reuse, and performance. 2. Modify the Smith-Waterman kernel with thread block-level tiling to use rectangular tiles.</p>
+<p>\3. Implement a version of the Smith-Waterman kernel with thread block-level tiling that uses cooperative groups for synchronization across blocks. 4. Implement a version of the Smith-Waterman kernel with thread block-level tiling that uses the unidirectional synchronization. The single lookback synchronization presented in Chapter 11 can be a reference. 5. Implement a version of the Smith-Waterman kernel with hypertiles that uses the unidirectional synchronization. The single lookback synchronization presented in Chapter 11 can be a reference. 6. Replace the max4() device function that we use in the kernels in this chapter with a DPX instruction with the same functionality.</p>
+<p>References [1] M. Alser, J. Lindegger, C. Firtina, N. Almadhoun, H. Mao, G. Singh, J. Gomez-Luna, O. Mutlu, From molecules to genomic variations: accelerating genome analysis via intelligent algorithms and architectures, Computational and Structural Biotechnology Journal 20 (2022) 4579&ndash;4599. [2] F. Irigoin, R. Triolet, Supernode partitioning, in: Proceedings of the 15th ACM SIGPLANSIGACT Symposium on Principles of Programming Languages, 1988, pp. 319&ndash;329. [3] P. Di, D. Ye, Y. Su, Y. Sui, J. Xue, Automatic parallelization of tiled loop nests with enhanced fine-grained parallelism on GPUs, in: 2012 41st International Conference on Parallel Processing, IEEE, 2012, pp. 350&ndash;359. [4] M.E. Belviranli, P. Deng, L.N. Bhuyan, R. Gupta, Q. Zhu, Peerwave: exploiting wavefront parallelism on GPUs with Peer-SM synchronization, in: Proceedings of the 29th ACM on International Conference on Supercomputing, 2015, pp. 25&ndash;35.</p>
+<p>CHAPTER</p>
+<p>Sparse matrix computation</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-1.png" alt="Figure 17.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.1.</strong> A simple sparse matrix example.</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] M. Alser, J. Lindegger, C. Firtina, N. Almadhoun, H. Mao, G. Singh, J. Gomez-Luna, O. Mutlu, From molecules to genomic variations: accelerating genome analysis via intelligent algorithms and architectures, Computational and Structural Biotechnology Journal</p>
+<p>[2] F. Irigoin, R. Triolet, Supernode partitioning, in: Proceedings of the 15th ACM SIGPLANSIGACT Symposium on Principles of Programming Languages, 1988, pp. 319&ndash;329.</p>
+<p>[3] P. Di, D. Ye, Y. Su, Y. Sui, J. Xue, Automatic parallelization of tiled loop nests with enhanced fine-grained parallelism on GPUs, in: 2012 41st International Conference on Parallel Processing, IEEE, 2012, pp. 350&ndash;359.</p>
+<p>[4] M.E. Belviranli, P. Deng, L.N. Bhuyan, R. Gupta, Q. Zhu, Peerwave: exploiting wavefront parallelism on GPUs with Peer-SM synchronization, in: Proceedings of the 29th ACM on International Conference on Supercomputing, 2015, pp. 25&ndash;35.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/15-ch15/"
+    aria-label="Previous - Chapter 15 Advanced optimizations for matrix multiplication" title="Chapter 15 Advanced optimizations for matrix multiplication" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 15 Advanced optimizations for matrix multiplication</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/17-ch17/"
+    aria-label="Next - Chapter 17 Sparse matrix computation" title="Chapter 17 Sparse matrix computation" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 17 Sparse matrix computation</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-16-1">16.1 Dynamic programming</a></li>
+    <li><a href="#sec-16-2">16.2 Implementation approaches</a></li>
+    <li><a href="#sec-16-3">16.3 Wavefront patterns</a></li>
+    <li><a href="#sec-16-4">16.4 Floyd-Warshall algorithm</a></li>
+    <li><a href="#sec-16-5">16.5 Genome sequence alignment and Smith-Waterman algorithm</a></li>
+    <li><a href="#sec-16-6">16.6 Wavefront parallelization: block-level tiling</a></li>
+    <li><a href="#sec-16-7">16.7 Hyperplane transformation</a></li>
+    <li><a href="#sec-16-8">16.8 More optimizations</a></li>
+    <li><a href="#sec-16-9">16.9 Summary</a></li>
+    <li><a href="#sec-16-10">16.10 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/16-ch16/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/16-ch16/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/16-ch16/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/16-ch16.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/16-ch16.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+16+Dynamic+programming+and+wavefront+parallelism"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/16-ch16/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/16-ch16/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/16-ch16/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/16-ch16/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

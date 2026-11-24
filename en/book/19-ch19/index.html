@@ -1,0 +1,802 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/19-ch19/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/18-ch18/">
+<link rel="next" href="/pmpp5-zh/en/book/20-ch20/"><meta name="robots" content="index, follow">
+
+<title>Chapter 19 Convolutional neural networks | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/19-ch19/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/19-ch19/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/19-ch19/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/19-ch19/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 19 Convolutional neural networks">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 19 Convolutional neural networks">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="11269">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 19 Convolutional neural networks">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/19-ch19/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/19-ch19/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/19-ch19/" aria-current="page" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 19 Convolutional neural networks</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/19-ch19.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/19-ch19.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;19&#43;Convolutional&#43;neural&#43;networks" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 19 Convolutional neural networks</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c19">Chapter 19 Convolutional neural networks<a class="td-heading-self-link" href="#c19" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>With special contributions from Juan Gómez-Luna CONTENTS 19.1 Convolutional neural networks. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 454 19.2 A CUDA convolutional layer kernel. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 460 19.3 Formulating convolutional layer as GEMM . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 463 19.4 CUDNN library. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 472 19.5 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 474 19.6 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 474 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 475 Deep learning [1] is a branch of the machine learning discipline whose studies give computers the ability to learn to perform certain tasks without being explicitly programmed. Machine learning for a task starts with a human developer architecting a parameterized model for given datasets that explicitly or implicitly specify the expected action for each input instance. The model parameters are ``learned&rsquo;&rsquo; by processing the datasets. The complexity and size of the machine learning models can vary widely based on the task being performed and the size of the datasets used. Deep learning models are designed for complex tasks, such as human facial recognition and natural language processing, whose expected actions can only be captured with and learned from datasets with massive numbers of examples. These models typically employ a deep hierarchy of classifiers that consist of a massive number of parameters to learn a large number of complex features. Thus, they can achieve more accurate pattern recognition results if there is enough training data to allow the system to properly learn the parameter values of all the layers of feature extractors in the model to automatically discover an adequate number of relevant patterns. While machine learning has existed as a subject of computer science for a long time and has been applied successfully to automate many simple, routine tasks, its deep learning branch had stayed dormant for decades because of the lack of massive datasets and the computing power needed to learn the values of the large number of model parameters from the massive datasets. Since 2012, deep learning based on multi-layer Artificial Neural Networks has gained a great deal of industry attention for two reasons. The first reason is the massive datasets available for training deep learning models from the pervasive use of the internet by both consumers and businesses. The second reason is the availability of ample computing power in GPU Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00030-5">https://doi.org/10.1016/B978-0-44-343900-1.00030-5</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<p>computing systems that can effectively and timely learn model parameter values from these massive datasets. The readers may find the introduction to machine learning and neural networks in Appendix B helpful. This chapter presents the acceleration of the convolutional neural networks (CNNs) whose demonstrated efficacy in computer vision triggered the first wave of deep learning revolution in 2012. In particular, the convolutional layers of the CNNs have a high compute-to-memory-access ratio, and high levels of parallelism, which makes them a perfect candidate for GPU acceleration. We will present a basic CUDA implementation of the forward (inference) path in a convolutional layer and a few optimizations that improve the speed of this basic implementation. We will then show how one can formulate the convolutional layers into matrix multiplication, which can be systematically accelerated using highly optimized hardware and software in modern GPUs.</p>
+<p>Deep learning [1] is a branch of the machine learning discipline whose studies give computers the ability to learn to perform certain tasks without being explicitly programmed. Machine learning for a task starts with a human developer architecting a parameterized model for given datasets that explicitly or implicitly specify the expected action for each input instance. The model parameters are “learned” by processing the datasets. The complexity and size of the machine learning models can vary widely based on the task being performed and the size of the datasets used. Deep learning models are designed for complex tasks, such as human facial recognition and natural language processing, whose expected actions can only be captured with and learned from datasets with massive numbers of examples. These models typically employ a deep hierarchy of classifiers that consist of a massive number of parameters to learn a large number of complex features. Thus, they can achieve more accurate pattern recognition results if there is enough training data to allow the system to properly learn the parameter values of all the layers of feature extractors in the model to automatically discover an adequate number of relevant patterns.</p>
+<p>While machine learning has existed as a subject of computer science for a long time and has been applied successfully to automate many simple, routine tasks, its deep learning branch had stayed dormant for decades because of the lack of massive datasets and the computing power needed to learn the values of the large number of model parameters from the massive datasets. Since 2012, deep learning based on multi-layer Artificial Neural Networks has gained a great deal of industry attention for two reasons. The first reason is the massive datasets available for training deep learning models from the pervasive use of the internet by both consumers and businesses. The second reason is the availability of ample computing power in GPU computing systems that can effectively and timely learn model parameter values from these massive datasets. The readers may find the introduction to machine learning and neural networks in Appendix B helpful.</p>
+<p>This chapter presents the acceleration of the convolutional neural networks (CNNs) whose demonstrated efficacy in computer vision triggered the first wave of deep learning revolution in 2012. In particular, the convolutional layers of the CNNs have a high compute-to-memory-access ratio, and high levels of parallelism, which makes them a perfect candidate for GPU acceleration. We will present a basic CUDA implementation of the forward (inference) path in a convolutional layer and a few optimizations that improve the speed of this basic implementation. We will then show how one can formulate the convolutional layers into matrix multiplication, which can be systematically accelerated using highly optimized hardware and software in modern GPUs.</p>
+<h2 id="sec-19-1">19.1 Convolutional neural networks<a class="td-heading-self-link" href="#sec-19-1" aria-label="Link to this heading"></a>
+</h2>
+<p>The CNNs, invented in late 1980s [2], are a type of feed-forward networks (Appendix B). By the early 1990s, CNNs had been experimentally applied to automated speech recognition, optical character recognition (OCR), handwriting recognition, and face recognition [3]. However, until the late 1990s, the mainstream of computer vision and that of automated speech recognition had been based on carefully engineered features. The amount of labeled data was insufficient for training a deep-learning system to compete with recognition/classification functions crafted by human experts. Furthermore, it was a common belief that it was computationally infeasible to automatically learn the parameter values of hierarchical feature extractors with enough layers to outperform human-crafted application-specific feature extractors even if the required labeled datasets existed Interest in deep, feed-forward networks were revived around 2006 by a group of researchers who introduced unsupervised learning methods that could create multilayer, hierarchical feature detectors without requiring labeled data [4,5]. The first major application of this approach was in speech recognition. The breakthrough was made possible by GPUs that allowed researchers to train networks ten times faster than traditional CPUs. This advancement, coupled with the massive amount of media data available online, drastically elevated the position of deep-learning approaches. Despite their success in speech, convolutional neural networks were largely ignored in the field of computer vision until 2012. In 2012, a group of researchers from the University of Toronto trained a convolutional neural network to classify 1000 different classes in the ILSVRC contest [6]. The network was huge by the norms of the time: it had approximately 60 million parameters and 650,000 neurons. It was trained on 1.2 million high-resolution images from the ImageNet database. The network was trained in only one week on two GPUs using a CUDA-based convolutional neural network library written by Alex FIGURE 19.1 LeNet-5, a convolutional neural network for handwritten digit recognition. The letter A in the input should be classified as none of the 10 classes (digits).</p>
+<p>Krizhevsky [7]. The network achieved break-through results with a winning test error rate of 15.3%. In comparison, the second-place team that used the traditional computer vision algorithms had an error rate of 26.2%. This success triggered a revolution in computer vision, and convolutional neural networks became a mainstream tool in computer vision, natural language processing, reinforcement learning, and many other areas. We will use LeNet-5, a CNN designed in the late 1980s for digit recognition [3] as a working example. As shown in Fig. 19.1, LeNet-5 is composed from three types of layers: convolutional layers, subsampling layers, and fully connected layers. While these three types of layers continue to be important components of today’s neural networks, the convolutional layers account for the majority of the execution time of CNNs. We will focus on the logical design and acceleration of the convolutional layers. Interested readers can refer to Appendix B and the literature for more treatment of other types of CNN layers. The forward path of LeNet-5 receives input on the left side and flows through the layers from left to right. The input to the network is shown as a gray image with a hand-written digit represented as a 2D 32 × 32 pixel array. The last layer computes the output, which is the probability for the original image to belong to each one of the 10 classes (digits) that the network is set up to recognize. During inference, the output generated by the forward path of the network is used as the answer (i.e., which digit is recognized from the input image) for the input image. During training, on the other hand, the output of the forward path is compared against the label, i.e., the expected output value for the input image. If the output disagrees with the expected output, the backward-propagation path is activated to adjust the model parameters of the network (Appendix B). That is, the forward path is activated during both the training phase and the inference phase. We will therefore use the forward path to illustrate the acceleration of the convolutional layers.1 1 Appendix B also presents the backward-propagation path of CNNs. Interested readers should explore the CUDA kernel implementation of the backward-propagation of the CNN layers by applying the skills that they acquired from studying the forward path.</p>
+<img src="/pmpp5-zh/figs/orig/fig-19-2.png" alt="Figure 19.2" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 19.2.</strong> Forward propagation path of a convolutional layer.</p>
+<p>The inputs to and outputs from the CNN layers are referred to as feature maps, or simply, features. For example, in Fig. 19.1, the computation of the C1 convolutional layer (Convolutions) at the input end of the network is organized to generate six (28 × 28) output feature maps from the (32 × 32) INPUT pixel array. The convolutional layer output to be produced for the input feature maps consists of pixels, each of which is produced by performing a convolution between a small local patch of the feature map pixels produced by the previous layer (INPUT in the case of C1) and a set of weights (i.e., a convolution mask as defined in Chapter 7) called a filter. The convolution result is then fed into an activation function like sigmoid (Appendix B) to produce an output pixel in the output feature map. One can think of the convolutional layer as a collection of perceptrons (Appendix B) where each pixel of an output feature map is generated by one of the perceptrons whose inputs are patches of pixels in the input feature maps. For the purpose of this chapter, we will focus on the efficient generation of the convolution result. Once an efficient kernel for generating the convolution result is in place, it is straightforward to add the activation functions either as a separate kernel or at the end the same kernel. That is, for the purpose of this chapter, the value of each output pixel is the sum of convolution results from the corresponding patches in all input feature maps. Fig. 19.2 shows a small convolutional layer example. There are three input feature maps, two output feature maps, and six filters. Different input and output feature map pairs in a layer use different filters. Since there are three input feature maps and two output feature maps in Fig. 19.2, we need 3 × 2 = 6 filters in the bank. For the C3 layer of LeNet in Fig. 19.1, there are 6 input feature maps and 16 output feature maps. Thus, a total of 6 × 16 = 96 filters are used in C3’s filter bank. Fig. 19.2(b) illustrates more details of the calculations done by a convolutional layer. We omitted the activation function for the output pixels for simplicity. We show that each output feature map is the sum of convolutions of all input feature maps. For example, the upper left corner element of output feature map 0 (value 14)</p>
+<img src="/pmpp5-zh/figs/orig/fig-19-3.png" alt="Figure 19.3" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 19.3.</strong> A C implementation of the forward propagation path of a convolutional layer.</p>
+<p>is calculated as the convolution between the circled patches of the input feature maps and the corresponding filters2 : (1, 2, 1, 1) · (1, 1, 2, 2) + (0, 2, 0, 3) · (1, 1, 1, 1) + (1, 2, 0, 1) · (0, 1, 1, 0) = 1 + 2 + 2 + 2 + 0 + 2 + 0 + 3 + 0 + 2 + 0 + 0 = 14 (19.1) Although not shown in Fig. 19.1, all 2D filters used in LeNet-5 are 5 × 5 convolution filters. Recall from Chapter 7 that generating a convolution output image from an input image and a convolution filter requires one to make assumptions about the “ghost cells&rsquo;&rsquo;. Instead of making such assumptions, the LeNet-5 design simply uses four elements at the right edge and four elements at the bottom edge of each input feature map as ``ghost cells&rsquo;&rsquo;. This reduces the size of each dimension by four: four at the right and four at the bottom. As a result, we see that for layer C1, the 32 × 32 INPUT image results in an output feature map that is a 28 × 28 image. Fig. 19.1 illustrates this computation by showing that a pixel in the C1 layer is generated from a square (5 × 5 although not explicitly shown) patch of INPUT pixels. Fig. 19.3 shows convLayer_forward, a sequential C function implementation of the forward propagation path of a convolutional layer. The input feature maps are stored in a 3D array parameter X whose size is C×H×W, where C is the second input 2 Although we use integer values for elements in the feature maps and filter bank for simplicity, they arefloating numbers in reality.</p>
+<p>parameter that specifies the number of input feature maps (i.e., number of channels), H is the third input parameter that specifies the height of each input map image, and W is the fourth input parameter that specifies the width of each input map image (line 1). That is, the highest dimension index for X selects one of the feature maps (often referred to as channels) and the indices of the lower two dimensions select one of the pixels in an input feature map. For example, the input feature maps for the C1 layer of Fig. 19.1 are stored in X whose dimensions are 1×32×32 since there is only one input feature map (INPUT in Fig. 19.1) that consists of 32 pixels in each of the x and y dimensions. This also reflects the fact that one can think of the 2D input feature maps to a layer altogether form a 3D input feature map, which is also referred to as the input tensor to the layer. The output feature maps of a convolutional layer are to be stored in a 3D M×(HK+1)×(W-K+1) array parameter Y, where M is the number of output feature maps and K is the height (and width) of each 2D filter (line 1). For example, the output feature maps for the C1 layer in Fig. 19.1 is stored in Y whose dimensions are 6×28×28 since C1 generates six output feature maps using the 5×5 filters. The filter bank is stored in a 4D M×C×K×K array parameter W. There are M×C filters, one for each pair of input feature map and output feature map. Filter F[m, c, _, _] is used when calculating the contribution of input feature map X[c, _, _] to output feature map Y[m, _, <em>], where ``</em>&rsquo;&rsquo; represents an index that ranges from 0 to K. Recall that each output feature map is the sum of convolutions of all input feature maps. Each iteration of the outermost (m) for-loop (lines 4-12) generates an output feature map. Each iteration of the next two levels (h and w) of for-loops (lines 5-12) generates one pixel of the current output feature map. The next three loop levels (lines 8-11) perform the convolution between the input feature maps and the associated filter banks before accumulating the convolution result for each input feature map into the output feature map (line 11). To complete our example, the convolutional layer C3 in Fig. 19.1 has 6 input feature maps and 16 output feature maps. Each input feature map is a 14×14 image and each output feature map is a 10×10 image. This layer has 6 × 16 = 96 filter banks and each filter bank has 5 × 5 = 25 weights. The output of C3 is passed into the subsampling layer S4 which generates 16 5 × 5 output feature maps. Finally, the last convolutional layer C5 which uses a bank of 16 *120 = 1920 5×5 filters to generate 120 one-pixel output feature maps from its 16 input feature maps. The output feature maps from C5 are passed through fully connected layer F6 which has 84 output units, where each output is fully connected to all inputs. The output is computed as a product of a weight matrix with an input vector, then a bias is added and the output is passed through sigmoid. For F6 in our example, the weight matrix (W) is a 120×84 matrix. In summary, the output is an 84-element vector Y6 = sigmoid(W * X + b). The reader should recognize that this is equivalent to 84 perceptrons and each perceptron takes all 120 one-pixel values generated by the C5 layer as its input. We leave the detailed implementation of a fully connected layer as an exercise.</p>
+<img src="/pmpp5-zh/figs/orig/fig-19-4.png" alt="Figure 19.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 19.4.</strong> Forward path of a batched convolutional layer.</p>
+<p>The final stage is an output layer that uses Gaussian connections [3] to generate a vector of 10 elements, which correspond to the probability that the input image contains one of the 10 digits (0 through 9). Batched Convolution Layer. To make full use of the computation resources, implementers of CNNs often resort to batched execution by collecting multiple inputs and running them through the network as a batch. The input feature maps and output feature maps generated for each input in the batch will be collectively referred to as a sample in the batch. During batched execution, batching allows the user to launch a much larger grid with more thread blocks, which can significantly improve the utilization of GPU execution resources. Batched CNN execution is especially popular for the training phase since one must run a massive number of inputs through the CNN during training. It is very natural to divide up the large number of training inputs into batches before running them through the network. Fig. 19.4 shows the revised forward path implementation of a convolutional layer that generates the output feature maps for all the samples of a batch. When compared to Fig. 19.3, there is an additional outer loop (line 4) that iterates through all the samples in the batch. Note that X and Y have an additional dimension, which consists of the different samples in the batch, whereas F does not because the same weights are used across samples in the same batch. We will use this batched implementation as the base for the CUDA kernels.</p>
+<h2 id="sec-19-2">19.2 A CUDA convolutional layer kernel<a class="td-heading-self-link" href="#sec-19-2" aria-label="Link to this heading"></a>
+</h2>
+<p>The computation pattern in training a convolutional neural network is like matrix multiplication: it is both compute intensive and highly parallel. We can process different samples in a mini-batch, different output feature maps for the same sample, and different elements for each output feature map in parallel. In Fig. 19.4, the nloop (line 4, over samples in a mini-batch), m-loop (line 5, over output feature maps), the nested h-w-loops (lines 6-7, over pixels of each output feature map) are all parallel loops in that their iterations can be executed in parallel. These four loop levels together offer a massive level of parallelism. The innermost three loop levels, the c-loop (over the input feature maps or channels) and the nested p-q-loops (over the weights in a filter bank), also offer a significant level of parallelism. However, to parallelize them, one would need to make heavy use of atomic operations in accumulating into the Y elements since different iterations of these loop levels would need to perform read-modify-write on the same Y elements. Therefore, we will keep these loops serial unless we really need more parallelism. Assuming that we exploit the four levels of <code>easy'' parallelism (n, m, h, w) in the convolutional layer, the total number of parallel iterations is the product N \* M \* H_out \* W_out. This high degree of available parallelism makes the convolutional layer a promising candidate for GPU acceleration. We can easily design a kernel with thread organizations designed to capture the parallelism. We need to first make some high-level design decisions on the thread organization. Assume that we will have each thread to compute one element of one output feature map. We will use 2D thread blocks, where each thread block computes a tile of TILE_WIDTH \* TILE_WIDTH pixels in one output feature map. For example, if we set TILE_WIDTH = 16, we would have a total 256 threads per block. This captures part of the nested h-w-loop level parallelism in generating the pixels of each output feature map. By assigning each thread block to generate TILE_WIDTH \* TILE_WIDTH pixels in one of the output feature maps, the </code>easy&rsquo;&rsquo; parallelism can support up to N * M * (H_out/TILE_WIDTH) * (W_out/TILE_WIDTH) thread blocks. Thread blocks can be organized into a 3D grid in several different ways. Each option designates the grid dimensions to capture the n, m, and h-w parallelism in different combinations. We will present the details of one of the options and leave it as an exercise for the reader to explore different options and evaluate the potential pros and cons of each option. The option that we present in detail is as follows: 1. The first dimension (X) corresponds to the (M) output features maps covered by each block. This assignment allows the threads in a thread block to use the X dimension of their common block index (blockIdx.x) to identify the output feature map that is assigned to them. 2. The second dimension (Y) reflects the location of a block’s output tile inside the output feature map selected by X. This assignment allows the threads in a thread block to use the Y dimension of their block index (blockIdx.y) to produce their assigned tile within their assigned output feature map.</p>
+<img src="/pmpp5-zh/figs/orig/fig-19-5.png" alt="Figure 19.5" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 19.5.</strong> Host code for launching a convolutional layer kernel.</p>
+<p>\3. The third dimension (Z) in the grid corresponds to inputs (N) in the batch. This assignment allows each block to use the Z dimension of their block index (blockIdx.z) to select one of the samples in the batch as its input. Fig. 19.5 shows the host code that launches a kernel based on the thread organization proposed above. The number of blocks in the X and Z dimensions of the grid are straightforward; they are simply M, the number of output feature maps, and N, the number of samples in a batch. That is, the X index and Z index of a thread block select the output feature map and the input sample of the current batch for the thread block to work on. The arrangement in the Y dimension is a little more complex and is illustrated in Fig. 19.6. Ideally, we would like to dedicate two dimensions of the grid indices to the vertical and horizontal tile indices for simplicity. However, we have only one dimension for both since we are using X for the output feature map index and Z for the sample index in a mini-batch. Therefore, we linearize the tile indices to encode both the horizontal and vertical tile indices of output feature map tiles. In the example in Fig. 19.6, each sample has 4 output feature maps (M = 4) and each output feature map consists of 2 × 2 tiles (W_grid = 2 in line 2 and H_grid = 2 in line 3) of 16 × 16 = 256 pixels each. The grid organization assigns each block to calculate one of these tiles. We have already assigned each output feature map to the X dimension, which is reflected as the four blocks in the X dimension each corresponding to one of the output feature maps. As shown in the bottom of Fig. 19.6, we linearize the 4 tiles in each output feature map and assign them to the blocks in the Y dimension. That is, tiles (0,0), (0,1), (1,0), and (1,1) are mapped using row-major order to the blocks with blockIdx.y values 0, 1, 2, and 3, respectively. Thus, the total number of blocks in the Y dimension is 4 (T = H_grid * W_grid = 4 in line 4). Therefore, we will launch a grid with gridDim(4, 4, N) in lines 6-7. Fig. 19.7 shows a kernel based on the thread organization above. Note that in the code, we use multi-dimensional indices in array accesses for clarity. We leave it to FIGURE 19.6 Mapping output feature map tiles to blocks in the X-Y dimension of the grid. The same mapping is done for all samples in the Z dimension.</p>
+<img src="/pmpp5-zh/figs/orig/fig-19-7.png" alt="Figure 19.7" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 19.7.</strong> Kernel for the forward path of a convolutional layer.</p>
+<h2 id="sec-19-3">19.3 Formulating convolutional layer as GEMM<a class="td-heading-self-link" href="#sec-19-3" aria-label="Link to this heading"></a>
+</h2>
+<p>reader to translate this pseudo-code into regular C assuming that X, Y, and F must be accessed via linearized indexing based on row-major layout (Chapter 3). Each thread starts by generating the n (sample within batch), m (feature map), h (vertical), and w (horizontal) indices of its assigned output feature map pixel. The n (line 6) and m (line 3) indices are straightforward given the host code. For the h index calculation in line 4, the blockIdx.y value is first divided by W_grid to recover the tile index in the vertical direction, as illustrated in Fig. 19.6. This tile index is then expanded by the TILE_WIDTH and added to the threadIdx.y to form the actual vertical pixel index into the output feature map (line 4). The derivation of the horizontal pixel index is similar (line 5). Each thread generates an output feature map pixel iteratively. In each iteration, it performs a convolution between a patch of the input feature map pixels and the selected convolution filter bank (lines 7-12). The convolution result is accumulated in the acc local variable. The process completes when the thread finishes the convolution for the same patch over all input feature maps. The thread will then assign the final result into the output feature map pixel (line 13). The kernel in Fig. 19.7 has a high degree of parallelism but consumes too much global memory bandwidth. Like the convolution pattern discussions in Chapter 7, the execution speed of the kernel will be limited by the global memory bandwidth. As we have also seen in Chapter 7, we can use techniques such as shared memory tiling to dramatically reduce the global memory traffic and improve the execution speed of the kernel. These optimizations to the convolution layer kernel are left as an exercise for the reader. Instead, we will present a more systematic approach to reducing memory bandwidth consumption in the following section.</p>
+<p>The convolutional layer presents multiple opportunities for reducing memory bandwidth consumption through data reuse. Since the execution speed of the kernel shown in Fig. 19.7 is limited by global memory bandwidth, any improvement in memory bandwidth consumption would likely lead to higher execution speed. For example, each input feature map is used in calculating all output feature maps. One can potentially tile the input feature maps and reuse these tiles in calculating multiple output feature maps. However, different thread blocks are used to calculate different output feature maps in the convolution layer kernel in Fig. 19.7. Tiling input feature maps into one thread block’s shared memory would not allow other thread blocks to reuse the tiled data. Enabling reuse of input feature map pixels would require major redesign of the kernel. This section presents an approach proposed by Chellapilla et al. [8] to formulating convolutional layers into equivalent matrix multiplication operations. With this formulation, well-defined tiling techniques (Chapter 15) can be readily used to enable the reuse of the input feature maps as well as the filter banks to reduce global memory bandwidth consumption. In fact, one can just use or slightly adapt one of thehighly optimized GEMM (General Matrix Multiply) kernels from the CUDA linear algebra library cuBLAS to implement high-performance convolutional-layer kernels. The central idea of the formulation is that each output feature map element is a dot product between elements of the input feature maps and the elements of their corresponding filter banks. Since matrix multiplication consists of dot products between row vectors of the first input and column vectors of the second input, one should be able to arrange the input feature maps and the filter banks into matrices so that each output element of the output feature map is an element of the product matrix. That is, one can make arrangements so that the filter banks needed to generate one output feature map pixel form one row vector of the first input matrix. One can also unfold and duplicate the input feature map pixels in such way that all elements needed to compute one output feature map pixel are stored as one column of the second input matrix.3 An example of such rearrangements is shown in Fig. 19.8. Consider a small example convolutional layer which takes as one input C = 3 feature maps each of which is of size 3×3 and produces M = 2 output features each of which is of size 2×2, as was shown in Fig. 19.2(b) and is shown again at the top of Fig. 19.8 for convenience. It uses M×C = 6 filter banks, where each filter bank is of size 2×2. Since the computation performed for each sample in a batch is completely independent of others in the same batch, Fig. 19.8 shows the input feature maps and the output feature maps of only one sample whose index is assumed to be n. Let’s consider the calculation needed to generate output feature map pixel Yn,0,0,0, i.e., pixel (0,0) of output feature map 0 of sample n shown at the upper left corner of Fig. 19.8, whose value should be 14. All the patches of input feature pixels needed for calculating Yn,0,0,0 are circled in the input feature maps. The expression for generating the Y0,0,0 is: Yn,0,0,0 = (1, 1, 2, 2) · (1, 2, 1, 1) + (1, 1, 1, 1) · (0, 2, 0, 3) + (0, 1, 1, 0) · (1, 2, 0, 1) = (1 + 2 + 2 + 2) + (0 + 2 + 0 + 3) + (0 + 2 + 0 + 0) = 14 (19.2) where the first input of each inner product is a vector that is formed by linearizing (in row-major order, Chapter 3) the filter bank used for the convolution. For example, the vector formed by linearizing filter bank 0 using row major order is (1, 1, 2, 2), which is the first input to the first inner product. Since the layout of C matrices in the global memory is already in row major order, there is no rearrangement needed inside these filter banks! All one needs to do is to ensure that the filter banks are concatenated in the order where all filter banks for an output feature with a larger index follow those for an output feature map with a smaller index. Among filter banks for the same output feature map, a filter bank for an input feature map with larger index follows those with smaller index. In our example, the filter banks should be concatenated in the order 3 See also <a href="https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/">https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/</a> for very de tailed explanation.</p>
+<img src="/pmpp5-zh/figs/orig/fig-19-8.png" alt="Figure 19.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 19.8.</strong> Formulation of convolutional layer as GEMM. Each sample in the batch has its own input feature maps and output feature maps but share the same filter banks. Since the samples within a batch are completely independent of each other, this figure shows the input feature maps and the output feature maps of only one sample (whose index is assumed to be n).</p>
+<p>F0,0 , F0,1 , F0,2 , F1,0 , F1,1 , F1,2 . Recall that the dimensions of F array in Fig. 19.3 (line 11) and Fig. 19.7 (line 11) are assumed to be m×c×p×q. With the output feature map index as the highest dimension and the input feature map as the second highest dimension, the filter banks are already concatenated in the desired order! With this order, the filter banks form a row major 2 × (3 ∗ 4) = 2 × 12 matrix, as shown on the lower left side of Fig. 19.8. The bottom line is that the filter banks are already organized for the matrix multiplication formulation without any further rearrangement. The second input to each inner product for calculating Yn,0,0,0 is a vector formed by linearizing (in row-major order) a patch of input map X pixels which are circled in Fig. 19.8. For example, the vector formed by linearizing the circled patch in input feature map 0 using row major order is (1, 2, 1, 1), which is the second input to the first inner product. We will further concatenate the linearized vectors from all theinput feature maps into a single vector, which allows us to reformulate the three inner products for calculating Yn,0,0,0 into one inner product: Yn,0,0,0 = (1, 2, 1, 1, 0, 2, 0, 3, 1, 2, 0, 1) · (1, 1, 2, 2, 1, 1, 1, 1, 0, 1, 1, 0) = 1 + 2 + 2 + 2 + 0 + 2 + 0 + 3 + 0 + 2 + 0 + 0 = 14 (19.3) The first input to the inner product is the vector formed by concatenating F0,0, F0,1 , and F0,2 . The second input is the concatenation of the linearized patches of the input feature map. If we make the first input vector a row of a matrix F and the second input vector a column of a matrix B, the inner product for producing Yn,0,0,0 would be naturally part of the matrix-matrix multiplication of F and B. During matrix multiplication, one row of the filter bank matrix (F) and the column of the input feature matrix (B) will produce one pixel of the output feature map. Since we already know how to form matrix F, we just need to complete the formation of matrix B from the input feature map patches. Note that there are H_out * W_out pixels in each output feature map and each column of the B matrix is used to generate one output map pixel. Therefore, B must consist of H_out * W_out columns. In our example, H_out = 2 and W_out = 2 so matrix B consists of four columns, as shown in Fig. 19.8. Each column of B will be generated by unfolding and concatenating patches of the input feature maps. In our example, since we have determined that each column of B consists of 3 ∗ 4 = 12 elements, the B matrix is of size 12 × 4, as shown in Fig. 19.8. By ordering the columns of B properly, we can generate the output feature maps in their desired row-major order in Y. For example, in the bottom half of Fig. 19.8, the top section of the output feature map matrix is the row-major view of output feature map 0 and the bottom is that of output feature map 1. Both are already in rowmajor order assumed by the C language so they can be used as input feature maps for the next layer. In general, the output feature map matrix generated by the matrix multiplication is the correct form of Y[n, m, p, q] with the p and q dimensions viewed in their linearized row-major order. The matrix multiplication generates the output feature maps in exactly the form of the input feature maps that is expected by the following or downstream layers in the network. Cost of Explicitly Unfolding Input Feature Maps While it is tempting to present the details of rearranging the input feature maps X into matrix B as our next step, we will first take a pause and analyze the cost of explicitly generating and storing B. As we see in Fig. 19.8, the B matrix has 12 ∗ 4 = 48 elements whereas the three the input feature maps altogether consist of only 3 ∗ 3 ∗ 3 = 27 elements. That is, there is a significant size increase of 1.78× from X to B. The root cause of the size increase is that the patches of input feature map for calculating different pixels of the output feature map overlap with each other due to the nature of convolution. This means that each input feature map pixel can be replicated multiple times as we produce matrix B. For example, in Fig. 19.8 the center pixel of each 3 × 3 input feature map is used four times to compute the four pixels of an output feature, so it will be duplicated four times when generating the B matrix. The pixels in the middle the edges of each input feature map are used two times so it will be duplicated two times. The four pixels at corners of each input feature map are used only one time and will not need to be duplicated. Therefore, the total number of pixels in the matrix B for one input feature map is 4 * 1 + 2 * 4 + 1 * 4 = 16. Since each original input feature map has only 9 pixels, the explicit generation of matrix B incurs an expansion ratio of 16/9 = 1.78× over the original input feature maps. In general, the size of the unfolded input feature map matrix B can be derived from the number of input feature map elements required to generate each output feature map element. The height, or the number of rows, of the expanded matrix is the number of input feature elements contributing to each output feature map element, which is C * K * K; each output element is the convolution of K * K elements from each input feature map and there are C input feature maps. In our example, the K is 2 since the filter bank is 2 × 2 and there are three input feature maps. Thus, the height of the expanded matrix should be 3 * 2 * 2 = 12, which is exactly the height of the matrix shown in Fig. 19.8. The width, or the number columns, of the unfolded matrix B is the number of elements in each output feature map, i.e., H_out * W_out. In our example, each output feature map is a 2 × 2 matrix, i.e., H_out = 2 and W_out=2, yielding four columns in the expanded matrix. Note that the number of output feature maps M does not play into the duplication. This is because all output feature maps are computed from the same unfolded input feature map matrix B. The ratio of expansion for the input feature maps is the size of the expanded matrix over the total size of the original input feature maps. The reader should verify that the expansion ratio is: K 2 ∗ H _out ∗ W _out C ∗ K ∗ K ∗ H _out ∗ W _out = C ∗ H _in ∗ W _in H _in ∗ W _in (19.4)</p>
+<p>where H_in and W_in are the height and width of each input feature map. In our example, the ratio is (3 * 2 * 2 * 2 * 2)/(3 * 3 * 3) = 16/9. In general, if the input feature maps and output feature maps are much larger than the filters, the ratio of expansion will approach K 2 . While the expansion seems to be modest for our small example, for practical feature map sizes where H_out and W_out are in the range of hundreds or thousands and K can be 5 or larger, the expansion can be easily 20× or more! Furthermore, explicit generation of unfolded matrix B requires an extra step that will further add to global memory bandwidth consumption, negating any reduction in global memory bandwidth consumption from the matrix multiplication formulation. This motivates the implicit approach as follows. An Implicit Approach to Unfolding Input Feature Maps To avoid the downside of input feature map size expansion, practical systems that implement convolutional layers with matrix multiplications typically generate the B matrix in a piece-meal manner as part of the tiled matrix multiplication process. The idea is that tiled matrix multiplication kernels, such as the one shown in Fig. 5.9, load FIGURE 19.9 During each phase of a tiled matrix multiplication that implements a convolutional layer, the B matrix tile elements are loaded from their corresponding X elements.</p>
+<p>tiles of the two input matrices before performing a phase of the multiplication for a tile of the output matrix. This presents an opportunity for leaving the input feature maps in their original form in the global memory. When a tile of the B matrix is to be loaded from the global memory, we adapt the tile loading code to assemble the B matrix tile by loading the pixels from the corresponding locations in the X array. In computer science terms, matrix B is only conceptual and is materialized on-demand in a tile-by-tile manner during a tiled matrix multiplication process. The key to the implicit approach is a systematic mapping between the B matrix elements and the X array elements. That is, when conceptual B element B[u,v] is to be loaded into a tile, one can identify a unique X array element to be used. For example, assume that the matrix multiplication is performed as a tiled matrix multiplication with 2 × 2 tiles, which is illustrated in Fig. 19.9(a). In this small example, the 2 × 2 tile configuration will result in launching a grid that consists of two thread blocks with 2 ∗ 2 = 4 threads each. Each thread generates one output feature map pixel and each block will collaboratively generate a tile of output feature map pixels. We will focus on the thread block that generates the output tile that consists pixels, i.e., Y[n,0,0,0], Y[n,0,0,1], Y[n,0,1,0], and Y[n,0,1,1], i.e., the left half of the Y array in the marked box in Fig. 19.9(a). For the phase 0 of the matrix multiplication, the B tile to be loaded consists of B[0,0], B[0,1], B[1,0], and B[1,1] (upper left corner of B in the marked box in Fig. 19.9(a)). As shown by the arrows in Fig. 19.9, B[0,0] can be loaded from X[n,0,0,0], B[0,1] from X[n,0,0,1], B[1,0] from X[n,0,0,1], and B[1,1] from X[n,0,0,2]. Fig. 19.9(b) shows the relevant mappings for phase 1 of the matrix multiplication. The B tile to be loaded by the same thread block during this phase will consists of FIGURE 19.10 A mapping example for B[10,2], i.e., u=10 and v=2. B[2,0], B[2,1], B[3,0], and B[3,1]. As shown by the arrows in Fig. 19.9(b), B[2,0] can be loaded from X[n,0,1,0], B[2,1] from X[n,0,1,1], B[3.0] from X[n,0,1,1], and B[3,1] from X[n,0,1,2]. We will use these two tiles as examples as we derive the general formula for mapping from B elements to X elements. Assume that a thread is responsible for B[u,v] when its thread block loads a tile. From our discussion above, v is a row-major linearized index that identifies the output feature map pixel to receive the contribution from this B element. We can recover the last two dimensions of the index into Y as v/W_out, v%W_out. That is, the output feature map element is Y[n,m,v/W_out,v%W_out]. These two indexes also identify the beginning position (upper left corner) of the patch of input feature map pixels involved in the convolution operation that generates the output feature map pixel. The u index specifies the input feature map where the patch of pixels comes from and the row-major linearized index for its B element inside the patch. We can identify the channel number of the input feature map by u/(K 2 ). For example, in Fig. 19.10, u is equal to 2 for element B[10,2]. We know that B[10,2] comes from input feature map 2 (c = 2) since 10/22 = 2. Indeed, Fig. 19.10 shows that B[10,2] resides in the bottom section of B, which comes from input feature map 2.</p>
+<p>Within the patch, u%K 2 is the row-major linearized index of the pixel. That is, (u%K 2 )/K is the local row index and (u%K 2 )%K the column index inside the patch. For example, for B[10,2], (10%4)/2 = 1 and (10%4)%2 = 0, which means that B[10,2] came from row 1 and column 0 of the input patch. Next, we project these local indexes within a patch onto the input feature map that contains the patch. This can be done by adding these local indexes to the indexes of the beginning pixel (upper left corner) of the patch, i.e., (v/W_out, v%W_out). Therefore, the row index and column index of the pixel within the selected input feature map are (u%K 2 )/K + v/W _out and (u%K 2 )%K + v%W _out, respectively. In our example, the input feature map pixel for B[10,2] has a row index of 1 + 1 = 2 and column index of 0 + 0 = 0. We also know that the pixel comes from input feature map 2. Thus, the pixel can be loaded from X[n,2,2,0] whose value is 3. In summary, we have the following mapping from the conceptual B matrix to the input feature map array X when formulating a batched convolutional layer into matrix-matrix multiplication: B[u, v] ← X[n, u/(K 2 ), (u%K 2 )/K + v/W _out, (u%K 2 )%K + v%W _out] (19.5) where n is the sample index in the batch currently being processed, K is the height and width of each filter bank of the convolutional layer, W _out is the width of each output feature map of the convolutional layer, / is integer divide operation, and % is integer remainder operation. Fig. 19.11 shows a CUDA tiled matrix multiplication kernel that implements a convolutional layer. The kernel is adapted from the tiled matrix multiplication kernel in Fig. 5.9. First, the parameters are adapted to specify the number of input maps (i.e., channels C), the number of output maps (M), the height of each input map (H), the width of each input feature map (W), the height/width of each filter (K), a pointer to the filter bank array (F), a pointer to the input feature map array (X), and a pointer to the output feature map array (Y) (line 3). The kernel assumes that it is launched with the input batch size as the Z dimension size (number of blocks) of the grid. Thus, each thread uses its blockIdx.z as an index to its assigned sample in the input feature map array (line 9). This index will be used when loading the tiles for B (line 28). As was in Fig. 5.9, each thread uses its block and thread indices in the X and Y dimensions to calculate the row and column indices of its assigned output feature map element (lines 14-15). The number of phases for the tiled matrix multiplication is the width of the F matrix (C×K×K) divided by the tile width (TILE_WIDTH) (line 19). Loading the F matrix tile (line 23) uses the same row and column indices as Fig. 5.9. Note that we did not include bounds checking in this version since we focus on the adaptation of the indices used for loading the B matrix tile. We leave the addition of bounds checking as an exercise. The row and column indices into B is the same as those used for matrix N in Fig. 5.9. The difference is that we need to map the access to B to an access to X, which follows Eq. (19.5). Note that we linearize the index to the 4D N×C×H×W X FIGURE 19.11 A tiled matrix multiplication kernel that implements a convolutional layer.</p>
+<p>array using row-major layout (line 28). W _out is expressed as W-K+1, where W is the width of the input feature map. After the thread block completes all phases, each thread writes into its designated Y element using the sample index, the row index, and the column index (line 37).</p>
+<p>Implementing convolutions with matrix multiplication can be very efficient since matrix multiplication is highly optimized on all hardware platforms. Tiled matrix multiplication is especially fast on GPUs because it has a high ratio of floating-point operations per byte of global memory data access. Recall from Chapter 5 that the number of reuse for each element is proportional to the dimension of the tiles. This implies that matrix multiplication is less efficient on small matrices whose small size may restrict the tile size. Furthermore, the kernel launch overhead tends to be significant for small matrix multiplication. Accordingly, the matrix multiplication approach to convolution is most effective when it creates large matrices for multiplication. As we mentioned earlier, the filter-bank matrix is an M × (C*K*K) matrix and the unfolded input feature map matrix is a (C*K*K) × (H_out*W_out) matrix. Note that except for the height of the filter-bank matrix, the sizes of all dimensions depend on products of the parameters to the convolution, not the parameters themselves. While individual parameters can be small, their products tend to be large. For example, it is often true that in early layers of a convolutional network, C is small, but H_out and W_out are large. On the other hand, at the end of the network, C is large, but H_out and W_out are small. Hence, the product C * H_out * W_out is usually large for all layers. This means that the sizes of the matrices tend to be consistently large for all layers and thus the utilization of GPU execution resources using this approach tends to be high for all layers in the network, resulting in high execution speed.</p>
+<h2 id="sec-19-4">19.4 CUDNN library<a class="td-heading-self-link" href="#sec-19-4" aria-label="Link to this heading"></a>
+</h2>
+<p>CUDNN is a library of optimized routines for implementing deep learning primitives. It was designed to make it much easier for deep learning frameworks to take advantage of GPUs. It provides a flexible and easy-to-use C-language deep learning API that integrates neatly into existing deep learning frameworks (e.g., PyTorch, Caffe, TensorFlow, MXNet, . . . ). The library requires that input and output data be resident in the GPU device memory as we discussed earlier in this chapter. This requirement is analogous to that of cuBLAS. The library is thread-safe in that its routines can be called from different host threads. Let us consider CNNs to explain the capabilities provided by CUDNN. Convolutional routines for the forward and backward paths use a common descriptor that encapsulates the attributes of the layer. Tensors and filters are accessed through opaque descriptors, with the flexibility to specify the tensor layout using arbitrary strides along each dimension. The most important computational primitive in convolutional neural networks is a special form of batched convolution. In this section, we describe the forward form of this convolution. The CUDNN parameters governing this convolution are listed Table 19.1. There are two inputs to the convolution: • D is a four-dimensional N * C * H * W tensor, which contains the input data,4 4 Tensor is a mathematical term for arrays that have more than two dimensions. In mathematics, matriceshave only two dimensions. Arrays with three or more dimensions are called tensors. For the purpose of this book, one can simply treat a T-dimensional tensor as a T-dimensional array.</p>
+<p>Table 19.1 Convolution parameters for CUDNN. Note that the CUDNN naming convention is slightly different than what we have been using in previous sections. Parameter N C H W K R S u v pad_h pad_w Meaning Number of images in mini-batch Number of input feature maps Height of input image Width of input image Number of output feature maps Height of filter Width of filter Vertical stride Horizontal stride Height of zero-padding Width of zero-padding • F is a four-dimensional K * C * R * S tensor, which contains the convolutional filters. The input data array (tensor) D ranges over N samples in a mini-batch, C input feature maps per sample, H rows per input feature map, and W columns per input feature map. The filters range over K output feature maps, C input feature maps, R rows per filter bank, and S columns per filter bank. The output is also a four-dimensional tensor O that ranges over N samples in the mini-batch, K output feature maps, P rows per output feature map, and Q columns per output feature map, where P = f(H; R; u; pad_h) and Q = f(W; S; v; pad_w), meaning that the height and width of the output feature maps depend on the input feature map and filter bank height and width, along with padding and striding choices. The striding parameters u and v allow the user to reduce the computational load by computing only a subset of the output pixels. The padding parameters allow users to specify how many rows or columns of 0 entries are appended to each feature map for improved memory alignment and/or vectorized execution. CUDNN [9] supports multiple algorithms for implementing a convolutional layer: matrix-multiplication-based (GEMM [10] and Winograd [11]), FFT-based [12], etc. The GEMM-based algorithm to implement the convolutions with a matrix multiplication is similar to the approach presented in Section 19.3. As we discussed at the end of Section 19.3, materializing the expanded input feature matrix in global memory can be costly in both the global memory space and bandwidth consumption. CUDNN avoids this problem by lazily generating and loading the expanded input feature map matrix into on-chip memory only (in a similar way to the implicit approach presented in the previous section), rather than by gathering it in off-chip memory before calling a matrix multiplication routine. NVIDIA provides a matrix-multiplication-based routine that achieves a high utilization of the maximaltheoretical floating-point throughput on GPUs. The algorithm for this routine is similar to the algorithm described in [10]. Fixed sized sub-matrices of the input matrices A and B are successively read into on-chip memory and are then used to compute a sub-matrix of the output matrix C. All indexing complexities imposed by the convolution are handled in the management of tiles in this routine. We compute on tiles of A and B while fetching the next tiles of A and B from off-chip memory into on-chip caches and other memories. This technique hides the memory latency associated with the data transfer, allowing the matrix multiplication computation to be limited only by the time it takes to perform the arithmetic calculations. Since the tiling required for the matrix multiplication routine is independent of any parameters from the convolution, the mapping between the tile boundaries of the expanded input feature map matrix and the convolution problem is non-trivial. Accordingly, the CUDNN approach entails computing this mapping and using it to load the correct elements of A and B into on-chip memories. This happens dynamically as the computation proceeds, which allows the CUDNN convolution implementation to exploit optimized infrastructure for matrix multiplication. It requires additional indexing arithmetic compared to a matrix multiplication, but fully leverages the computational engine of matrix multiplication to perform the work. After the computation is complete, CUDNN performs the required tensor transposition to store the result in the user’s desired data layout.</p>
+<h2 id="sec-19-5">19.5 Summary<a class="td-heading-self-link" href="#sec-19-5" aria-label="Link to this heading"></a>
+</h2>
+<p>This chapter starts with a brief introduction to machine learning and convolutional neural networks. Then, we present a basic convolutional neural network and the implementation of its major types of layers. We then build on the convolution pattern in Chapter 7 to present a CUDA kernel implementation of the convolutional layer, the most computationally intensive layer of convolutional neural networks. We then present techniques for formulating convolutional layers as matrix multiplications by implicitly unrolling the input feature maps into a matrix. The conversion allows the convolutional layers to benefit from highly optimized GEMM libraries for GPUs. We also present the CUDA implementation of a matrix multiplication kernel that performs implicit unrolling of the input feature map. We end the chapter with an overview of the CUDNN library, which is used by most deep learning frameworks. Users of these frameworks can benefit from the highly optimized layer implementations without writing CUDA kernels themselves.</p>
+<h2 id="sec-19-6">19.6 Exercises<a class="td-heading-self-link" href="#sec-19-6" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Implement the forward pass for the subsampling layer that is introduced in the Section 19.1. An explanation about this type of layer can be found in Appendix B.</p>
+<p>References</p>
+<p>\2. We used an [N * C * H * W] layout for input and output features. Can we reduce the memory bandwidth by changing it to an [N * H * W * C] layout? What are potential benefits of using a [C * H * W * N] layout? 3. Implement the backward pass for the convolutional layer introduced in the Section 19.1, and further described in Appendix B. 4. Analyze the memory access patterns in the matrix multiplication kernel of Fig. 19.11 and discuss whether the memory accesses to global memory are coalesced and whether the shared memory accesses may suffer from bank conflicts.</p>
+<p>References [1] Y. LeCun, Y. Bengio, G. Hinton, Deep learning, Nature 521 (7553) (2015) 436&ndash;444. [2] Y. LeCun, L. Bottou, Y. Bengio, P. Haffner, Gradient-based learning applied to document recognition, Proceedings of the IEEE 86 (11) (1998) 2278&ndash;2324. [3] Y. LeCun, B. Boser, J. Denker, D. Henderson, R. Howard, W. Hubbard, L. Jackel, Handwritten digit recognition with a back-propagation network, Advances in Neural Information Processing Systems 2 (1989). [4] G.E. Hinton, S. Osindero, Y.-W. Teh, A fast learning algorithm for deep belief nets, Neural Computation 18 (7) (2006) 1527&ndash;1554. [5] R. Raina, A. Madhavan, A.Y. Ng, Large-scale deep unsupervised learning using graphics processors, in: Proceedings of the 26th Annual International Conference on Machine Learning, 2009, pp. 873&ndash;880. [6] A. Krizhevsky, I. Sutskever, G.E. Hinton, ImageNet classification with deep convolutional neural networks, Advances in Neural Information Processing Systems 25 (2012). [7] A. Krizhevsky, cuda-convnet, <a href="https://code.google.com/p/cuda-convnet/">https://code.google.com/p/cuda-convnet/</a>, 2014. [8] K. Chellapilla, S. Puri, P. Simard, High performance convolutional neural networks for document processing, in: Tenth International Workshop on Frontiers in Handwriting Recognition, Suvisoft, 2006. [9] S. Chetlur, C. Woolley, P. Vandermersch, J. Cohen, J. Tran, B. Catanzaro, E. Shelhamer, cuDNN: efficient primitives for deep learning, arXiv preprint, arXiv:1410.0759, 2014. [10] G. Tan, L. Li, S. Triechle, E. Phillips, Y. Bao, N. Sun, Fast implementation of DGEMM on Fermi GPU, in: Proceedings of 2011 International Conference for High Performance Computing, Networking, Storage and Analysis, 2011, pp. 1&ndash;11. [11] A. Lavin, S. Gray, Fast algorithms for convolutional neural networks, in: Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2016, pp. 4013&ndash;4021. [12] N. Vasilache, J. Johnson, M. Mathieu, S. Chintala, S. Piantino, Y. LeCun, Fast convolutional nets with fbfft: a GPU performance evaluation, arXiv preprint, arXiv:1412.7580, 2014.</p>
+<p>CHAPTER</p>
+<p>Large language models</p>
+<p>With special contributions from Juan Gómez-Luna</p>
+<p>ChatGPT [3], the sequence of previous tokens, collectively called the context, is composed of the system prompt, user input, and the tokens already generated by the model. In order for LLMs to generate accurate results,2 they contain billions of parameters (i.e., tens of layers with hundreds of millions of parameters each) that must be trained on huge datasets. During inference, large contexts help to provide more accurate responses. A mechanism, referred to as attention is needed to maintain the context and to identify the parts of the large context that are the most relevant to the generation of the next token. It is therefore important to understand the attention mechanism as well as the Transformer Architecture [1] which is the most popular approach to incorporating attention mechanisms into LLMs.3 20.1 Transformer architecture Most LLMs today employ the transformer architecture and its attention mechanism to capture dependencies between tokens and their relative importance in generating the next token. The attention mechanism resembles a classification process within a neural network. It uses the softmax function to generate probabilities. The probability assigned to each token in the sequence of previous tokens serves as an indication of the relative importance of that token to the generation of the next token. The transformer architecture was originally proposed for transduction tasks, such as machine translation. As such, it was designed with two types of layers. The encoder layers contextualize (or mix) the input tokens by generating a sequence of continuous representations, i.e., floating-point embedding vectors, from a sequence of symbols (e.g., tokens) in the source language. The decoder layers take the sequence of continuous representations from the encoder and generate output tokens (one at a time) in the target language. The decoder does not only take the output of the encoder as input but also the most recent output tokens generated by itself. For this reason, the transformer models are auto-regressive models. Since its first introduction, transformers have been adapted to other types of tasks. Depending on the specific task being performed, a transformer may not need both types of layers. For example, models that perform discriminative tasks such as classification do not need a decoder because they do not generate text in a target language. On the other hand, decoder-only models can perform generative tasks, such as text generation. This is the case of LLMs, where text is generated as a response to a user’s query but not as a sequence-to-sequence transformation. Such generative tasks 2 For some LLM tasks (e.g., text summarization), accuracy may not be the right metric, since many dif ferent answers can be correct. However, in this chapter, we use <code>accurate'' with the more general meaning of </code>correct&rsquo;&rsquo;, <code>valid'', or </code>useful&rsquo;&rsquo;. 3 Although we focus on Transformers and the attention mechanism in this chapter, the research community keeps actively exploring other approaches to LLMs that provide different advantages. Notable examples are state-space models (e.g., Mamba [4]), convolutional models (e.g., Hyena [5]), and hybrid models. They may provide certain advantages over transformers, e.g., less memory requirements.</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] Y. LeCun, Y. Bengio, G. Hinton, Deep learning, Nature 521 (7553) (2015) 436&ndash;444.</p>
+<p>[2] Y. LeCun, L. Bottou, Y. Bengio, P. Haffner, Gradient-based learning applied to document recognition, Proceedings of the IEEE 86 (11) (1998) 2278&ndash;2324.</p>
+<p>[3] Y. LeCun, B. Boser, J. Denker, D. Henderson, R. Howard, W. Hubbard, L. Jackel, Handwritten digit recognition with a back-propagation network, Advances in Neural Information Processing Systems 2 (1989).</p>
+<p>[4] G.E. Hinton, S. Osindero, Y.-W. Teh, A fast learning algorithm for deep belief nets, Neural Computation 18 (7) (2006) 1527&ndash;1554.</p>
+<p>[5] R. Raina, A. Madhavan, A.Y. Ng, Large-scale deep unsupervised learning using graphics processors, in: Proceedings of the 26th Annual International Conference on Machine</p>
+<p>[6] A. Krizhevsky, I. Sutskever, G.E. Hinton, ImageNet classification with deep convolutional neural networks, Advances in Neural Information Processing Systems 25 (2012).</p>
+<p>[7] A. Krizhevsky, cuda-convnet, <a href="https://code.google.com/p/cuda-convnet/">https://code.google.com/p/cuda-convnet/</a>, 2014.</p>
+<p>[8] K. Chellapilla, S. Puri, P. Simard, High performance convolutional neural networks for document processing, in: Tenth International Workshop on Frontiers in Handwriting</p>
+<p>[9] S. Chetlur, C. Woolley, P. Vandermersch, J. Cohen, J. Tran, B. Catanzaro, E. Shelhamer, cuDNN: efficient primitives for deep learning, arXiv preprint, arXiv:1410.0759, 2014.</p>
+<p>[10] G. Tan, L. Li, S. Triechle, E. Phillips, Y. Bao, N. Sun, Fast implementation of DGEMM on Fermi GPU, in: Proceedings of 2011 International Conference for High Performance Computing, Networking, Storage and Analysis, 2011, pp. 1&ndash;11.</p>
+<p>[11] A. Lavin, S. Gray, Fast algorithms for convolutional neural networks, in: Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, 2016,</p>
+<p>[12] N. Vasilache, J. Johnson, M. Mathieu, S. Chintala, S. Piantino, Y. LeCun, Fast convolutional nets with fbfft: a GPU performance evaluation, arXiv preprint, arXiv:1412.7580,</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/18-ch18/"
+    aria-label="Previous - Chapter 18 Graph traversal" title="Chapter 18 Graph traversal" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 18 Graph traversal</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/20-ch20/"
+    aria-label="Next - Chapter 20 Large language models" title="Chapter 20 Large language models" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 20 Large language models</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-19-1">19.1 Convolutional neural networks</a></li>
+    <li><a href="#sec-19-2">19.2 A CUDA convolutional layer kernel</a></li>
+    <li><a href="#sec-19-3">19.3 Formulating convolutional layer as GEMM</a></li>
+    <li><a href="#sec-19-4">19.4 CUDNN library</a></li>
+    <li><a href="#sec-19-5">19.5 Summary</a></li>
+    <li><a href="#sec-19-6">19.6 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/19-ch19/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/19-ch19/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/19-ch19/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/19-ch19.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/19-ch19.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+19+Convolutional+neural+networks"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/19-ch19/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/19-ch19/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/19-ch19/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/19-ch19/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

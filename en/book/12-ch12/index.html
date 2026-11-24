@@ -1,0 +1,798 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/12-ch12/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/11-ch11/">
+<link rel="next" href="/pmpp5-zh/en/book/13-ch13/"><meta name="robots" content="index, follow">
+
+<title>Chapter 12 Filter | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/12-ch12/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/12-ch12/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/12-ch12/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/12-ch12/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 12 Filter">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 12 Filter">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="5984">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 12 Filter">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/12-ch12/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/12-ch12/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/12-ch12/" aria-current="page" title="Chapter 12 Filter"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 12 Filter</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/12-ch12.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/12-ch12.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;12&#43;Filter" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 12 Filter</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c12">Chapter 12 Filter<a class="td-heading-self-link" href="#c12" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>Filter And warp voting</p>
+<p>CONTENTS 12.1 Background . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 289 12.2 A simple parallel unstable filter. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 290 12.3 Coalescing atomic operations with warp-level primitives . . . . . . . . . . . . . . . . . . . . . . . . . . . . 291 12.4 Privatization . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 295 12.5 A simple parallel stable filter. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 297 12.6 Improving memory coalescing with shared memory and thread coarsening . . . . . . 298 12.7 In-place stable filter. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 300 12.8 Related patterns . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 301 12.9 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 302 12.10 Exercises. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 302 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 302 Filter operations rearrange data in a list to make more efficient use of memory after some of the list elements are deleted. If we view the deleted elements and the remaining elements as two sub-lists, a filter operation can be viewed as the inverse of a merge operation. In this chapter, we show that using a technique called warp voting we can enable coalescing of atomic operations across threads and improve the speed of parallel implementations of filter. We look at the considerations for performing the stable filter operation in place instead of out of place. Finally, we discuss other related patterns with similar implementations and optimizations, such as removing duplicates from a sorted list and adding/removing rows and columns from a matrix.</p>
+<p>Filter operations rearrange data in a list to make more efficient use of memory after some of the list elements are deleted. If we view the deleted elements and the remaining elements as two sub-lists, a filter operation can be viewed as the inverse of a merge operation. In this chapter, we show that using a technique called warp voting we can enable coalescing of atomic operations across threads and improve the speed of parallel implementations of filter. We look at the considerations for performing the stable filter operation in place instead of out of place. Finally, we discuss other related patterns with similar implementations and optimizations, such as removing duplicates from a sorted list and adding/removing rows and columns from a matrix.</p>
+<h2 id="sec-12-1">12.1 Background<a class="td-heading-self-link" href="#sec-12-1" aria-label="Link to this heading"></a>
+</h2>
+<p>Filtering refers to a computation that removes one or more selected items from a list according to a given criterion and compacts the list to eliminate the holes thus created. An example use case is garbage collection. After the application de-allocates some objects and frees their chunks of memory from the heap, there can be many small chunks of available memory. At some point, it may be desirable to compact the remaining objects on the heap into consecutive locations and create a much larger chunk of available memory space at the end of the heap. In this way, if the application needs to allocate a large object, there is sufficient consecutive memory available. Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00022-6">https://doi.org/10.1016/B978-0-44-343900-1.00022-6</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<img src="/pmpp5-zh/figs/orig/fig-12-1.png" alt="Figure 12.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 12.1.</strong> Unstable vs. stable variants of the out-of-place filter pattern.</p>
+<p>When the list is very large, it becomes desirable to employ many threads to move the items in parallel to reduce execution time. Filters can be in-place or out-of-place. In-place filters compact the remaining items in the original list, whereas out-of-place filters compact them into a new list. In the memory management example, creating a new list means that enough memory must be set aside to accommodate the entire new heap, drastically increasing the inefficiency of memory usage. However, moving an item to an earlier position in the list may overwrite the element that is currently in that position waiting to be moved to an earlier position. Thus, when multiple threads are employed to move the items in a list, the threads must synchronize so that no items would be incorrectly overwritten before they can be moved. In this chapter, we will first learn to implement out-of-place filters that are often used in data search/retrieval applications to generate a relevant list by removing irrelevant items. The general approach to parallelizing out-of-place filters is to have multiple threads to simultaneously move the remaining items into the new list. We then introduce in-place filter implementation techniques that can be built on top of the scan pattern introduced in Chapter 11. Fig. 12.1 shows examples of the two variants of the filter operation. Following the convention in computer science, we will refer to the items in a filtered list as keys. The shaded keys in the input list indicate the keys that remain where as unshaded keys are deleted. Stable filters preserve the original order of the remaining keys, whereas unstable filters do not. Unstable filters are used when the list does not need to be ordered. We will begin with parallel implementation of unstable filters.</p>
+<h2 id="sec-12-2">12.2 A simple parallel unstable filter<a class="td-heading-self-link" href="#sec-12-2" aria-label="Link to this heading"></a>
+</h2>
+<p>Fig. 12.2 shows the code for a simple unstable filter kernel. The kernel takes an input array of size N and filters it into an output array. The parameter outputSize points to a FIGURE 12.2 Code for a simple unstable filter kernel.</p>
+<h2 id="sec-12-3">12.3 Coalescing atomic operations with warp-level primitives<a class="td-heading-self-link" href="#sec-12-3" aria-label="Link to this heading"></a>
+</h2>
+<p>global memory counter variable where the size of the output array is to be stored and is initialized to zero before the kernel is called. Every thread identifies the index of the key in the input that it is responsible for (line 03), checks if that index is within bounds (line 04), and loads the key at that index from global memory (line 05). The thread then checks if the loaded value meets the condition cond() by which we are filtering (line 06). If the condition is met, the thread allocates space for that value in the output array by atomically incrementing the counter at outputSize (line 07-09). Finally, the thread stores the value to the allocated space (line 10). Note that this implementation results in an unstable filter operation because the atomic operations on the counter may be performed by the hardware in any order. Hence, each thread will acquire an arbitrary place in the output array to put its value in irrespective of the input key’s position in the input array. A clear bottleneck in this implementation is the contention caused by the atomic operations on the output counter in global memory. This contention is exacerbated by the fact that all the atomic operations are performed on the same counter, so they are all serialized by the hardware. As we learned in Chapter 9, output contention can be mitigated via the privatization optimization which we look at in Section 12.4. However, before looking at privatization, we will first look at another technique for reducing contention, called coalesced atomic operations, that leverages the fact that the atomic operations are performed on the same counter by threads of the same warp.</p>
+<p>In the simple unstable filter kernel in Fig. 12.2, atomic operations contend on the same output counter causing a performance bottleneck. This contention is particularly pronounced for threads in the same warp that issue their atomic operations at the same time. In this case, the atomic operations are certain to conflict with each other and get serialized by the hardware. However, we can take advantage of the fact that threads in the same warp can coordinate quickly with each other to avoid this situation. Rather FIGURE 12.3 Code for unstable filter kernel with coalesced atomic operations.</p>
+<p>than having each thread in the warp independently issue an atomic operation, we can have the threads coordinate to identify the total amount by which they would like to collectively increment the counter, then have one thread in the warp issue a single atomic operation on behalf of the rest. We will refer to the combined atomic operation as a coalesced atomic operation. It is similar to how loads and stores by threads in the same warp are coalesced by the hardware (Chapter 5). The detailed steps for coalescing the atomic operations are as follows. First, we assign a leader thread from among the threads in the warp that are active when the atomic operation is performed. Second, we identify the total amount that needs to be added by all the threads. Third, we have the leader thread perform the atomic operation on the global counter and broadcast the beginning of the acquired space to the other threads. Fourth, each thread identifies its offset within the acquired space where it will store its output key. These steps require the use of special warp-level primitives, including shuffle instructions which were introduced in Chapter 10 as well as other primitives which are introduced in this section. Fig. 12.3 shows the code for implementing an unstable filter kernel that uses coalesced atomic operations. Compared to the simple implementation in Fig. 12.2, the difference starts on line 07 where the atomic operation is performed. In Fig. 12.3, we start by identifying which threads are active by calling the __activemask() primitive (line 07). This primitive returns a 32-bit integer where bit i is set to 1 if the i th thread in the warp is active. For example, if the threads that are active inside the if-statement are threads 1, 2, 4, and 5, then __activemask() will return 00000000000000000000000000110110.</p>
+<p>Once we know which threads are active, we need to assign a leader thread from among the active threads. A deterministic way of doing so is by picking the active thread with the smallest index within the warp as the leader. In other words, we need to find the index of the least significant bit that is set to 1 in the active mask. To do so, we call the __ffs() (Find First Set) intrinsic on the active mask (line 10) which finds the least significant bit that is set to 1 in the mask. We subtract one from the value returned by __ffs() because the intrinsic adds a one to the index it returns because the return value of zero is reserved for when none of the bits in the mask are set. Once we have identified a leader thread, the leader thread needs to find out by how much the threads in the warp collectively want to increment the counter. Since in the original code, each active thread incremented the counter by one, that means that the total amount to increment the counter is equal to the total number of active threads in the warp. This number can be obtained by counting the number of bits that are set to one in the active mask, which is done by calling the __popc() (Population Count) intrinsic on the mask (line 13). Once the leader thread knows the total amount to increment the counter by, it proceeds to increment the global counter by this total amount (lines 15-17). The returned value, which is saved in j, marks the beginning index into the output array where the active threads in the warp will place their values. This value is shuffled from the leader thread to all the other active threads in the warp (line 20). Once each active thread knows the warp’s beginning index into the output array, what remains is for each active thread to find its offset from this index. That is, the first active thread will have an offset of 0, the second active thread will have an offset of 1, etc. In other words, a thread’s offset is equivalent to the number of active threads that precede it in the warp. Finding this value is equivalent to performing a binary prefix sum operation [1] on the active mask. To find the value, each thread starts by generating a mask that represents the preceding threads in the warp. That is, thread i in the warp generates a mask where bits 0 to i − 1 are set. This mask can be generated by computing 2i − 1 (line 22). After that, the mask of preceding threads is intersected with the mask of active threads to obtain the active preceding threads (line 23). Finally, calling __popc() on the mask of active preceding threads will return the number of active preceding threads (line 24), which is the offset we’re looking for. Once the offset is known, the active threads store their filtered values at the starting index plus the thread’s offset (line 26). Here, we observe another benefit of using coalesced atomic operations in this context. In addition the reducing the number of atomic operations, using coalesced atomic operations also results in active threads in the warp storing their filtered values at adjacent memory locations. Hence, the stores to global memory are more likely to be coalesced by the hardware. To coalesce the atomic operations, we have had to perform many operations that involve managing the active threads in a warp. To facilitate the management of active warp threads, the cooperative groups API provides a special kind of group called a coalesced group. A coalesced group is a cooperative group that represents the active threads in a warp. Programmers can get a handle on a coalesced group as follows:</p>
+<img src="/pmpp5-zh/figs/orig/fig-12-4.png" alt="Figure 12.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 12.4.</strong> Code for unstable filter kernel with coalesced atomic operations using cooperative groups.</p>
+<p>coalesced_group activeThreads = coalesced_threads();</p>
+<p>Using this handle, it becomes easy to find the number of active threads in the warp and the index of an active thread with respect to other active threads. The number of active threads in the warp is simply the size of the group, i.e., activeThreads.size(). The index of an active thread with respect to other active threads is simply the thread’s rank in the group, i.e., activeThreads.thread_rank(). Fig. 12.4 shows how the code in Fig. 12.3 can be simplified using the cooperative groups API. Instead of using the __activemask() intrinsic function to find the active threads in the warp (line 07 in Fig. 12.3), we declare and initialize a cooperative group (line 07 in Fig. 12.4). Instead of using the __ffs() intrinsic function to assign a leader thread (lines 10-11 in Fig. 12.3), we designate the thread whose rank is zero as the leader (line 10 in Fig. 12.4). Instead of using the __popc() intrinsic function to find the number of active threads (line 13 in Fig. 12.3), we get the size of the coalesced group (line 12 in Fig. 12.4). The shuffle instruction is also performed using the coalesced group (line 19 in Fig. 12.4). Finally, instead of using bitwise calculations to find the thread’s index with respect to other threads in the warp (lines 22-24 in Fig. 12.3), we get the thread’s rank in the group (line 21 in Fig. 12.4). In practice, the compiler already implements the optimization of coalescing atomic operations that we discussed in this section, so it is unnecessary for programmers to apply it manually. Moreover, it is unnecessary to apply the optimization if there is only one thread in the warp that executes the atomic operation, and the compiler indeed refrains from applying the optimization if it can establish that only one thread in the warp is active. Despite programmers not needing to apply this optimization in practice, it is still a good exercise to see how such an optimization would FIGURE 12.5 Unstable filter with privatization.</p>
+<h2 id="sec-12-4">12.4 Privatization<a class="td-heading-self-link" href="#sec-12-4" aria-label="Link to this heading"></a>
+</h2>
+<p>be implemented because it is a good opportunity to introduce warp voting functions (namely __activemask()), intrinsic functions such as __ffs() and __popc(), and coalesced groups from the cooperative groups API. Other warp voting functions that programmers might encounter include __all_sync() which checks if all threads in the warp evaluate some condition as true, __any_sync() which checks if some thread in the warp evaluates some condition as true, and __ballot_sync which returns a mask of which threads evaluate some condition as true.</p>
+<p>We have seen in Section 12.3 how coalesced atomic operations can reduce the contention of the atomic operations on the output list counter. In this section, we look at another optimization for reducing the contention on the counter, namely privatization. Recall from Chapter 6 and Chapter 9 that privatization is an optimization where private versions of the output data are created and updated to reduce contention on the public output data, and then the private versions are merged with the public version at the end. We apply this same optimization to the filter pattern. Fig. 12.5 illustrates how privatization can be applied in the context of the filter pattern. We create private versions of the output array and the output counter for each thread block in the shared memory. While processing the input keys, threads atomically update their thread block’s private counter and place their filtered keys in their thread block’s private output array. When all the input keys have been processed, one thread in the thread block atomically updates the public output counter and the threads collaboratively write the contents of the block’s private output array to the public output array. The private counters and private output arrays are placed in shared memory to reduce latency and increase throughput for atomically updating the counter and writing to the output private array. Fig. 12.6 shows the code for implementing an unstable filter kernel with privatization applied. We start by declaring a private output list (line 05) and private counter FIGURE 12.6 Code for unstable filter kernel with privatization.</p>
+<p>(line 06) for each thread block in shared memory. Next, one of the threads in the block initializes the private counter to zero (lines 07-09). The threads then execute a barrier synchronization to ensure that the counter is initialized before any of the threads start updating it (line 10). The threads then proceed to perform the filter operation, but place the filtered values in the private output list instead of the public output list (lines 13-22). This code is similar to the code in Fig. 12.2, except that the private counter and private output list are used instead of the public ones. Also, the scope of the atomic reference to the counter is cuda::thread_scope_block instead of cuda::thread_scope_device since the counter in shared memory is only accessed by threads in the same block. Another barrier synchronization is then executed to ensure that all threads finish adding to the private output list before it is committed to the public output list (line 23). The next step is to reserve space for the private output list in the public output list. Here, one thread in the block atomically updates the public counter, incrementing it by the total number of keys in the private output list (lines 26-31). The beginning index of the reserved space, j, is placed in shared memory so that it can be accessed by the other threads in the block. A barrier synchronization ensures that j is written to shared memory before any of the other threads start using it (line 32). The final step is to write the private output list to the public output list. Consecutive threads will write consecutive keys, hence we use the thread index to read from the private output list and write to the public output list starting at j (lines 35-37). Similar to the case of coalesced atomic operation, we observe the additional benefit of privatization besides reduced contention on the public counter. Since consecutive threads write consecutive keys to global memory, the memory stores will be coalesced.</p>
+<h2 id="sec-12-5">12.5 A simple parallel stable filter<a class="td-heading-self-link" href="#sec-12-5" aria-label="Link to this heading"></a>
+</h2>
+<p>We now turn our attention to parallelizing the stable filter operation, where the filtered keys retain the same order in the output list that they had in the input list. The need to retain the order of the keys means that a thread cannot place a filtered key in an arbitrary place in the output list by atomically incrementing a counter. Instead, the thread needs to find out the specific place where the key should go in the output list by finding out how many of the preceding input keys were filtered. Stable filters are used when some select elements are to be deleted or extracted from a sorted list. Fig. 12.7 illustrates how the stable filter operation can be parallelized. A thread is launched for each key in the input list. Each thread evaluates the condition on its input value and sets a ``keep&rsquo;&rsquo; flag that indicates whether the input value should be kept or not. Next, the thread must identify the offset of its key in the output list by identifying how many preceding keys will be placed in the output list. In other words, FIGURE 12.7 Parallelizing the stable filter operation.</p>
+<img src="/pmpp5-zh/figs/orig/fig-12-8.png" alt="Figure 12.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 12.8.</strong> Code for a simple stable filter kernel.</p>
+<p>the thread needs to find the sum of the ``keep&rsquo;&rsquo; values of all the preceding threads. Finding this sum for all preceding threads amounts to an exclusive scan operation, which we have studied in Chapter 11. We can also optimize this prefix sum operation by leveraging the fact that its input is binary and performing a binary prefix sum [1] on small segments using bit-level operations, as shown in Section 12.3. Once the thread identifies its key’s offset in the output list, it proceeds to store the key in the output list. Fig. 12.8 shows the code for a simple stable filter kernel. First, each thread identifies the index of the key that it is responsible for (line 03) and loads it from global memory (line 04). Next, the thread evaluates the filter condition on the value and sets the integer keep to 1 if the condition is true, and 0 otherwise (line 05). After that, the threads in the grid execute a grid-wide exclusive scan on the keep value to obtain the offset of the key in the output list (line 06). This grid-wide exclusive scan is performed within a single kernel following the single-kernel scan implementation discussed in Chapter 11. The threads with a key to be kept write their key to the output list at the offset obtained from the scan operation (lines 07-09). Finally, the last thread in the grid writes out the total size of the resulting output list (lines 10-12).</p>
+<h2 id="sec-12-6">12.6 Improving memory coalescing with shared memory and thread coarsening<a class="td-heading-self-link" href="#sec-12-6" aria-label="Link to this heading"></a>
+</h2>
+<p>One source of inefficiency in the simple stable filter implementation presented in Section 12.5 is that not all threads in the block participate when storing the filtered keys to global memory. This situation misses opportunities for memory coalescing because keys being written to adjacent memory locations in global memory may be written by threads in different warps with many inactive threads between them. These missed opportunities can be recovered by gathering the filtered keys in shared memory, and then writing them from shared memory to global memory as one contiguous chunk. Fig. 12.9 illustrates how this form of privatization can be applied. In this case, 12.6 Improving memory coalescing FIGURE 12.9 Using shared memory to improve memory coalescing.</p>
+<img src="/pmpp5-zh/figs/orig/fig-12-10.png" alt="Figure 12.10" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 12.10.</strong> Thread coarsening to further improve memory coalescing. This toy example assumes that two thread blocks are used and each thread block consists of four threads.</p>
+<p>adjacent output keys are written from shared memory to global memory by consecutive threads, increasing the number of adjacent keys written by the same warp, and hence the opportunities for memory coalescing. To further improve memory coalescing, thread coarsening can also be applied. Fig. 12.10 illustrates how thread coarsening can be applied in the context of stable filter. Each thread block is assigned more keys to filter than the number of threads in the block, which results in fewer and larger contiguous chunks of output keys being written from shared memory to global memory. Having fewer and larger chunks exposes more opportunities for memory coalescing which further improves performance. Here, the price of finer-grain parallelization can be thought of as the need to divide the output lists into smaller chunks which impacts memory coalescing. Perhaps an even more important benefit of thread coarsening is its impact on the scan operation. The scan operation is the most expensive part of the stable filterprocess. Recall from Chapter 11 that scan benefits substantially from thread coarsening because it improves work efficiency and reduces synchronization overhead. By coarsening the filter operation, we naturally coarsen the scan operation within it, which substantially improves the performance of stable filter as a whole. We leave the detailed stable filter implementation with exclusive scan, privatization, and thread coarsening as an exercise.</p>
+<h2 id="sec-12-7">12.7 In-place stable filter<a class="td-heading-self-link" href="#sec-12-7" aria-label="Link to this heading"></a>
+</h2>
+<p>In many situations, we may want to perform a filter operation in place. In other words, we may want for the output of the filter operation to occupy the same memory array as the input, not a separate array. One situation we may prefer an in-place operation is where the array being filtered is very large relative to the capacity of the GPU’s global memory. For example, in our heap object de-allocation example (Section 12.1), there may not be enough space in the global memory to accommodate a new filtered heap. In this case, we may not want to allocate a separate array for storing the output keys. When performing a filter operation in place, we must be careful not to write any output keys to the array before reading the keys that used to occupy the same memory location. For example, in Fig. 12.10, if the filter operation was done in place, where the input and output arrays are the same, then k3 would occupy the same location that k1 used to occupy. For this reason, we must ensure that thread 1 finishes reading k0 before thread 3 writes k3 . This ordering can easily be enforced by making sure that the thread block executes a barrier synchronization between the step where all the threads read the input values and the step where they write the output values. A less trivial scenario arises where the threads that read and write in the same location are in different thread blocks. For example, in Fig. 12.10, if the filter operation was done in place, then k8 would occupy the same location 4 that k4 used to occupy. However, the threads that read and write these keys are in different thread blocks. Hence, we must ensure that the second block does not write any values before the first block reads its values. In general, we must ensure that no block writes any values before all preceding blocks read their values. It turns out that this ordering is already enforced by the device-wide scan operation. Hence, the code that we have written also works if an in-place filter operation is desired. To demonstrate that the desired ordering for in-place filter is already enforced, Fig. 12.11 illustrates the dependence between different operations in the stable filter implementation. The desired ordering is that for any pair of blocks i and j such that j &gt; i, the read of i happens before the write of j . We can see from the diagram that this is true. The read of i happens before the scan of i, which happens before the scan of j since j &gt; i, which happens before the write of j . We leave it as an exercise for the reader to adapt a single-kernel implementation of exclusive scan into a single kernel implementation of in-place stable filter.</p>
+<h2 id="sec-12-8">12.8 Related patterns<a class="td-heading-self-link" href="#sec-12-8" aria-label="Link to this heading"></a>
+</h2>
+<img src="/pmpp5-zh/figs/orig/fig-12-11.png" alt="Figure 12.11" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 12.11.</strong> Dependence diagram for stable filter.</p>
+<p>The stable filter operation is one example of a more general class of patterns where data needs to be moved in a one-directional manner. We review some of these patterns in the section, while noting that many of the optimizations discussed in the context of stable filter are applicable to these related patterns as well. One similar pattern to stable filter is removing duplicate keys from a sorted list. This pattern can be viewed as a special case of the filter pattern where the condition for the key to be preserved is that the key is not equal to the preceding key. Another similar pattern is removing rows and/or columns from a matrix. This pattern resembles filtering in that specific keys need to be removed from the input array, however, the difference is that the keys are removed based on their index, not based on their values. Consequently, threads can analytically determine their keys’ positions in the output without the need to perform a scan operation. However, if the operation were to be performed in place, we would still need to make sure that earlier thread blocks read their input values before later thread blocks write their output values. In this case, we can use the one-directional synchronization used in the single-pass scan operation just for enforcing an ordering between thread blocks, but without the need to propagate a partial sum. One more similar pattern is adding rows and/or columns to a matrix. Such pattern often occurs when adjusting the matrix layout to improve memory alignment. Like removing rows/columns, this pattern also determines where keys are to be moved analytically without the need to perform a scan operation. However, one notable difference is that the keys are moved outward in the array, not inward. If the operation were out-of-place, this difference is not significant. However, if the operation were in-place, then this difference affects the direction of synchronization. Since keys are moving outwards, it is now the earlier thread blocks that write to memory locations previously occupied by keys read by earlier thread blocks. Hence, we need to ensure that later thread blocks finish reading their input values before earlier thread blocks write their output values. In this case, the one-directional synchronization is performed in the opposite direction, from the thread block processing the last set of keys to the thread block processing the first set of keys. Interested readers are referred to the literature for more complex data in-place data movement patterns such as transposition of matrices and tensors [2].</p>
+<h2 id="sec-12-9">12.9 Summary<a class="td-heading-self-link" href="#sec-12-9" aria-label="Link to this heading"></a>
+</h2>
+<p>In this chapter, we discussed the parallel implementations and optimizations of both stable and unstable filters. The unstable out-of-place filters are based on atomic operations and the optimizations are focused on minimizing the number of atomic operations on the counter and the coalescing of writes to the output. The stable outof-place filters are based on the scan operation and can be built on the single-pass scan kernel in Chapter 11. In practice, the Thrust [3] and CUB [4] libraries offer filter implementations. Once the reader has mastered the introduction and optimizations of different types of filters, the reader is well equipped to select the Thrust or CUB API functions that are appropriate for the application.</p>
+<h2 id="sec-12-10">12.10 Exercises<a class="td-heading-self-link" href="#sec-12-10" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Implement a stable filter with exclusive scan as three separate kernels: condition evaluation, exclusive scan, and output generation. 2. Implement stable filter as a single kernel by adding the filtering code into a one-pass scan kernel. What are the major advantages of a single-kernel implementation? 3. Apply privatization to the kernel in Exercise 2. 4. Apply thread coarsening to the kernel in Exercise 3.</p>
+<p>References [1] M. Harris, M. Garland, Optimizing parallel prefix operations for the Fermi architecture, in: GPU Computing Gems Jade Edition, Elsevier, 2012, pp. 29&ndash;38. [2] I.-J. Sung, J. Gómez-Luna, J.M. González-Linares, N. Guil, W.-M.W. Hwu, In-place transposition of rectangular matrices on accelerators, ACM SIGPLAN Notices 49 (8) (2014) 207&ndash;218. [3] N. Bell, J. Hoberock, Thrust: a productivity-oriented library for cuda, in: GPU Computing Gems Jade Edition, Elsevier, 2012, pp. 359&ndash;371. [4] NVIDIA, CUB, <a href="https://nvidia.github.io/cccl/cub/index.html">https://nvidia.github.io/cccl/cub/index.html</a>, 2025.</p>
+<p>CHAPTER</p>
+<p>Merge And dynamic input data identification With special contributions from Li-Wen Chang and Jie Lv</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] M. Harris, M. Garland, Optimizing parallel prefix operations for the Fermi architecture, in: GPU Computing Gems Jade Edition, Elsevier, 2012, pp. 29&ndash;38.</p>
+<p>[2] I.-J. Sung, J. Gómez-Luna, J.M. González-Linares, N. Guil, W.-M.W. Hwu, In-place transposition of rectangular matrices on accelerators, ACM SIGPLAN Notices 49 (8) (2014)</p>
+<p>[3] N. Bell, J. Hoberock, Thrust: a productivity-oriented library for cuda, in: GPU Computing Gems Jade Edition, Elsevier, 2012, pp. 359&ndash;371.</p>
+<p>[4] NVIDIA, CUB, <a href="https://nvidia.github.io/cccl/cub/index.html">https://nvidia.github.io/cccl/cub/index.html</a>, 2025.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/11-ch11/"
+    aria-label="Previous - Chapter 11 Scan" title="Chapter 11 Scan" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 11 Scan</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/13-ch13/"
+    aria-label="Next - Chapter 13 Merge" title="Chapter 13 Merge" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 13 Merge</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-12-1">12.1 Background</a></li>
+    <li><a href="#sec-12-2">12.2 A simple parallel unstable filter</a></li>
+    <li><a href="#sec-12-3">12.3 Coalescing atomic operations with warp-level primitives</a></li>
+    <li><a href="#sec-12-4">12.4 Privatization</a></li>
+    <li><a href="#sec-12-5">12.5 A simple parallel stable filter</a></li>
+    <li><a href="#sec-12-6">12.6 Improving memory coalescing with shared memory and thread coarsening</a></li>
+    <li><a href="#sec-12-7">12.7 In-place stable filter</a></li>
+    <li><a href="#sec-12-8">12.8 Related patterns</a></li>
+    <li><a href="#sec-12-9">12.9 Summary</a></li>
+    <li><a href="#sec-12-10">12.10 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/12-ch12/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/12-ch12/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/12-ch12/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/12-ch12.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/12-ch12.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+12+Filter"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/12-ch12/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/12-ch12/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/12-ch12/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/12-ch12/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

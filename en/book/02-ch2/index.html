@@ -1,0 +1,811 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/02-ch2/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/01-ch1/">
+<link rel="next" href="/pmpp5-zh/en/book/03-ch3/"><meta name="robots" content="index, follow">
+
+<title>Chapter 2 Heterogeneous data-parallel computing | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/02-ch2/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/02-ch2/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/02-ch2/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/02-ch2/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 2 Heterogeneous data-parallel computing">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 2 Heterogeneous data-parallel computing">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="8694">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 2 Heterogeneous data-parallel computing">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/02-ch2/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/02-ch2/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/02-ch2/" aria-current="page" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 2 Heterogeneous data-parallel computing</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/02-ch2.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/02-ch2.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;2&#43;Heterogeneous&#43;data-parallel&#43;computing" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 2 Heterogeneous data-parallel computing</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c2">Chapter 2 Heterogeneous data-parallel computing<a class="td-heading-self-link" href="#c2" aria-label="Link to this heading"></a>
+</h1>
+<p>Data parallelism refers to the phenomenon that the computations to be performed on different parts of a dataset can be done independently of each other and thus can be done in parallel with each other. Many applications exhibit a rich amount of data parallelism that makes them amenable to scalable parallel execution where the speed of execution improves proportionally to the amount of execution resources in the system. It is therefore important for parallel programmers to be familiar with the concept of data parallelism and the parallel programming language constructs for writing code that exploit data parallelism. In this chapter, we will use the CUDA C++ language constructs to develop a simple data parallel program.</p>
+<h2 id="sec-2-1">2.1 Data parallelism<a class="td-heading-self-link" href="#sec-2-1" aria-label="Link to this heading"></a>
+</h2>
+<p>When modern software applications run slowly, the problem is usually data &ndash; too much data to process. Image processing applications manipulate images or videos with millions to trillions of pixels. Scientific applications model fluid dynamics using billions of grid points. Molecular dynamics applications simulate interactions between thousands to billions of atoms. Airline scheduling must deal with thousands of flights, crews, and airport gates. Most of these pixels, particles, grid points, interactions, flights, and so on can usually be dealt with largely independently. For example, in image processing, converting a color pixel to grayscale requires only the data of that pixel. Blurring an image averages each pixel’s color with the colors of nearby pixels, requiring only the data of that small neighborhood of pixels. Even a seemingly global operation, such as finding the average brightness of all pixels in an image, can be broken down into many smaller computations that can be executed independently. Such independent evaluation of different pieces of data is the basis of data parallelism. Writing data parallel code entails (re)organizing the computation around the data such that one can execute the resulting independent computations in parallel to complete the overall job faster &ndash; often much faster. Let us illustrate the concept of data parallelism with a color-to-grayscale conversion example. Fig. 2.1 shows a color image (left side) consisting of many pixels, each Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00011-1">https://doi.org/10.1016/B978-0-44-343900-1.00011-1</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-1.png" alt="Figure 2.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.1.</strong> Conversion of a color image to a grayscale image.</p>
+<p>containing a red, green, and blue fractional value (r, g, b) varying from 0 (black) to 1 (full intensity). To convert the color image (left side of Fig. 2.1) to a grayscale image (right side), we compute the luminance value L for each pixel by applying the following weighted sum formula: L = r ∗ 0.299 + g ∗ 0.587 + b ∗ 0.114 (2.1)</p>
+<p>RGB Color Image Representation In an RGB representation, each pixel of an image is specified as a tuple of (r, g, b) values. The format of an image’s row is (r g b) (r g b) . . . (r g b), as illustrated in the following conceptual picture.</p>
+<p>Each tuple specifies a mixture of red (R), green (G), and blue (B). That is, for each pixel, the r, g, and b values represent the intensity (0 being dark and 1 being full intensity) of the red, green, and blue light sources when the pixel is rendered. If we consider the input to be an image organized as an array I of RGB values and the output to be a corresponding array O of luminance values, we get the simple FIGURE 2.2 Data parallelism in color-image-to-grayscale conversion &ndash; pixels can be calculated independently of each other.</p>
+<p>computation structure shown in Fig. 2.2. For example, O[0] is generated by calculating the weighted sum the RGB values in I[0] according to the formula above; O[1] by calculating the weighted sum of the RGB values in I[1]; O[2] by calculating the weighted sum of the RGB values in I[2]; and so on. None of these per-pixel computations depends on each other. All of them can be performed independently. Clearly, color-to-grayscale conversion exhibits a rich amount of data parallelism as modern images commonly consist of millions of pixels. Of course, data parallelism in complete applications can be more complex and much of this book is devoted to teaching the ``parallel thinking&rsquo;&rsquo; necessary to find and exploit data parallelism. Data Parallelism vs. Task Parallelism Data parallelism is not the only type of parallelism used in parallel programming. Task Parallelism has also been used extensively in parallel programming. Task parallelism is typically exposed through task decomposition of applications. For example, a simple application may need to do a vector addition and a matrix-vector multiplication. Each of these would be a task. Task parallelism exists if the two tasks can be done independently. I/O and data transfers are also common sources of tasks. In large applications, there is usually a larger number of independent tasks and therefore a larger amount of task parallelism. For example, in a molecular dynamics simulator, the list of natural tasks include vibrational force calculation, rotational force calculation, neighbor identification for non-bonding forces, nonbonding force calculation, velocity and position calculation, etc. In general, data parallelism is the main source of performance improvement for parallel programs. With large data sets, one can often find abundant data parallelism to be able to utilize massively parallel processors and allow application performance to grow with each generation of hardware that has more execution resources, a desirable property referred to as scalability. Nevertheless, task parallelism can also play an important role in achieving performance goals.</p>
+<h2 id="sec-2-2">2.2 CUDA C++ program structure<a class="td-heading-self-link" href="#sec-2-2" aria-label="Link to this heading"></a>
+</h2>
+<p>Our next step is to learn how to write a program to exploit data parallelism for faster execution in heterogeneous computing systems. Without loss of generality, we will use code examples of CUDA C++ programs to illustrate the algorithms and techniques in this book. From our experience, concepts learned based on CUDA C++ can be easily extended to other programming languages and platforms. CUDA C++1 extends the popular C++ programming language with minimal new syntax and with library functions to let programmers target heterogeneous computing systems containing both CPUs and GPUs. As the name implies, CUDA C++ is built on NVIDIA’s CUDA platform. CUDA is currently the most mature framework for massively parallel computing. It is broadly used in the high-performance computing industry, with essential tools such as compilers, debuggers, and profilers available on the most common operating systems. The structure of a CUDA C++ program reflects the co-existence of a host (CPU) and one or more devices (GPUs) in the computer. Each CUDA C++ source file can have a mixture of both host code and device code. By default, any traditional C++ program is a CUDA C++ program that contains only host code. One can add device code into any source file. The device code is clearly marked with special CUDA C++ keywords. The device code includes functions, or kernels, whose code is executed in a data-parallel manner. The execution of a CUDA C++ program is illustrated in Fig. 2.3. The execution starts with host code (CPU serial code) whose execution is illustrated as a single curly arrow that represents a thread. When a kernel, which is a piece of device code (device parallel kernel in Fig. 2.3), is called, a large number of threads are launched on a device to execute the kernel. All the threads that are launched by a kernel call are collectively called a grid. These threads are the primary vehicle of parallel execution in a CUDA platform. Fig. 2.3 shows the execution of two grids of threads. Each grid is shown as multiple blocks of threads. We will discuss how these grids and blocks are organized soon. When all threads of a grid complete their execution, the grid terminates and the execution continues on the host until another grid is launched. As is implied in Fig. 2.3, heterogeneous computing applications can manage overlapped CPU and GPU execution to take advantage of both CPUs and GPUs. Threads A thread is a simplified view of how a processor executes a sequential program in modern computers. A thread consists of the code of the program, the point in the code that is being executed, and the values of its variables and data structures. The execution of a thread is sequential as far as a user is concerned. One 1 In the code examples in this book, we use C-style programming for simplicity and introduce C++ fea tures where needed. However, readers should be aware that CUDA programming has evolved towards C++ to support modern generic programming and other object-oriented programming practices.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-3.png" alt="Figure 2.3" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.3.</strong> Execution of a CUDA program.</p>
+<p>can use a source-level debugger to monitor the progress of a thread by executing one statement at a time, looking at the statement that will be executed next and checking the values of the variables and data structures as the execution progresses. Threads have been used in programming for many years. If a programmer wants to start parallel execution in an application, the programmer creates and manages multiple threads using thread libraries or special languages. In CUDA, the execution of each device thread is sequential as well. A CUDA program initiates parallel execution by calling kernel functions, which causes the underlying runtime mechanisms to launch a grid of device threads that process different parts of the data in parallel. Launching a grid typically generates many threads to exploit data parallelism. In the color-to-grayscale conversion example, each thread could be used to compute one pixel of the output array. In this case, the number of threads that ought to be generated by the grid launch is equal to the number of pixels in the image. For large images, a large number of threads, i.e., millions, could be generated. In practice, one might use each thread to compute multiple output pixels to enhance execution and data access efficiency, as we will discuss later in this book. CUDA programmers can assume that these threads take very few clock cycles to generate and schedule due to efficient hardware support. This assumption contrasts with traditional CPU threads that typically take thousands of clock cycles to generate and schedule. In Chapter 3, we show how to implement color-tograyscale conversion and image blur kernels. In this chapter, we will use vector addition as a running example for simplicity.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-4.png" alt="Figure 2.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.4.</strong> A simple traditional vector addition C++ code example.</p>
+<h2 id="sec-2-3">2.3 A vector addition example<a class="td-heading-self-link" href="#sec-2-3" aria-label="Link to this heading"></a>
+</h2>
+<p>Vector addition is arguably the simplest possible data parallel computation &ndash; the parallel equivalent of <code>Hello World'' from sequential programming. Before we show the kernel code for vector addition, it is helpful to first review how a conventional vector addition (host code) function works. Fig. 2.4 shows a simple C++ program that consists of a main function and a vector addition function. In all our examples, whenever there is a need to distinguish between host and device data, we will suffix the names of variables that are used by the host with </code>_h&rsquo;&rsquo; and those of variables that are used by a device with <code>_d'' to remind ourselves of the intended usage of these variables. Since we only have host code in Fig. 2.4, we only see variables suffixed with </code>_h&rsquo;&rsquo;. Assume that the vectors to be added are stored in arrays A and B that are allocated and initialized in the main function. The output vector is in array C, which is also allocated in the main function. For brevity, we do not show the details of how A, B, and C are allocated or initialized in the main function. The pointers to these arrays are passed to the vecAdd function, along with the variable N that contains the length of the vectors. Note that the parameters of the vecAdd function are suffixed with ``_h&rsquo;&rsquo; to emphasize that they are used by the host. Pointers in the C++ Language The function arguments A, B, and C in Fig. 2.4 are pointers. In the C and C++ languages, a pointer can be used to access variables and data structures. While a floating-point variable V can be declared with: float V;</p>
+<p>a pointer variable P can be declared with: float *P;</p>
+<p>By assigning the address of V to P with the statement P = &amp;V, we make P ``point to&rsquo;&rsquo; V. *P becomes a synonym for V. For example, U = *P assigns the value of V to U. For another example, *P = 3 changes the value of V to 3. An array in a C or C++ program can be accessed through a pointer that points to its 0th element. For example, the statement P = &amp;(A[0]) makes P point to the 0th FIGURE 2.5 Outline of a revised vecAdd (host code) function that moves the work to a device.</p>
+<p>element of array A. P[i] becomes a synonym for A[i]. In fact, the array name A is in itself a pointer to its 0th element. In Fig. 2.4, passing an array name A as the first argument in the function call to th vecAdd makes the function’s first parameter A_h point to the 0 element of A. As a result, A_h[i] in the function body can be used to access A[i] for the array A defined in the main function. See [1] for an easy-to-follow explanation of the detailed usage of pointers in C. The vecAdd function in Fig. 2.4 uses a for-loop to iterate through the vector elements. In the i th iteration, output element C_h[i] receives the sum of A_h[i] and B_h[i]. The vector length parameter n is used to control the loop so that the number of iterations matches the length of the vectors. The function reads the elements of A and B and writes the elements of C through the pointers A_h, B_h, and C_h, respectively. When the vecAdd function returns, the subsequent statements in the main function can access the new contents of C. A straightforward way to execute vector addition in parallel is to modify the vecAdd function and move its calculations to a device. The structure of such a modified vecAdd function is shown in Fig. 2.5. Part 1 of the function allocates space in the device (GPU) memory to hold copies of the A, B, and C vectors, and copies the A and B vectors from the host memory to the device memory. Part 2 calls a vector addition kernel to launch a grid of threads on the device. Part 3 copies the sum vector C from the device memory to the host memory and frees the three arrays from the device memory.</p>
+<p>Note that the revised vecAdd function is essentially an outsourcing agent that ships input data to a device, activates the calculation on the device, and collects the results from the device. The agent does so in such a way that the main program does not need to even be aware that the vector addition is now actually done on a device. In practice, such ``transparent&rsquo;&rsquo; outsourcing model can be very inefficient because of all the copying of data back and forth. One would often keep large and important data structures on the device and simply invoke device functions that operate on the data structures from the host code. For now, however, we will use the simplified transparent model to introduce the basic CUDA C++ program structure. The details of the revised function, as well as the way to compose the kernel function, will be the topic of the rest of this chapter.</p>
+<h2 id="sec-2-4">2.4 Device global memory and data transfer<a class="td-heading-self-link" href="#sec-2-4" aria-label="Link to this heading"></a>
+</h2>
+<p>In current CUDA systems, devices are often hardware cards that come with their own Dynamic Random-Access Memory (DRAM) called device global memory, or simply global memory. For example, the NVIDIA Hopper H100 GPU comes with 80 GB or 94 GB of global memory. Calling it ``global&rsquo;&rsquo; memory distinguishes it from other types of device memory that are also accessible to programmers. Details about the CUDA memory model and the different types of device memory are discussed in 5. For the vector addition kernel, before calling the kernel, the programmer needs to allocate space in the device global memory and transfer data from the host memory to the allocated space in the device global memory. These activities correspond to Part 1 of Fig. 2.5. Similarly, after device execution, the programmer needs to transfer the output data from the device global memory back to the host memory and free up the allocated space in the device global memory that is no longer needed. These activities correspond to Part 3 of Fig. 2.5. The CUDA runtime system (typically running on the host) provides API functions to perform these activities on behalf of the programmer. From this point on, we will simply say that data is transferred from host to device as shorthand for saying that the data is copied from the host memory to the device global memory. The same holds for the opposite direction. In Fig. 2.5, Part 1 and Part 3 of the vecAdd function need to use the CUDA API functions to allocate device global memory for A, B, and C, transfer A and B from host to device, transfer C from device to host after the vector addition, and free the device global memory for A, B, and C. We will explain the memory allocation and free functions first. Fig. 2.6 shows two API functions for allocating and freeing device global memory. The cudaMalloc function can be called from the host code to allocate a piece of device global memory for an object. The reader should notice the striking similarity between cudaMalloc and the malloc function from the standard C runtime library, which is also part of C++. This similarity is intentional; CUDA C++ is C++ with minimal extensions. CUDA C++ uses the standard C and C++ runtime library malloc function to manage the host memory and adds cudaMalloc as an extension to the C++ FIGURE 2.6 CUDA API functions for managing device global memory.</p>
+<p>runtime library. By keeping the interface as close to the original C and C++ runtime libraries as possible, CUDA C++ minimizes the time that a C or C++ programmer spends to relearn the use of these extensions. The first parameter to the cudaMalloc function is the address of a pointer variable that will be set to point to the allocated object. The address of the pointer variable should be cast to (void**) because the function expects a generic pointer; the memory allocation function is a generic function that is not restricted to any particular type of objects.2 This parameter allows the cudaMalloc function to write the address of the allocated memory into the provided pointer variable regardless of its type. The host code that calls kernels passes this pointer value to the kernels that need to access the allocated memory object. The second parameter to the cudaMalloc function gives the size of the data to be allocated, in number of bytes. The usage of this second parameter is consistent with the size parameter to the C malloc function. Note that cudaMalloc has a slightly different format from the C malloc function. The C malloc function returns a pointer to the allocated object. It takes only one parameter that specifies the size of the allocated object. The cudaMalloc function writes to the pointer variable whose address is given as the first parameter. As a result, the cudaMalloc function takes two parameters. The two-parameter format of cudaMalloc allows it to use the return value to report any errors in the same way as other CUDA API functions. The cudaFree function strongly resembles the C free function. It takes one input parameter, the pointer to the memory to be freed, and frees the allocated space from the device memory. CUDA C++ also has more advanced library functions for allocating and deallocating space in the host and device memories. These alternative methods allow for faster copying of data, or eliminate the need to copy the data explicitly and allow it to be copied automatically on-demand. Such methods provide programs with improved performance or convenience when managing the device memory. We discuss these other forms of memory allocation in Chapter 23 and in Appendix C. We now use the following simple code example to illustrate the use of cudaMalloc and cudaFree: 2 The fact that cudaMalloc returns a generic object makes the use of dynamically allocated multidimen sional arrays more complex. We address this issue in Chapter 3.</p>
+<p>float *A_d int size = n*sizeof(float); cudaMalloc((void**)&amp;A_d, size); &hellip; cudaFree(A_d);</p>
+<p>This code is a continuation of the example in Fig. 2.5. For clarity, we suffix a pointer variable with ``_d&rsquo;&rsquo; to indicate that it points to an object in the device global memory. The first argument passed to cudaMalloc is the address of pointer A_d (i.e., &amp;A_d) cast to a void pointer. When cudaMalloc returns, A_d will point to the device global memory region allocated for the A vector. The second argument passed to cudaMalloc is the size of the region to be allocated. Since size is in number of bytes, the programmer needs to translate from the number of elements in an array to the number of bytes when determining the value of size. For example, when allocating space for an array of n single-precision floating-point elements, the value of size would be n times the size of a single-precision floating number, which is 4 bytes in computers today. Therefore, the value of size would be n*4. After the computation, cudaFree is called with pointer A_d passed as an argument to free the storage space for the A vector from the device global memory. Note that cudaFree does not need to change the value of A_d; it only needs to use the value of A_d to return the allocated memory back to the available pool. Thus, only the value and not the address of A_d is passed as an argument. The addresses in A_d, B_d, and C_d point to locations in the device global memory. These addresses should not be dereferenced in the host code. They should only be used in calling API functions and kernel functions. Dereferencing a device global memory pointer in host code can cause exceptions or other types of run-time errors since these addresses are located in the device global memory and are not accessible by the user host code. Now that we have discussed the declaration of the A_d pointer variable, and its use in cudaMalloc and cudaFree calls, the reader should be able to complete Part 1 of the vecAdd example in Fig. 2.5 with similar declarations of the B_d and C_d pointer variables as well as their corresponding cudaMalloc calls. Furthermore, Part 3 in Fig. 2.5 can be completed with the cudaFree calls for B_d and C_d. Once the host code has allocated space in the device global memory for the data objects, it can request that data be transferred from host to device and vice versa. This transfer is accomplished by calling one of the CUDA API functions. Fig. 2.7 shows such an API function, cudaMemcpy. The cudaMemcpy function takes four parameters. The first parameter is a pointer to the destination location for the data object to be copied. The second parameter points to the source location. The third parameter specifies the number of bytes to be copied. The fourth parameter indicates the location of the memory involved in the copy: from host to host, from host to device, from device to host, and from device to device. For example, the memory copy function can be used to copy data from one location in the device global memory to another location of the device global memory. The vecAdd function calls the cudaMemcpy function to copy the host memory arrays pointed to by A_h and B_h to the device memory arrays pointed to by A_d and B_d FIGURE 2.7 CUDA API function for data transfer between host and device.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-8.png" alt="Figure 2.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.8.</strong> A more complete version of the vecAdd function.</p>
+<p>before adding them. The vecAdd function also calls the cudaMemcpy function to copy the device memory array pointed to by C_d to the host memory array pointed to by C_h after the vector addition is done. Assume that the values of A_h, B_h, A_d, B_d, and size have already been set as we discussed before, the three cudaMemcpy calls are shown below. cudaMemcpy(A_d, A_h, size, cudaMemcpyHostToDevice); cudaMemcpy(B_d, B_h, size, cudaMemcpyHostToDevice); &hellip; cudaMemcpy(C_h, C_d, size, cudaMemcpyDeviceToHost);</p>
+<p>The two symbolic constants, cudaMemcpyHostToDevice and cudaMemcpyDeviceToHost, are recognized, predefined constants of the CUDA programming environment. Note that the same cudaMemcpy function can be used to transfer data in both directions by properly ordering the source and destination pointers and using the appropriate constant for the transfer type. To summarize, the main function in Fig. 2.4 calls vecAdd, which is also executed on the host. The vecAdd function, outlined in Fig. 2.5, allocates space in device global memory, requests data transfers, and calls the kernel that performs the actual vector addition. We refer to this type of host code as a stub for calling a kernel. We show a more complete version of the vecAdd function in Fig. 2.8.</p>
+<p>Compared to Fig. 2.5, the vecAdd function in Fig. 2.8 is complete for Part 1 and Part 3. Part 1 allocates device global memory for A_d, B_d, and C_d and transfers A_h to A_d and B_h to B_d. This is done by calling the cudaMalloc and cudaMemcpy functions. The readers are encouraged to write their own function calls with the appropriate parameter values and compare their code with that shown in Fig. 2.8. Part 2 calls the kernel and will be described in the following subsection. Part 3 copies the vector sum data from device to host so that the values will be available in the main function. This is accomplished with a call to the cudaMemcpy function. It then frees the memory for A_d, B_d, and C_d from the device global memory, which is done by calls to the cudaFree function. Error Checking and Handling in CUDA C++ Programs It is important for a program to check for and handle errors. With good error checking and handling, one can catch the errors when they happen and detect them close to the root cause of the problems. CUDA API functions return flags that indicate whether an error has occurred when they served the request. Most errors are due to inappropriate argument values used in the call. For brevity, we will not show error checking code in our examples. For example, Fig. 2.8 shows a call to cudaMalloc as follows: cudaMalloc((void **) &amp;A_d, size);</p>
+<p>In practice, CUDA programmers surround the call with code that checks the returned error condition and prints out a relevant error message so that the user can be aware of the fact that an error has occurred. A simple version of such checking code is as follows: cudaError_t err = cudaMalloc((void **) &amp;A_d, size); if (error != cudaSuccess) { printf(&quot;%s in %s at line %d \n&quot;, cudaGetErrorString(err), <strong>FILE</strong>, <strong>LINE</strong>); exit(EXIT_FAILURE); } This way, if the system is out of device memory, the user will be informed about the situation. Proper error checking can save many hours of debugging time. One could define a C++ macro to make the checking code more concise in the source code.</p>
+<h2 id="sec-2-5">2.5 Kernel functions and threading<a class="td-heading-self-link" href="#sec-2-5" aria-label="Link to this heading"></a>
+</h2>
+<p>We are now ready to discuss more about the CUDA C++ kernel functions and the effect of calling these kernel functions. In CUDA, a kernel function specifies the FIGURE 2.9 All threads in a grid execute the same kernel code.</p>
+<p>code to be executed by GPU threads during a parallel phase. Since all these threads execute the same code, CUDA C++ programming is an instance of the well-known Single-Program Multiple-Data (SPMD) [2] parallel programming style, a popular programming style for parallel computing systems. When a program’s host code calls a kernel, the CUDA runtime system running on the host launches a grid of GPU threads that are organized into a two-level hierarchy. Each grid is organized as an array of thread blocks, which will be referred to as blocks for brevity. All blocks of a grid have the same size. Each block can contain up to 1024 threads on current systems. Fig. 2.9 shows an example where each block consists of 256 threads. Each thread is represented by a curly arrow stemming from a box that is labeled with the thread’s index number in the block. The total number of blocks in the grid and the total number of threads in each block is specified by the host code when a kernel is called. The same kernel can be called with different numbers of blocks and threads in different parts of the host code. For a given grid of threads, the number of threads in a block is available in a built-in variable named blockDim. The blockDim variable’s type is a C++ struct with three unsigned integer fields (x, y, and z) which help the programmer organize the threads into a one-, two-, or three-dimensional array. For a one-dimensional organization, only the x field is used. For a two-dimensional organization, the x and y fields are used. For a three-dimensional structure, all three x, y, and z fields are used. The choice of dimensionality for organizing threads usually reflects the dimensionality of the data. This makes sense since the threads are created to process data in parallel, so it is only natural that the organization of the threads reflects the organization of the data. Built-in Variables Many programming languages have built-in variables. These variables have special meaning and purpose. The values of these variables are often pre-initialized by the runtime system and are typically read-only in the program. The programmers should refrain from redefining these variables for any other purposes.</p>
+<p>In Fig. 2.9, each thread block is organized as a one-dimension array of threads because the data are one-dimensional vectors. The value of the blockDim.x variable indicates the total number of threads in each block, which is 256 in Fig. 2.9. In general, it is recommended that the total number of threads in a thread block is a multiple of 32 for hardware efficiency reasons. We will revisit this point later. CUDA kernels have access to two more built-in variables, threadIdx and blockIdx, that allow threads to distinguish themselves from each other and to determine the area of data each thread is to work on. The threadIdx variable gives each thread a unique coordinate within a block. In Fig. 2.9, since we are using a one-dimensional thread organization, only threadIdx.x is used. The threadIdx.x value for each thread is shown in the small shaded box of each thread in Fig. 2.9. The first thread in each block has value 0 in its threadIdx.x variable, the second thread has value 1, the third thread has value 2, etc. The blockIdx variable gives all threads in a block a common block coordinate. In Fig. 2.9, all threads in the first block have value 0 in their blockIdx.x variables, those in the second thread block value 1, and so on. Using an analogy with the telephone system, one can think of threadIdx.x as local phone number and blockIdx.x as area code (see Sidebar on Hierarchical Organizations). The two together gives each telephone line a unique phone number in the whole country. Similarly, each thread can combine its threadIdx and blockIdx values to create a unique global index for itself within the entire grid. In Fig. 2.9, a unique global index i is calculated with the C++ statement i = blockIdx.x * blockDim.x + threadIdx.x. Recall that blockDim.x is 256 in our example. The i values of threads in block 0 range from 0 to 255. The i values of threads in block 1 range from 256 to 511. The i values of threads in block 2 range from 512 to 767. That is, the i values of the threads in these three blocks form a continuous coverage of the values from 0 to 767. Since each thread uses i to access A, B, and C, these threads cover the first 768 iterations of the original loop. By launching a grid with a larger number of blocks, one can process larger vectors. By launching a grid with n or more threads, one can process vectors of length n. Hierarchical Organizations Like CUDA threads, many real-world systems are organized hierarchically. The U.S. telephone system is a good example. At the top level, the telephone system consists of <code>areas'' each of which corresponds to a geographical area. All telephone lines within the same area have the same 3-digit </code>area code&rsquo;&rsquo;. A telephone area is sometimes larger than a city. For example, many counties and cities of central Illinois are within the same telephone area and share the same area code 217. Within an area, each phone line has a seven-digit local phone number, which allows each area to have a maximum of about ten million numbers. One can think of each phone line as a CUDA thread, with the area code as the value of blockIdx and the seven-digital local number as the value of threadIdx. This hierarchical organization allows the system to have a very large number of phone FIGURE 2.10 A simple vector addition kernel function.</p>
+<p>lines while preserving <code>locality'' for calling the same area. That is, when dialing a phone line in the same area, a caller only needs to dial the local number. As long as we make most of our calls within the local area, we seldom need to dial the area code. If we occasionally need to call a phone line in another area, we dial 1 and the area code, followed by the local number (this is the reason why no local number in any area should start with a 1). The hierarchical organization of CUDA threads also offers a form of locality. We will study this locality soon. Fig. 2.10 shows a kernel function for vector addition. Note that we do not use the “_h'' and </code>_d&rsquo;&rsquo; convention in the kernel code because there is no potential for confusion. We do not access any host memory from the kernel code in our examples.3 The syntax of a kernel follows the C++ standard with some notable extensions. First, there is a CUDA-specific keyword <strong>global</strong> in front of the declaration of the vecAddKernel function. This keyword indicates that the function is a kernel and that it can be called to generate a grid of threads on a device. In general, CUDA C++ extends the C++ language with three qualifier keywords that can be used in function declarations. The meaning of these keywords is summarized in Fig. 2.11. The <strong>global</strong> keyword indicates that the function being declared is a CUDA C++ kernel function. Note that there are two underscore characters on each side of the word ``global&rsquo;&rsquo;. Such a kernel function is executed on the device and can be called from the host. In CUDA systems that support dynamic parallelism (starting with the Kepler architecture), it can also be called from the device. The important feature is that calling such a kernel function results in a new grid of threads being launched on the device, i.e., the GPU. 3 In general, it is possible for the kernel code to access host memory through a mechanism called Unified Virtual Address (UVA). This mechanism allows the GPU to access host memory but at lower bandwidth than accessing its own device global memory, and is discussed in Appendix C.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-11.png" alt="Figure 2.11" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.11.</strong> CUDA C++ keywords for function declaration.</p>
+<p>The <strong>device</strong> keyword in Fig. 2.11 indicates that the function being declared is a CUDA device function. A device function executes on a GPU device and can only be called from a kernel function or another device function. The device function is executed by the device thread that calls it and does not result in any new device threads being launched. The <strong>host</strong> keyword indicates that the function being declared is a CUDA host function. A host function is simply a traditional C++ function that executes on host and can only be called from another host function. By default, all functions in a CUDA program are host functions if they do not have any of the CUDA keywords in their declaration. This makes sense since many CUDA applications are ported from CPU-only execution environments. The programmer would add kernel functions and device functions during the porting process. The original functions remain as host functions. Having all functions to default into host functions spares the programmer the tedious work to change all original function declarations. Since all functions are host functions by default, the reader may wonder why the <strong>host</strong> keyword is needed. In some cases, a programmer may want a function to be available on both the host and the device. Labeling the function with the <strong>device</strong> keyword makes the function available only on the device. To make it available on both, one can use both the <strong>host</strong> and <strong>device</strong> keywords together in a function declaration. This combination tells the compilation system to generate two versions of object code for the same function. One is executed on the host and can only be called from a host function. The other is executed on the device and can only be called from a device or kernel function. This capability supports a common use case when the same function source code can be recompiled to generate a device version. Many user library functions will likely fall into this category. The second notable CUDA C++ extension used the vecAdd kernel function in Fig. 2.10 is the built-in variables threadIdx, blockIdx, and blockDim. Recall that all threads execute the same kernel code and there needs to be a way for them to distinguish themselves from each other and direct each thread towards a particular part of the data. These built-in variables are the means for threads to access hardware registers that provide the identifying coordinates to threads. Different threads will seedifferent values in their threadIdx.x, blockIdx.x, and blockDim.x variables. For readability, we will sometimes refer to a thread as thread blockIdx.x, threadIdx.x in our discussions. The global index computed using the built in variables (line 05 in Fig. 2.10) is written to an automatic (local) variable i of type int.4 In a CUDA kernel function, automatic variables are private to each thread. That is, a version of i will be generated for every thread. If the grid is launched with 10,000 threads, there will be 10,000 versions of i, one for each thread. The value assigned by a thread to its i variable is not visible to other threads. We will discuss these automatic variables in more details in Chapter 5. A quick comparison between Fig. 2.4 and Fig. 2.10 reveals an important insight for CUDA kernels. The kernel function in Fig. 2.10 does not have a loop that corresponds to the one in Fig. 2.10. The reader should ask where the loop went. The answer is that the loop is now replaced with the grid of threads. The entire grid forms the equivalent of the loop. Each thread in the grid corresponds to one iteration of the original loop. This is sometimes referred to as loop parallelism, where iterations of the original sequential code are executed by threads in parallel. Note that there is an if (i&lt;n) statement in vecAddVecKernel in Fig. 2.10. This is because not all vector lengths can be expressed as multiples of the block size. For example, let’s assume that the vector length is 100. The smallest efficient thread block dimension is 32. Assume that we picked 32 as the block size. One would need to launch four thread blocks to process all the 100 vector elements. However, the four thread blocks would have 128 threads. We need to disable the last 28 threads in thread block 3 from doing work not expected by the original program. Since all threads are to execute the same code, all will test their i values against n, which is 100. With the if (i&lt;n) statement, the first 100 threads will perform the addition whereas the last 28 will not. This allows the kernel to be called to process vectors of arbitrary lengths.</p>
+<h2 id="sec-2-6">2.6 Calling kernel functions<a class="td-heading-self-link" href="#sec-2-6" aria-label="Link to this heading"></a>
+</h2>
+<p>Having implemented the kernel function, the remaining step is to call that function from the host code to launch the grid. Fig. 2.12 shows the host code for calling the vector addition kernel. When the host code calls a kernel function, it sets the grid and thread block dimensions via execution configuration parameters. The configuration 4 Different C and C++ programmers may choose to use the int or the unsigned int type when declaringvariables intended to represent array indices, array sizes, loop iteration counters, and loop bounds. The use of unsigned int makes the intent clear that these variables should never be negative and may result in beneficial compiler warnings that prevent bugs. On the other hand, the use of int avoids bugs when performing subtraction or intermixing unsigned int variables with other int variables when performing arithmetic. Moreover, since the overflow of int variables is undefined, the compiler can take advantage of that fact when performing optimizations. Throughout this book, we sometimes used int and sometimes use unsigned int when declaring array indices, array sizes, loop iteration counters, and loop bounds. Readers can use either style in their own implementations.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-12.png" alt="Figure 2.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.12.</strong> A host code example with a vector addition kernel call statement.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-13.png" alt="Figure 2.13" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.13.</strong> A vector addition kernel call statement.</p>
+<p>parameters are given between the <code>&lt;&lt;&lt;'' and </code>&raquo;&gt;&rsquo;&rsquo; brackets before the traditional C++ function arguments. The first configuration parameter gives the number of blocks in the grid. The second specifies the number of threads in each block. In this example, there are 256 threads in each block. To ensure that we have enough threads in the grid to cover all the vector elements, we need to set the number of blocks in the grid to the ceiling division (rounding up the quotient to the immediate higher integer value) of the desired number of threads (n in this case) by the thread block size (256 in this case). There are many ways to perform a ceiling division. One way is to apply the C++ ceiling function to n/256.0. Using floating point value 256.0 ensures that we generate a floating value for the division so that the ceiling function can round it up correctly. For example, if we want 1000 threads, we would launch ceil(1000/256.0) = 4 thread blocks. As a result, the statement will launch 4*256 = 1024 threads. With the if (i &lt; n) statement in the kernel as shown in Fig. 2.10, the first 1000 threads will perform addition on the 1000 vector elements. The remaining 24 will not. Fig. 2.13 shows the final host code in the vecAdd function. This source code completes the skeleton code in Fig. 2.5. Fig. 2.10 and Fig. 2.13 jointly illustrate a simple FIGURE 2.14 Overview of the compilation process of a CUDA C++ program.</p>
+<h2 id="sec-2-7">2.7 Compilation<a class="td-heading-self-link" href="#sec-2-7" aria-label="Link to this heading"></a>
+</h2>
+<p>CUDA program that consists of both host code and a device kernel. The code is hardwired to use thread blocks of 256 threads each. The number of thread blocks used, however, depends on the length of the vectors (n). If n is 750, then three thread blocks will be used. If n is 4000, then 16 thread blocks will be used. If n is 2,000,000, then 7813 blocks will be used. Note that all the thread blocks operate on different parts of the vectors. They can be executed in any arbitrary order. Programmers must not make any assumptions regarding execution order. A small GPU with a small amount of execution resources may execute only one or two of these thread blocks in parallel. A larger GPU may execute 128 or 256 blocks in parallel. This gives CUDA kernels scalability in execution speed with hardware. That is, the same code runs at lower speed on small GPUs and higher speed on larger GPUs. We revisit this point in Chapter 4.</p>
+<p>We have seen that implementing CUDA C++ kernels requires using various extensions that are not part of C++. Once these extensions are used in the code, it is no longer acceptable to a traditional C++ compiler. The code needs to be compiled by a compiler that recognizes and understands these extensions such as NVCC (NVIDIA CUDA Compiler). As shown at the top of Fig. 2.14, the NVCC compiler processes a CUDA C++ program, using the CUDA keywords to separate the host code and device code. The host code is straight C++ code, which is compiled with a standard C/C++ compiler and is run as a traditional CPU process. The device code which is marked with CUDA keywords that designate CUDA kernels and their associated device functions and data structures is compiled by NVCC into virtual binary files called PTXfiles. These PTX files are further compiled by a run-time component of NVCC into the real object files and executed on a CUDA-capable GPU device.</p>
+<h2 id="sec-2-8">2.8 Summary<a class="td-heading-self-link" href="#sec-2-8" aria-label="Link to this heading"></a>
+</h2>
+<p>This chapter provided a quick, simplified overview of the CUDA C++ programming model. CUDA C++ extends the C++ language to support parallel computing. We discussed an essential subset of these extensions in this chapter. For the reader’s convenience, we summarize these extensions as follows. Function Declarations. CUDA C++ extends the C++ function declaration syntax to support heterogeneous parallel computing. The extensions are summarized in Fig. 2.11. Using one of <code>__global__'', </code><strong>device</strong>&rsquo;&rsquo;, or <code>__host__'', a programmer can instruct the compiler to generate a kernel function, a device function, or a host function. All function declarations without any of these keywords default to host functions. If both the </code><strong>host</strong>&rsquo;&rsquo; and ``<strong>device</strong>&rsquo;&rsquo; keywords are used in a function declaration, the compiler generates two versions of the function, one for the device and one for the host. Kernel Call and Grid Launch. CUDA C++ extends the C++ function call syntax with kernel execution configuration parameters surrounded by the &laquo;&lt; and &raquo;&gt; brackets. These execution configuration parameters are only used when calling a kernel function to launch a grid. We discussed the execution configuration parameters that define the dimensions of the grid and the dimensions of each block. The reader should refer to the CUDA Programming Guide [3] for more details of the kernel launch extensions as well as other types of execution configuration parameters. Built-in (Predefined) Variables. CUDA kernels can access a set of built-in readonly variables that allow each thread to distinguish itself from other threads and to determine the area of data to work on. We discussed the threadIdx, blockDim, and blockIdx variables in this chapter. In Chapter 3, we discuss more details of using these variables to manage multi-dimensional blocks and grids while processing multidimensional data. Runtime API. CUDA supports a set of Application Programming Interface (API) functions to provide services to CUDA C++ programs. The services that we discussed in this chapter are the cudaMalloc, cudaFree and cudaMemcpy functions. These functions are called by the host code to allocate device global memory, deallocate device global memory, and transfer data between host and device on behalf of the calling program, respectively. The reader is referred to the CUDA C++ Programming Guide [3] for other CUDA API functions. Our goal for this chapter is to introduce the core concepts of CUDA C++ and the essential CUDA extensions to C++ for writing a simple CUDA program. The chapter is by no means a comprehensive account of all CUDA features. More features will be covered in the remainder of the book. However, our emphasis will be on the key parallel computing concepts supported by these features. We will only introduce enough CUDA C++ features that are needed in our code examples for parallel programming techniques. In general, we encourage the reader to always consult the CUDA C++ Programming Guide [3] for more details of the latest features of CUDA.</p>
+<h2 id="sec-2-9">2.9 Exercises<a class="td-heading-self-link" href="#sec-2-9" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. If we want to use each thread in a grid to calculate one output element of a vector addition, what would be the expression for mapping the thread/block indices to the data index (i) in our kernel function? a. i=threadIdx.x + threadIdx.y; b. i=blockIdx.x + threadIdx.x; c. i=blockIdx.x*blockDim.x + threadIdx.x; d. i=blockIdx.x * threadIdx.x; 2. Assume that we want to use each thread to calculate two adjacent elements of a vector addition. What would be the expression for mapping the thread/block indices to the data index (i) of the first element to be processed by a thread? a. i=blockIdx.x*blockDim.x + threadIdx.x +2; b. i=blockIdx.x*threadIdx.x*2; c. i=(blockIdx.x*blockDim.x + threadIdx.x)*2; d. i=blockIdx.x*blockDim.x*2 + threadIdx.x; 3. We want to use each thread to calculate two elements of a vector addition. Each thread block process 2*blockDim.x consecutive elements that form two sections. All threads in each block will first process a section first, each processing one element. They will then all move to the next section, each processing one element. Assume that variable i should be the index for the first element to be processed by a thread. What would be the expression for mapping the thread/block indices to data index of the first element? a. i=blockIdx.x*blockDim.x + threadIdx.x +2; b. i=blockIdx.x*threadIdx.x*2; c. i=(blockIdx.x*blockDim.x + threadIdx.x)*2; d. i=blockIdx.x*blockDim.x*2 + threadIdx.x; 4. For a vector addition, assume that the vector length is 8000, each thread calculates one output element, and the thread block size is 1024 threads. The programmer configures the kernel call to have a minimal number of thread blocks to cover all output elements. How many threads will be in the grid? a. 8000 b. 8196 c. 8192 d. 8200 5. If we want to allocate an array of v integer elements in CUDA device global memory, what would be an appropriate expression for the second argument of the call to cudaMalloc? a. n b. v c. n * sizeof(int) d. v * sizeof(int) 6. If we want to allocate an array of n floating-point elements and have a floatingpoint pointer variable A_d to point to the allocated memory, what would be an appropriate expression for the first argument of the cudaMalloc call?</p>
+<p>a. n b. (void *) A_d c. *A_d d. (void **) &amp;A_d 7. If we want to copy 3000 bytes of data from host array A_h (A_h is a pointer to element 0 of the source array) to device array A_d (A_d is a pointer to element 0 of the destination array), what would be an appropriate API call for this data copy in CUDA? a. cudaMemcpy(3000, A_h, A_d, cudaMemcpyHostToDevice); b. cudaMemcpy(A_h, A_d, 3000, cudaMemcpyDeviceToHost); c. cudaMemcpy(A_d, A_h, 3000, cudaMemcpyHostToDevice); d. cudaMemcpy(3000, A_d, A_h, cudaMemcpyHostToDevice); 8. How would one declare a variable err that can appropriately receive the returned value of a CUDA API call? a. int err; b. cudaError err; c. cudaError_t err; d. cudaSuccess_t err; 9. Consider the CUDA kernel and the corresponding host function that calls it in Fig. 2.15.</p>
+<img src="/pmpp5-zh/figs/orig/fig-2-15.png" alt="Figure 2.15" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 2.15.</strong> CUDA code for Exercise Question 9.</p>
+<p>a. What is the number of threads per block? b. What is the number of threads in the grid? c. What is the number of blocks in the grid? d. What is the number of threads that execute the code on line 02? e. What is the number of threads that execute the code on line 04? 10. A new CUDA programmer is frustrated with CUDA. He has been complaining that CUDA is very tedious: he had to declare many functions that he plans to execute on both the host and the device twice, once as a host function and once as a device function. How would you help this new programmer?</p>
+<p>References</p>
+<p>References [1] Y.N. Patt, S.J. Patel, Introduction to Computing Systems: from Bits and Gates to C and Beyond, McGraw Hill Publisher, 2020, 2000, 2004. [2] M.J. e. Atallah, Algorithms and Theory of Computation Handbook, CRC Press, 1998. [3] NVIDIA, CUDA C++ programming guide. Release 13.0, <a href="https://docs.nvidia.com/cuda/">https://docs.nvidia.com/cuda/</a> cuda-c-programming-guide, 2025.</p>
+<p>CHAPTER</p>
+<p>Multidimensional grids and data</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] Y.N. Patt, S.J. Patel, Introduction to Computing Systems: from Bits and Gates to C and Beyond, McGraw Hill Publisher, 2020, 2000, 2004.</p>
+<p>[2] M.J. e. Atallah, Algorithms and Theory of Computation Handbook, CRC Press, 1998.</p>
+<p>[3] NVIDIA, CUDA C++ programming guide. Release 13.0, <a href="https://docs.nvidia.com/cuda/">https://docs.nvidia.com/cuda/</a> cuda-c-programming-guide, 2025.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/01-ch1/"
+    aria-label="Previous - Chapter 1 Introduction" title="Chapter 1 Introduction" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 1 Introduction</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/03-ch3/"
+    aria-label="Next - Chapter 3 Multidimensional grids and data" title="Chapter 3 Multidimensional grids and data" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 3 Multidimensional grids and data</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-2-1">2.1 Data parallelism</a></li>
+    <li><a href="#sec-2-2">2.2 CUDA C++ program structure</a></li>
+    <li><a href="#sec-2-3">2.3 A vector addition example</a></li>
+    <li><a href="#sec-2-4">2.4 Device global memory and data transfer</a></li>
+    <li><a href="#sec-2-5">2.5 Kernel functions and threading</a></li>
+    <li><a href="#sec-2-6">2.6 Calling kernel functions</a></li>
+    <li><a href="#sec-2-7">2.7 Compilation</a></li>
+    <li><a href="#sec-2-8">2.8 Summary</a></li>
+    <li><a href="#sec-2-9">2.9 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/02-ch2/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/02-ch2/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/02-ch2/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/02-ch2.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/02-ch2.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+2+Heterogeneous+data-parallel+computing"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/02-ch2/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/02-ch2/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/02-ch2/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/02-ch2/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -1,0 +1,808 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/17-ch17/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/16-ch16/">
+<link rel="next" href="/pmpp5-zh/en/book/18-ch18/"><meta name="robots" content="index, follow">
+
+<title>Chapter 17 Sparse matrix computation | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/17-ch17/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/17-ch17/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/17-ch17/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/17-ch17/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 17 Sparse matrix computation">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 17 Sparse matrix computation">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="10299">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 17 Sparse matrix computation">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/17-ch17/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/17-ch17/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/17-ch17/" aria-current="page" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 17 Sparse matrix computation</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/17-ch17.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/17-ch17.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;17&#43;Sparse&#43;matrix&#43;computation" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 17 Sparse matrix computation</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c17">Chapter 17 Sparse matrix computation<a class="td-heading-self-link" href="#c17" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>Sparse matrix computation</p>
+<p>CONTENTS 17.1 Background. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 402 17.2 A simple SpMV kernel with the COO format. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 404 17.3 Grouping row non-zeros with the CSR format. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 407 17.4 Improving memory coalescing with the ELL format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 410 17.5 Regulating padding with the hybrid ELL-COO format. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 414 17.6 Reducing control divergence with the JDS format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 416 17.7 Column-wise accessibility with the CSC format. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 418 17.8 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 421 17.9 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 422 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 423 Our next parallel pattern is sparse matrix computation. In a sparse matrix, the majority of the elements are zeros. Storing and processing these zero elements are wasteful in terms of memory capacity, memory bandwidth, time, and energy. Many important real-world problems involve sparse matrix computation. Due to the importance of these problems, several sparse matrix storage formats and their corresponding processing methods have been developed and are widely used in the field. All these methods employ some type of compaction techniques to avoid storing or processing zero elements at the cost of introducing some level of irregularity into the data representation. Unfortunately, such irregularity can lead to underutilization of memory bandwidth, control flow divergence, and load imbalance in parallel computing. It is therefore important to strike a good balance between compaction and regularization. Some storage formats achieve a high level of compaction at a high level of irregularity. Others achieve a more moderate level of compaction while keeping the representation more regular. The relative performance of a parallel computation using each storage format is known to be heavily dependent on the distribution of non-zero elements in the sparse matrices. Understanding the wealth of work in sparse matrix storage formats and their corresponding parallel algorithms gives a parallel programmer important background for addressing compaction and regularization challenges in solving related problems. Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00028-7">https://doi.org/10.1016/B978-0-44-343900-1.00028-7</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-1.png" alt="Figure 17.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.1.</strong> A simple sparse matrix example.</p>
+<p>Our next parallel pattern is sparse matrix computation. In a sparse matrix, the majority of the elements are zeros. Storing and processing these zero elements are wasteful in terms of memory capacity, memory bandwidth, time, and energy. Many important real-world problems involve sparse matrix computation. Due to the importance of these problems, several sparse matrix storage formats and their corresponding processing methods have been developed and are widely used in the field. All these methods employ some type of compaction techniques to avoid storing or processing zero elements at the cost of introducing some level of irregularity into the data representation. Unfortunately, such irregularity can lead to underutilization of memory bandwidth, control flow divergence, and load imbalance in parallel computing. It is therefore important to strike a good balance between compaction and regularization. Some storage formats achieve a high level of compaction at a high level of irregularity. Others achieve a more moderate level of compaction while keeping the representation more regular. The relative performance of a parallel computation using each storage format is known to be heavily dependent on the distribution of non-zero elements in the sparse matrices. Understanding the wealth of work in sparse matrix storage formats and their corresponding parallel algorithms gives a parallel programmer important background for addressing compaction and regularization challenges in solving related problems.</p>
+<h2 id="sec-17-1">17.1 Background<a class="td-heading-self-link" href="#sec-17-1" aria-label="Link to this heading"></a>
+</h2>
+<p>A sparse matrix is a matrix where most of the elements are zeros. Sparse matrices arise in many scientific, engineering, and financial modeling problems. For example, matrices can be used to represent the coefficients in a linear system of equations. Each row of the matrix represents one equation of the linear system. In many science and engineering problems, the large number of variables and equations involved are sparsely coupled. That is, each equation only involves a small number of variables. This is illustrated in Fig. 17.1, where each column of the matrix corresponds to the coefficients for a variable: column 0 for x0 , column 1 for x1 , etc. For example, the fact that row 0 has non-zero elements in columns 0 and 1 indicates that only variables x0 and x1 are involved in equation 0. It should be clear that variables x0, x2 , and x3 are present in equation 1, variables x1 and x2 are present in equation 2, and only variable x3 is present in equation 3. Sparse matrices are typically stored in a format, or representation, that avoids storing the zero elements. Matrices are often used in solving linear systems of M equations of N variables in the form of A × X + Y = 0, where A is an M × N matrix, X is a vector of N variables, and Y is a vector of M constant values. The objective is to solve for the X variable values that will satisfy all the equations. An intuitive approach is to invert the matrix so that X = A−1 × (−Y ). This can be done for matrices of moderate size through methods such as Gaussian elimination. While it is theoretically possible to use these methods to solve equations represented in sparse matrices, the sheer size of many sparse matrices can simply overwhelm this intuitive approach. Furthermore, an inverted sparse matrix is often much larger than the original due the fact that the inversion process tends to generate many addition non-zero elements called ``fillins&rsquo;&rsquo;. As a result, it is often impractical to compute and store the inverted matrix when solving real-world problems. Instead, linear systems of equations represented in sparse matrices can be better solved with an iterative approach. When the sparse matrix A is positive-definite (i.e., x T Ax &gt; 0 for all non-zero vectors x in R n ), one can use Conjugate Gradient methods to iteratively solve the corresponding linear system with guaranteed convergence to a solution [1]. Conjugate Gradient methods guess a solution for X and perform A × X + Y and see if the result is close to a 0 vector. If not, we can use a gradient vector formula to refine the guessed X and perform another iteration of A × X + Y .</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-2.png" alt="Figure 17.2" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.2.</strong> A small example of matrix-vector multiplication and accumulation.</p>
+<p>These iterative solution methods for linear systems are closely related to the iterative solution methods for differential equations that we introduced in Chapter 8. The most time-consuming part of iterative approaches to solving linear systems of equations is in the evaluation of A × X + Y , which is a sparse matrix-vector multiplication and accumulation. Fig. 17.2 shows a small example of matrix-vector multiplication and accumulation, where A is a sparse matrix. The dark squares in A represent non-zero elements. In contrast, both X and Y are typically dense vectors. That is, most of the elements of X and Y hold non-zero values. Due to its importance, standardized library function interfaces have been created to perform this operation under the name SpMV (Sparse Matrix Vector multiplication and accumulation). We will use SpMV to illustrate the important tradeoffs between different storage formats in parallel sparse matrix computation. The main objective of the different sparse matrix storage formats is to remove all the zero elements from the matrix representation. Removing all the zero elements not only saves storage, but it also eliminates the need to fetch these zero elements from memory and perform useless multiplication and addition operations with them. This can significantly reduce the consumption of memory bandwidth and computation resources. Moreover, for very large matrices, the reduction in the memory capacity needed to represent the matrix enables storing the entire matrix in the memory of one compute node. Otherwise, out-of-core methods or distributed computation would be needed to process such larger matrices, which suffer from high I/O or network communication latency. There are various design considerations that go into the structure of a sparse matrix storage formats. The following is a list of some of the key considerations: • Space efficiency (or compaction): the amount of memory capacity required to represent the matrix using the storage format • Flexibility: the extent to which the storage format makes it easy to modify the matrix by adding or removing non-zeros • Accessibility: the kinds of data that the storage format makes easy to access FIGURE 17.3 Example of the Coordinate (COO) format.</p>
+<p>• Memory access efficiency: the extent to which the storage format enables an efficient memory access pattern for a particular computation (one facet of regularization) • Load balance: the extent to which the storage format balances load across different threads for a particular computation (another facet of regularization) Throughout this chapter, we introduce different storage formats and examine how these storage formats compare in each of the aforementioned design considerations.</p>
+<h2 id="sec-17-2">17.2 A simple SpMV kernel with the COO format<a class="td-heading-self-link" href="#sec-17-2" aria-label="Link to this heading"></a>
+</h2>
+<p>The first sparse matrix storage format we will discuss is the Coordinate (COO) format. The COO format is illustrated in Fig. 17.3. COO stores the non-zero values in a one-dimensional array shown as the value array. Each non-zero element is stored with both its column index and row index. We have both colIdx and rowIdx arrays to accompany the value array. For example A[0,0] of our small example is stored at the entry with index 0 in the value array (1 in value[0]) with both its column index (0 in colIdx[0]) and its row index (0 in rowIdx[0]) stored at the same position in the other arrays. COO completely removes all zero elements from the storage. It does incur storage overhead by introducing the colIdx and rowIdx arrays. In our small example where the number of zero elements is not much larger than the number of non-zero elements, the storage overhead is actually more than the space saved by not storing the zero elements. However, it should be clear that for sparse matrices where the vast majority of elements are zeros, the overhead introduced is far less than the space saved by not storing zeros. For example, in a sparse matrix where only 1% of the elements are nonzero values, the total storage for the COO representation including all the overhead would be around 3% of the space required to store both zero and non-zero elements. In the COO example in Fig. 17.3, the non-zero elements are sorted by row index then by column index. While COO representations tend to be sorted in practice, sorting is not a requirement. The SpMV kernel presented in the section that uses the COO format works even if the non-zeros are not sorted. One approach to performing SpMV in parallel using a sparse matrix represented in the COO format is to assign a thread to each non-zero element in the matrix.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-4.png" alt="Figure 17.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.4.</strong> Example of parallelizing SpMV with the COO format.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-5.png" alt="Figure 17.5" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.5.</strong> A parallel SpMV/COO kernel.</p>
+<p>An example of this parallelization approach is illustrated in Fig. 17.4, and the corresponding code is shown in Fig. 17.5. In this approach, each thread identifies the index of the non-zero element it is responsible for (line 02) and ensures that it is within bounds (line 3). Next, the thread identifies the row index (line 04), column index (line 05), and value (line 06) of the non-zero element it is responsible for from the rowIdx, colIdx, and value arrays, respectively. It then looks up the input vector value at the location corresponding to the column index, multiplies it with the nonzero value, then accumulates the result to the output value at the corresponding row index (lines 07-08). An atomic operation is used for the accumulation because multiple threads may update the same output element as is the case with the first two threads mapped to row 0 of the matrix in Fig. 17.4. It should be obvious that any SpMV computation code will reflect the storage format assumed. Therefore, we add the storage format to the name of the kernel to clarify the combination used. We also refer to the SpMV code in Fig. 17.5 as SpMV/COO. Now we examine the COO format under the design considerations listed in Section 17.1: space efficiency, flexibility, accessibility, memory access efficiency, and load balance. For space efficiency, we defer the discussion for later when we have introduced other formats. For flexibility, we observe that we can arbitrarily re-order the elements in a COO format without losing any information as long as we re-order the rowIdx, colIdx, and value arrays the same way. This is illustrated using our small example in Fig. 17.6, where we have reordered the elements of rowIdx, colIdx, and FIGURE 17.6 Re-ordering Coordinate (COO) format. value. Now value[0] actually contains an element from row 1 and column 3 of theoriginal sparse matrix. Because we have also shifted the row index and column index values along with the data value, we can correctly identify this element’s location in the original sparse matrix. In the COO format, we can process the elements in any order we want. The correct y element identified by rowIdx[i] will receive the correct contribution from the product of value[i] and x[colIdx[i]]. If we make sure that somehow we perform this operation for all elements of value, we will calculate the correct final answer regardless of the order in which we process these elements. The reader may ask why we would want to reorder these elements. One reason is that the data may be read from a file that does not provide the non-zeros in a particular order, and we still need a consistent way of representing the data. For this reason, COO is a popular choice of storage format when the matrix is initially being constructed. Another reason is that not having to provide any ordering guarantees enables non-zeros to be added to the matrix by simply appending entries at the end of each of the three arrays. For this reason, COO is a popular choice of storage format when the matrix is modified throughout the computation. We will also see another benefit of the flexibility of the COO format in Section 17.5. The next design consideration we look at is accessibility. COO makes it easy to access, for a given non-zero, its corresponding row index and column index. This feature of COO enables parallelization across non-zero elements in SpMV/COO. On the other hand, COO does not make it easy to access, for a given row or column, all the non-zeros in that row or column. For this reason, COO would not be a good choice of format if the computation required a row- or column-wise traversal of the matrix. For memory access efficiency, we refer to the physical view in Fig. 17.4 for how the threads access the matrix data from memory. The access pattern is such that consecutive threads access consecutive elements in each of the three arrays that form the COO format. Therefore, accesses to the matrix by SpMV/COO are coalesced. For load balance, we recall that each thread is responsible for a single non-zero value. Hence, all threads are responsible for the same amount of work, which means that we do not expect any control divergence to take place in SpMV/COO except for the threads at the boundary. The main drawback of SpMV/COO is the need to use atomic operations. The reason for using atomic operations is that multiple threads are assigned to non-zeros FIGURE 17.7 Example of Compressed Sparse Row (CSR) format.</p>
+<h2 id="sec-17-3">17.3 Grouping row non-zeros with the CSR format<a class="td-heading-self-link" href="#sec-17-3" aria-label="Link to this heading"></a>
+</h2>
+<p>in the same row, and therefore need to update the same output value. Using atomic operations in SpMV is problematic for two reasons. The first reason is that they incur high latency and have low throughput as we have seen in previous chapters. The second reason is that the order in which the atomic operations are applied to the same output element is non-deterministic. This nondeterminism in the order of the operations is problematic when operating on floating point values because it may cause numerical stability issues (see Appendix A). The atomic operations can be avoided if all the non-zeros in the same row were assigned to the same thread such that the thread will be the only one updating the corresponding output value. However, recall that the COO format does not give this accessibility. In the COO format, it is not easy to access, for a given row, all the non-zeros in that row. In the next section, we will see another storage format that provides this kind of accessibility.</p>
+<p>In Section 17.2, we have seen that parallelizing SpMV with the COO format suffers from the use of atomic operations because the same output value is updated by multiple threads. These atomic operations can be avoided if the same thread was responsible for all the non-zeros of a row, which requires the storage format to give us the ability to access, for a given row, all the non-zeros in that row. This kind of accessibility is provided by the Compressed Sparse Row (CSR) storage format. Fig. 17.7 illustrates how the matrix in Fig. 17.1 can be stored using the CSR format. Like the COO format, CSR stores the non-zero values in a one-dimensional array shown as the value array in Fig. 17.7. However, these non-zero values are grouped by row. For example, we store the non-zero elements of Row 0 (1 and 7) first, followed by the non-zero elements of Row 1 (5, 3, and 9), followed by the non-zero elements of Row 2 (2 and 8), and finally the non-zero elements of Row 3 (6). Also similar to the COO format, CSR stores for each non-zero element in the value array its column index at the same position in the colIdx array. Naturally, these column indices are grouped by row as the values are. In Fig. 17.7, the non-zeros of each row are sorted by their column indices in increasing order. Sorting the nonzeros in this way results in favorable memory access patterns, but it is not necessary. The non-zeros within each row may not necessarily be sorted by their column index, FIGURE 17.8 Example of parallelizing SpMV with the CSR format.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-9.png" alt="Figure 17.9" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.9.</strong> A parallel SpMV/CSR kernel.</p>
+<p>and the kernel presented in this section will still work correctly. When the non-zeros within each row are sorted by their column index, the layout of the value array (and the colIdx array) for CSR can be viewed as the row-major layout of the matrix after eliminating all the zero elements. The key distinction between the COO format and the CSR format is that the CSR format replaces the rowIdx array with a rowPtrs array that stores the starting offset of each row’s non-zeros in the colIdx and value arrays. In Fig. 17.7, we show a rowPtrs array whose elements are the indices for the beginning locations of each row. That is, rowPtrs[0] indicates that Row 0 starts at location 0 of the value array, rowPtrs[1] indicates that Row 1 starts at location 2, etc. Note that rowPtrs[4] stores the starting location of a non-existing ``Row 4&rsquo;&rsquo;. This is for convenience, as some algorithms need to use the starting location of the next row to delineate the end of the current row. This extra marker gives a convenient way to locate the ending location of Row 3. To perform SpMV in parallel using a sparse matrix represented in the CSR format, one can assign a thread to each row of the matrix. An example of this parallelization approach is illustrated in Fig. 17.8, and the corresponding code is shown in Fig. 17.9. In this approach, each thread identifies the row that it responsible for (line 02) and ensures that it is within bounds (line 03). Next, the thread loops through the non-zero elements of its row to perform the dot product (line 05-06). To find the row’s non-zeroelements, the thread looks up their starting index in the rowPtrs array (rowPtrs[row]). It also finds where they end by looking up the starting index of the next row’s nonzeros (rowPtrs[row + 1]). For each non-zero element, the thread identifies its column index (line 07) and value (line 08). It then looks up the input value at the location corresponding to the column index, multiplies it with the non-zero value, and accumulates the result to a local variable sum (line 09). The sum variable is initialized to 0 before the dot product loop begins (line 04) and is accumulated to the output vector after the loop is over (line 11). Notice that the accumulation of sum to the output vector does not require atomic operations. The reason is that each row is traversed by a single thread, so each thread will write to a distinct output value as illustrated in Fig. 17.8. Now we examine the CSR format under the design considerations listed in Section 17.1: space efficiency, flexibility, accessibility, memory access efficiency, and load balance. For space efficiency, we observe that CSR is more space efficient than COO. COO requires three arrays, rowIdx, colIdx, and value, that each have as many elements as the number of non-zeros. In contrast, CSR only requires two arrays, colIdx and value, with as many elements as the number of non-zeros. The third array, rowPtrs, only requires as many elements as the number of rows plus one, which makes it substantially smaller than the rowIdx array in COO. This difference makes CSR more space efficient than COO. For flexibility, we observe that CSR is less flexible than COO when it comes to adding non-zeros to the matrix. In COO, a non-zero can be added by simply appending it to the ends of the arrays, provided we have over-allocated memory in anticipation of adding non-zeros. On the other hand, in CSR, a non-zero to be added must be added to the specific row that it belongs to. This means that the non-zero elements of the later rows would all need to be shifted, and the row offsets of the later rows in the rowPtrs array would all need to be incremented accordingly. For this reason, adding non-zeros to a CSR matrix is substantially more expensive than adding them to a COO matrix. For accessibility, CSR makes it easy to access, for a given row, the non-zeros in that row. This feature of CSR enables parallelization across rows in SpMV/CSR, which is what allows it to avoid atomic operations in comparison with SpMV/COO. In a real-world sparse matrix application, there are usually thousands to millions of rows, each of which contains tens to hundreds of non-zero elements. This makes parallelization across rows seem very appropriate: there are many threads, and each thread has a substantial amount of work. On the other hand, for some applications, the sparse matrix may not have enough rows to fully utilize all the GPU threads. In these kinds of applications, the COO format can extract more parallelism since there are more non-zeros than rows. Moreover, CSR does not make it easy to access, for a given column, all the non-zeros in that column. If easy access to all elements of a column is needed, an application may need to maintain an additional column-oriented layout of the matrix, such as the CSC format covered in Section 17.7. For memory access efficiency, we refer to the physical view in Fig. 17.8 for how the threads access the matrix data from memory during the first iteration of the dotproduct loop. The access pattern is such that consecutive threads access data elements that are far apart. In particular, threads 0, 1, 2, and 3 access value[0], value[2], value[5], and value[7], respectively, in the first iteration of their dot product loop. They will then access value[1], value[3], value[6], and no data, respectively, in the second iteration, and so on. As a result, the accesses to the matrix by the parallel SpMV/CSR kernel in Fig. 17.9 are not coalesced. The kernel does not make efficient use of memory bandwidth. For load balance, we observe that the SpMV/CSR kernel can potentially have significant control flow divergence in all warps. The number of iterations taken by a thread in the dot product loop depends on the number of non-zero elements in the row assigned to the thread. Since the distribution of non-zero elements among rows can be random, adjacent rows can have very different number of non-zero elements. As a result, there can be wide-spread control flow divergence in most or even all warps. In summary, we have seen that the advantages of CSR over COO are that it has better space efficiency, and that it gives us access to all the non-zeros of a row, which allows us to avoid atomic operations by parallelizing the computation across rows in SpMV/CSR. On the other hand, the disadvantages of CSR over COO are that it provides less flexibility with adding non-zero elements to the sparse matrix, it exhibits a memory access pattern that is not amenable to coalescing, and it causes high control divergence. In the following sections, we discuss additional storage formats that sacrifice some space efficiency as compared to CSR in order to improve memory coalescing and reduce control divergence. Note that converting from COO to CSR on the GPU is an excellent exercise for the reader, using multiple fundamental parallel computing primitives, including histogram and prefix sum.</p>
+<h2 id="sec-17-4">17.4 Improving memory coalescing with the ELL format<a class="td-heading-self-link" href="#sec-17-4" aria-label="Link to this heading"></a>
+</h2>
+<p>The problem of non-coalesced memory accesses can be addressed by applying data padding and transposition on the sparse matrix data. These ideas were used in the ELL storage format, whose name came from the sparse matrix package in ELLPACK a package for solving elliptic boundary value problems [2]. A simple way to understand the ELL format is to start with the CSR format, as is illustrated in Fig. 17.10. From a CSR representation which groups non-zeros by row, we determine the rows with the maximal number of non-zero elements. We then add padding elements to all other rows after the non-zero elements to make them the same length as the maximal rows. This makes the matrix a rectangular matrix. For our small sparse matrix example, we determine that row 1 has the maximal number of elements. We then add one padding element to row 0, one padding element to row 2, and two padding elements to row 3 to make all them the same length. These additional padding elements are shown as squares with an * in Fig. 17.10. Now the matrix has become a rectangular matrix. Note that the colIdx array also needs to be padded the same way to preserve its correspondence to the values array.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-10.png" alt="Figure 17.10" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.10.</strong> Example of ELL storage format.</p>
+<p>We can now lay the padded matrix out in column major order. That is, we will place all elements of column 0 in consecutive memory locations, followed by all elements of column 1, and so on. This is equivalent to transposing the rectangular matrix in the row major order used by the C language. In terms of our small example, after the transposition, value[0] through value[3] now contain 1, 5, 2, and 6, the 0th elements of all rows. This is illustrated in the bottom-left portion of Fig. 17.10. Similarly, colIdx[0] through colIdx[3] contain the column positions of 0th elements of all rows. Note that we no longer need the rowPtrs since the beginning of row r is now simply value[r]. With the padded elements, it is also very easy to move from the current element of row r to the next element by simply adding the number of rows in the original matrix to the index. For example, the 0th element of row 2 is in value[2] and the next element is in value[2+4] which is equivalent to value[6], where 4 is the number of rows in the original matrix in our small example. We illustrate how to parallelize SpMV using the ELL format in Fig. 17.11, along with a parallel SpMV/ELL kernel in Fig. 17.12. Like CSR, each thread is assigned to a different row of the matrix (line 02) and a boundary check ensures that the row is within bounds (line 03). Next, a dot product loop goes through the non-zero elements of each row (line 05). Note that the SpMV/ELL kernel assumes that the input matrix has a vector ellMatrix.nnzPerRow that records the number of non-zeros in each row and allows each thread to only iterate through the non-zeros in its assigned row. If the input matrix does not have this vector, the kernel can simply iterate through all elements including the padding elements and still execute correctly since the padding elements have value zero and will not affect the output values. Next, since the compressed matrix is stored in column major order, the index i of the non-zero element in the one-dimensional array can be found by multiplying the iteration number t by the number of rows and adding the row index (line 06). Next, the thread loads the column FIGURE 17.11 Example of parallelizing SpMV with the ELL format.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-12.png" alt="Figure 17.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.12.</strong> A parallel SpMV/ELL kernel.</p>
+<p>index (line 07) and non-zero value (line 08) from the ELL matrix arrays. Note that the accesses to these arrays are coalesced because the index i is expressed in terms of row, which itself is expressed in terms of threadIdx.x, meaning that consecutive threads have consecutive array indices. Next, the thread looks up the input value, multiplies it with the non-zero value, and accumulates the result to a local variable sum (line 09). The sum variable is initialized to 0 before the dot product loop begins (line 04) and is accumulated to the output vector after the loop is over (line 11). Now we examine the ELL format under the design considerations listed in Section 17.1: space efficiency, flexibility, accessibility, memory access efficiency, and load balance. For space efficiency, we observe that the ELL format is less space efficient than the CSR format due to the space overhead of the padding elements. The overhead of the padding elements highly depends on the distribution of non-zeros in the matrix. In situations where one or a small number of rows have an exceedingly large number of non-zero elements, the ELL format will result in excessive number of padded elements. Consider our sample matrix, in the ELL format we have replaced a 4x4 matrix with a 4x3 matrix, and with the overhead from the column indices we are storing more data than contained in the original 4x4 matrix. For a more realistic example, if a 1000x1000 sparse matrix has 1% of its elements of non-zero value. This means that on average, each row has 10 non-zero elements. With the overhead, the size of a CSR representation would be about 2% of the uncompressed total size. Assume that one of the rows has 200 non-zero values while all other rows have less than 10. Using the ELL format, we will pad all other rows to 200 elements. This makes the ELL representation about 40% of the uncompressed total size and 20 times larger than the CSR representation. This calls for a method to control the number of padded elements when we convert from the CSR format to the ELL format, which we introduce in Section 17.5. For flexibility, we observe that ELL is more flexible than CSR when it comes to adding non-zeros to the matrix. In CSR, adding a non-zero to a row would require shifting all the non-zeros of the subsequent rows and incrementing their row offsets. However, in ELL, as long as a row does not have the maximum number of non-zeros in the matrix, a non-zero can be added to the row by simply replacing a padding element with an actual value. Moreover, if we have over-allocated memory for the ELL arrays, we can even add elements to the row with the maximum number of nonzeros by extending the bounds of the arrays with one more column and adding one more padding element to the other rows without shifting any of the existing elements. In this case, the ELL format is as flexible as the COO format. For accessibility, ELL gives us the accessibility of both CSR and COO. We have seen in Fig. 17.12 how ELL allows to access, given a row index, the non-zeros of that row. However, ELL also allows to access, given the index of a non-zero element, the row and column index of that element. The column index is trivial to find as it can be accessed from the colIdx array at the same location i. However, the row index can also be accessed due to the regular nature of the padded matrix. Recall that the index i of the non-zero element was calculated in Fig. 17.9 as: i = t*ellMatrix.numRows + row Therefore, if instead i is given and we would like to find row, it can be found as: row = i%ellMatrix.numRowsbecause row is always less than ellMatrix.numRows, so row%ellMatrix.numRows is simply row itself. This accessibility of ELL allows parallelization across both rows as well as non-zero elements. However, parallelization across non-zero elements will have some threads wastefully assigned to padding elements, which is a drawback over COO. For memory access efficiency, we refer to the physical view in Fig. 17.11 for how the threads access the matrix data from memory during the first iteration of the dot product loop. The access pattern is such that consecutive threads access consecutive data elements. By arranging the elements in column major order, all adjacent threads are now accessing adjacent memory locations, enabling memory coalescing and thus making more efficient use of memory bandwidth. Some GPU architectures, especially in the older generations, have more strict address alignment rules for memory coalescing. One can force each iteration of the SpMV/ELL kernel to be fully aligned to architecturally specified alignment units such as 64-bytes by adding a few rows to the end of the matrix before transposition. For load balance, we observe that SpMV/ELL still exhibits the same load imbalance as SpMV/CSR because each thread still loops over the number of non-zeros in the row it is responsible for. Therefore, ELL does not address the problem of control divergence. In summary, the ELL format improves on the CSR format by allowing more flexibility to add non-zeros elements, better accessibility, and most importantly, more opportunities for memory coalescing in SpMV/ELL. However, ELL has worse space efficiency than CSR, and the control divergence of SpMV/ELL is as bad as that of SpMV/CSR. In Section 17.5, we will see how we can improve on the ELL format to address the problems of space efficiency and control divergence.</p>
+<h2 id="sec-17-5">17.5 Regulating padding with the hybrid ELL-COO format<a class="td-heading-self-link" href="#sec-17-5" aria-label="Link to this heading"></a>
+</h2>
+<p>The problems of low space efficiency and control divergence in the ELL format are most pronounced when one or a small number of rows have an exceedingly large number of non-zero elements. If we have a mechanism to ``take away&rsquo;&rsquo; some elements from these rows, we can reduce the number of padded elements in ELL and also reduce the control divergence. The answer lies in an important use case for the COO format. The COO format can be used to curb the length of rows in the ELL format. Before we convert a sparse matrix to ELL, we can take away some of the elements from the rows with exceedingly large number of non-zero elements and place them into a separate COO storage. We can use SpMV/ELL on the remaining elements. With the excess elements removed from the extra-long rows, the number of padded elements for other rows can be significantly reduced. We can then use a SpMV/COO to finish the job. This approach of employing two formats to collaboratively complete a computation is often referred to as a hybrid method. Fig. 17.13 illustrates how an example matrix can be represented using the hybrid ELL-COO format. We see that in the ELL format alone, rows 1 and 6 have the largest number of non-zero elements, causing the other rows to have excessive padding. To address this issue, we remove the last three non-zero elements of row 2 and the last two non-zero elements of row 6 from the ELL representation and move them into a separate COO representation. By removing these elements, we reduce the maximal number of non-zero elements among all rows in the small sparse matrix from 5 to 2. As shown in Fig. 17.13, we reduced the number of padded elements from 22 to 3. More importantly, all threads now only need to take 2 iterations. The reader may question whether the additional work done to separate COO elements from an ELL format could incur too much overhead. The answer is: it depends. In situations where a sparse matrix is only used in one SpMV calculation, this extra work can indeed incur significant overhead. However, in many real-world applications, the SpMV operation is performed with the same sparse matrix repeatedly in an iterative solver. In each iteration of the solver, the x and y vectors vary but the sparse matrix remains the same since its elements correspond to the coefficients of the linear system of equations being solved and these coefficients do not change from iteration FIGURE 17.13 Hybrid ELL + COO example.</p>
+<p>to iteration. So, the work done to produce both the hybrid ELL and COO representation can be amortized across many iterations. We will come back to this point in Section 17.6. Now we examine the hybrid ELL-COO format under the design considerations listed in Section 17.1: space efficiency, flexibility, accessibility, memory access efficiency, and load balance. For space efficiency, we observe that the hybrid ELL-COO format has better space efficiency than the ELL format alone because it reduces the amount of padding used. For flexibility, we observe that the hybrid ELL-COO format is more flexible than the ELL format when it comes to adding non-zeros to the matrix. With both formats, we can add non-zero elements to rows that have padding elements by replacing the padding elements. If the row does not have any padding elements that can be replaced, then we need to append a column in the ELL format, whereas in the hybrid ELL + COO format, we can simply append non-zeros to the COO part of the format. For accessibility, we observe that the hybrid ELL-COO format sacrifices accessibility compared to the ELL format alone. In particular, it is not always possible to access, given a row index, all the non-zeros in that row. Such an access can be done only for the rows that fit in the ELL part of the format. If the row overflows to the COO part, then finding all the non-zeros of the row would require searching the COO part which is expensive. For memory access efficiency, both SpMV/ELL and SpMV/COO exhibit coalesced memory accesses to the sparse matrix. Hence, their combination will also result in a coalesced access pattern. For load balance, removing non-zeros from the long rows in the ELL part of the format reduces control divergence of the SpMV/ELL kernel. These non-zeros are placed in the COO part of the format, which does not impact control divergence since SpMV/COO does not exhibit control divergence as we have seen. In summary, the hybrid ELL-COO format, in comparison with the ELL format alone, improves space efficiency by reducing padding, retains the flexibility of adding non-zeros to the matrix, retains the coalesced memory access pattern, and reduces control divergence. The price paid is a small limitation in accessibility, where it becomes more difficult to access all the non-zeros of a given row if that row overflows to the COO part of the format.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-14.png" alt="Figure 17.14" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.14.</strong> Example of JDS storage format.</p>
+<h2 id="sec-17-6">17.6 Reducing control divergence with the JDS format<a class="td-heading-self-link" href="#sec-17-6" aria-label="Link to this heading"></a>
+</h2>
+<p>We have seen that the ELL format can be used to achieve coalesced memory access patterns when accessing the sparse matrix in SpMV, and that the hybrid ELL-COO format can further improve space efficiency by reducing padding and can also reduce control divergence. In this section, we will look at another format that can achieve coalesced memory access patterns in SpMV and also reduce control divergence, without the need to perform any padding. The idea is to sort the rows according to their length, say from the longest to the shortest. Since the sorted matrix looks largely like a triangular matrix, the format is often referred to as the Jagged Diagonal Storage (JDS) format. Fig. 17.14 illustrates how a matrix can be stored using the JDS format. First, the non-zeros are grouped by row like with CSR and ELL. Next, the rows are sorted by the number of non-zeros in each row in increasing order. As we sort the rows, we typically maintain an additional row array that preserves the index of the original row. Whenever we exchange two rows in the sorting process, we also exchange the corresponding elements of the row array. This way, we can always keep track the original position of all rows. After the rows have been sorted, the non-zeros in the value array and their corresponding column indices in the colIdx array are stored in column major order. A iterPtr array is added to track the beginning of the non-zero elements for each iteration. Fig. 17.15 illustrates how SpMV can be parallelized using the JDS format. Each thread is assigned to a row of the matrix and iterates through the non-zeros of that row, performing the dot product along the way. The threads use the iterPtr array to identify where the non-zeros of each iteration begin. It should be clear from the physical view on the right side of Fig. 17.15, which depicts the first iteration for each FIGURE 17.15 Example of parallelizing SpMV with the JDS format.</p>
+<p>thread, that the threads access the non-zeros and column indices in the JDS arrays in a coalesced manner. The code for implementing SpMV/JDS is left as an exercise. In another variation of the JDS format, the rows after being sorted can be partitioned into sections of rows. Since the rows have been sorted, all rows in a section will likely have more or less uniform number of non-zero elements. We can then generate the ELL representation for each section. Within each section, we only need to pad the rows to match the row with the maximal number of elements in that section. This would reduce the number of padding elements substantially compared to one ELL representation of the entire matrix. In this variation of JDS, the iterPtr array would not be needed. Instead, one would need a section offset array that indicates the beginning of each ELL section only (as opposed to each iteration). The reader should ask whether sorting rows will result into incorrect solutions to the linear system of equations. Recall that we can freely re-order equations of a linear system without changing the solution. As long as we re-order the y elements along with the rows, we are effectively re-ordering the equations. Therefore, we will end up with the correct solution. The only extra step is to reorder the final solution back to the original order using the row array. The other question is whether sorting will incur significant overhead. The answer is similar to what we saw in the hybrid ELL-COO method. As long as the SpMV/JDS kernel is used in an iterative solver, one can afford to perform such sorting as well as the re-ordering of the final solution x elements and amortize the cost among many iterations of the solver. Now we examine the ELL format under the design considerations listed in Section 17.1: space efficiency, flexibility, accessibility, memory access efficiency, and load balance. For space efficiency, the JDS format is more space efficient than the ELL format because it avoids padding. The variant of JDS that uses ELL for each section has padding, but the amount of padding is less than that with the ELL format. For flexibility, the JDS format, does not make it easy to add non-zeros to a row of the matrix. It is even less flexible than the CSR format because adding non-zeros changes the sizes of the rows, which may require rows to be resorted. For accessibility, the JDS format is similar to the CSR format in that it allows us to access, given a row index, the non-zero elements of that row. On the other hand, it FIGURE 17.16 Example of Compressed Sparse Column (CSC) format.</p>
+<p>does not make it easy to access, given a non-zero, the row index and column index of that non-zero, as the COO and ELL formats do. For memory access efficiency, the JDS format is like the ELL format in that it stores the non-zeros in column major order. Accordingly, the JDS format enables accesses to the sparse matrix to happen in a coalesced manner. Because JDS does not require padding, the starting location of memory accesses in each iteration, as shown in the physical view of Fig. 17.15, can vary in arbitrary ways. As a result, there is no simple, inexpensive way to force all iterations of the SpMV/JDS kernel to start at architecturally specified alignment boundaries. This lack of option to force alignment can make memory accesses for JDS less efficient than those in ELL. For load balance, the most unique feature of JDS is that it sorts the rows of the matrix such that threads in the same warp are likely to iterate over rows of similar length. Therefore, JDS is effective at reducing control divergence.</p>
+<h2 id="sec-17-7">17.7 Column-wise accessibility with the CSC format<a class="td-heading-self-link" href="#sec-17-7" aria-label="Link to this heading"></a>
+</h2>
+<p>We have seen that the COO and ELL formats allow us to access the row and column indexes of a given non-zero element, and that the CSR, ELL, and JDS formats allow us to access all the non-zero elements of a given row. For some computations other than SpMV, we may be interested in performing a column-wise traversal, i.e., we may be interested in accessing all the non-zero elements of a given column. For such computations, a useful format is the Compressed Sparse Column (CSC) format. Fig. 17.16 illustrates how the matrix in Fig. 17.1 can be stored using the CSC format. The CSC format strongly resembles the CSR format, but with the treatment of rows and columns swapped. The CSC format stores the non-zero values in a onedimensional array shown as the value array in Fig. 17.16. These non-zero values are grouped by column: we store the non-zero elements of Column 0 (1 and 5) first, followed by the non-zero elements of Column 1 (7 and 2), followed by the non-zero elements of Column 2 (3 and 8), and finally the non-zero elements of Column 3 (9 and 6). The CSC format also stores for each non-zero element in the value array its row index at the same position in the rowIdx array. In Fig. 17.16, the non-zeros of each column are sorted by their row indices in increasing order, but it is not necessary.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-17.png" alt="Figure 17.17" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.17.</strong> Example of parallelizing SpMV with the CSC format.</p>
+<img src="/pmpp5-zh/figs/orig/fig-17-18.png" alt="Figure 17.18" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 17.18.</strong> A parallel SpMV/CSR kernel.</p>
+<p>Finally, the CSC format stores a colPtrs array that stores the starting offset of each column’s non-zeros in the rowIdx and value arrays. In Fig. 17.16, we show a colPtrs array whose elements are the indices for the beginning locations of each column. That is, colPtrs[0] indicates that Column 0 starts at location 0 of the value array, colPtrs[1] indicates that Column 1 starts at location 2, etc. The last value, colPtrs[4] stores the starting location of a non-existing ``Column 4&rsquo;&rsquo; to delineate the end of Column 3. The CSC format is not intended to be used for performing SpMV. However, we will show an implementation of SpMV using the CSC format for completeness, and for the interesting exercise of comparing its advantages and disadvantages to other formats. To perform SpMV using the CSC format, one can assign a thread to each column of the matrix. An example of this parallelization approach is illustrated in Fig. 17.17, and the corresponding code is shown in Fig. 17.18. In this approach, each thread identifies the column that it responsible for (line 02) and ensures that it is within bounds (line 03). Next, the thread loads the input vector value that corresponds to that column (line 04). After that, the thread loops through the non-zero elements of its column (line 05-06). To find the column’s non-zero elements, the thread looks up their starting index in the colPtrs array (colPtrs[col]). It also finds where they end by looking up the starting index of the next column’s non-zeros (colPtrs[col + 1]). For each non-zero element, the thread identifies its row index (line 07) and value (line 08). Finally, it multiplies the input vector value with the matrix non-zero value, andatomically accumulates the result to the corresponding location in the output vector (lines 09-10). The atomic operation is needed because different threads iterating through different columns may simultaneously attempt to update the same output vector element, such as the first and second thread in Fig. 17.17. Now we examine the CSC format under the design considerations listed in Section 17.1: space efficiency, flexibility, accessibility, memory access efficiency, and load balance. For space efficiency, we observe that the CSC format has the same space efficiency as the CSR format, assuming the matrix has a similar number of rows and columns. It requires two arrays, rowIdx and value, with as many elements as the number of non-zeros and a third array, colPtrs, that requires as many elements as the number of columns plus one. For flexibility, we observe that CSC is as inflexible as CSR when it comes to adding non-zeros to the matrix. In CSC, a non-zero to be added must be added to the specific column that it belongs to, which means that the non-zero elements of the later columns would all need to be shifted and the column offsets of the later columns in the colPtrs array would all need to be incremented accordingly. For accessibility, CSC makes it easy to access, for a given column, the non-zeros in that column. As mentioned earlier, this kind of accessibility is not favorable for SpMV since SpMV does not need to perform column-wise traversal. However, we will mention later that this kind of accessibility may be useful for other computations. For memory access efficiency, we refer to the physical view in Fig. 17.17 for how the threads access the matrix data. The access pattern is such that consecutive threads access data elements that are far apart. In particular, threads 0, 1, 2, and 3 access value[0], value[2], value[4], and value[6], respectively, in the first iteration of their dot product loop. They will then access value[1], value[3], value[5], and value[7], respectively, in the second iteration. As a result, the accesses to the matrix by the parallel SpMV/CSC kernel in Fig. 17.18 are not coalesced. Furthermore, the access to the output vector requires atomic operations because the same output vector element may be accessed by different threads. For load balance, we observe that the SpMV/CSC kernel can potentially have significant control flow divergence in all warps. The number of loop iterations performed by a thread depends on the number of non-zero elements in the column assigned to the thread. Since the distribution of non-zero elements among columns can be random, adjacent columns can have a very different number of non-zero elements. Although this is coincidentally not the case in Fig. 17.17 where all columns have the same number of non-zeros, in practice different columns can have a very different number of non-zeros. As a result, there can be wide-spread control flow divergence in most or even all warps. Overall, the CSC format when used for SpMV seems to combine the worst aspects of the COO and CSR formats together. Like the COO format, it requires atomic operations when accessing the output vector. Moreover, like the CSR format, it incurs accesses to the input matrix that are not coalesced and imposes control divergence. The uncoalesced accesses to the input matrix and the control divergence can be partially mitigated by applying techniques similar to those applied by the ELL and JDSformats. However, the atomic operations when accessing the output vector would remain. CSC does have one favorable feature when performing SpMV which is the manner in which the input vector is accessed. While the SpMV kernels implemented for all other formats access the input vector randomly, SpMV/CSC accesses the input vector in a coalesced manner as seen in Fig. 17.18 (line 04). In particular, adjacent threads assigned to adjacent columns load adjacent values from the input vector. Moreover, each value in the input vector is loaded only once and reused for all the non-zeros of the column. Nevertheless, this favorable access to the input vector does not overcome the unfavorable accesses to the input matrix and output vector, not to mention the control divergence, making CSC an unsuitable format for SpMV overall. CSC is most useful for computations where column-wise traversal is most natural. For example, assume we needed to perform vector-matrix multiplication instead of matrix-vector multiplication, i.e., the input vector is the first operand and the matrix is the second operand. In this case, every element in the output vector would be the dot product of the input vector and the corresponding column in the input matrix. CSC would be a natural fit for such a computation because it involves a column-wise traversal. As another example, assume we are performing matrixvector multiplication, but the input vector is sparse. This computation is referred to as sparse-matrix-sparse-vector multiplication (SpMSpV). In this case, we can leverage the fact that the input vector is sparse and skip all the non-zero elements in the input matrix that are in a column corresponding to an input vector value that is zero. Skipping the non-zero elements of an entire column is possible with CSC because they are grouped together.</p>
+<h2 id="sec-17-8">17.8 Summary<a class="td-heading-self-link" href="#sec-17-8" aria-label="Link to this heading"></a>
+</h2>
+<p>In this chapter, we presented sparse matrix computation as an important parallel pattern. Sparse matrices are important in many real-world applications that involve modeling complex phenomena. Furthermore, sparse matrix computation is a simple example of data-dependent performance behavior of many large real-world applications. Due to the large amount of zero elements, compaction techniques are used to reduce the amount of storage, memory accesses, and computation performed on these zero elements. Using this pattern, we introduce the concept of regularization using hybrid methods and sorting/partitioning. These regularization methods are used in many real-world applications. Interestingly, some of the regularization techniques reintroduce zero elements into the compacted representations. We use hybrid methods to mitigate the pathological cases where we could introduce too many zero elements. Readers are referred to [3] and encouraged to experiment with different sparse data sets to gain more insight into the data dependent performance behavior of the various SpMV kernels presented in this chapter. It should be clear that both the execution efficiency and memory bandwidth efficiency of the parallel SpMV kernels depends on the distribution of the input datamatrix. This is quite different from most of the kernels we have studied so far. However, such data-dependent performance behavior is quite common in real-world applications. This is one of the reasons why parallel SpMV is such an important parallel pattern. It is simple and yet it illustrates an important behavior in many complex parallel applications. The advantage of sparse matrix representation over dense matrix representation is realized when the matrix is very sparse. Dense matrices have the advantage of having implicit indices and being easy to tile in order to optimize their movement throughout the memory hierarchy. On the other hand, sparse matrix storage formats store explicit indices that need to be accessed, and they are more difficult to apply tiling techniques to. These penalties are worthwhile only when the sparsity is very high and the number of zero elements removed is very large. In general, the FLOPS rating achieved by either CPUs or GPUs are much lower for sparse matrix computation than for dense matrix computation. People are often surprised by the low FLOPS rating of this type of computation on both CPUs and GPUs. After reading this chapter, one should be no longer be surprised. Because of the importance of sparse matrix computations, the cuSPARSE library [4] provides GPU-accelerated routines for performing basic linear algebra computations on a number of sparse matrix storage formats. This chapter gives readers the right background needed to effectively use such libraries, or to develop more sophisticated formats and routines that are tailored to their specific sparse computations of interest.</p>
+<h2 id="sec-17-9">17.9 Exercises<a class="td-heading-self-link" href="#sec-17-9" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Consider the following sparse matrix:</p>
+<p>Represent it in each of the following formats: (a) COO, (b) CSR, (c) ELL, and (d) JDS. 2. Given a sparse matrix of integers with m rows, n columns, and z non-zeros. How many integers are needed to represent the matrix in (a) COO, (b) CSR, (c) ELL, and (d) JDS. If the information provided is not enough to answer, indicate what information is missing. 3. Implement the code to convert from COO to CSR using fundamental parallel computing primitives, including histogram and prefix sum. 4. Implement the host code for producing the hybrid ELL-COO format and using it to perform SpMV. Launch the ELL kernel to execute on the device, and compute the contributions of the COO elements on the host. 5. Implement a kernel that performs parallel SpMV using a matrix stored in the JDS format.</p>
+<p>References</p>
+<p>References [1] M.R. Hestenes, E. Stiefel, et al., Methods of Conjugate Gradients for Solving Linear Systems, vol. 49, NBS, Washington, DC, 1952. [2] J.R. Rice, R.F. Boisvert, Solving Elliptic Problems Using ELLPACK, vol. 2, Springer Science &amp; Business Media, 2012. [3] N. Bell, M. Garland, Implementing sparse matrix-vector multiplication on throughputoriented processors, in: Proceedings of the Conference on High Performance Computing Networking, Storage and Analysis, 2009, pp. 1&ndash;11. [4] NVIDIA, cuSPARSE, <a href="http://docs.nvidia.com/cuda/cusparse">http://docs.nvidia.com/cuda/cusparse</a>, 2025.</p>
+<p>CHAPTER</p>
+<p>Graph traversal</p>
+<p>With special contributions from John Owens and Juan Gómez-Luna</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] M.R. Hestenes, E. Stiefel, et al., Methods of Conjugate Gradients for Solving Linear Systems, vol. 49, NBS, Washington, DC, 1952.</p>
+<p>[2] J.R. Rice, R.F. Boisvert, Solving Elliptic Problems Using ELLPACK, vol. 2, Springer Science &amp; Business Media, 2012.</p>
+<p>[3] N. Bell, M. Garland, Implementing sparse matrix-vector multiplication on throughputoriented processors, in: Proceedings of the Conference on High Performance Computing Networking, Storage and Analysis, 2009, pp. 1&ndash;11.</p>
+<p>[4] NVIDIA, cuSPARSE, <a href="http://docs.nvidia.com/cuda/cusparse">http://docs.nvidia.com/cuda/cusparse</a>, 2025.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/16-ch16/"
+    aria-label="Previous - Chapter 16 Dynamic programming and wavefront parallelism" title="Chapter 16 Dynamic programming and wavefront parallelism" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 16 Dynamic programming and wavefront parallelism</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/18-ch18/"
+    aria-label="Next - Chapter 18 Graph traversal" title="Chapter 18 Graph traversal" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 18 Graph traversal</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-17-1">17.1 Background</a></li>
+    <li><a href="#sec-17-2">17.2 A simple SpMV kernel with the COO format</a></li>
+    <li><a href="#sec-17-3">17.3 Grouping row non-zeros with the CSR format</a></li>
+    <li><a href="#sec-17-4">17.4 Improving memory coalescing with the ELL format</a></li>
+    <li><a href="#sec-17-5">17.5 Regulating padding with the hybrid ELL-COO format</a></li>
+    <li><a href="#sec-17-6">17.6 Reducing control divergence with the JDS format</a></li>
+    <li><a href="#sec-17-7">17.7 Column-wise accessibility with the CSC format</a></li>
+    <li><a href="#sec-17-8">17.8 Summary</a></li>
+    <li><a href="#sec-17-9">17.9 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/17-ch17/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/17-ch17/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/17-ch17/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/17-ch17.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/17-ch17.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+17+Sparse+matrix+computation"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/17-ch17/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/17-ch17/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/17-ch17/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/17-ch17/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

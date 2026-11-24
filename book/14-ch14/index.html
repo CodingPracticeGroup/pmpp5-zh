@@ -1,0 +1,917 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/book/14-ch14/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/book/13-ch13/">
+<link rel="next" href="/pmpp5-zh/book/15-ch15/"><meta name="robots" content="index, follow">
+
+<title>第14章 排序 | 大规模并行处理器编程（第5版）中文学习译稿</title>
+<meta name="description" content="第14章 排序 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/book/14-ch14/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/14-ch14/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/14-ch14/">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/book/14-ch14/">
+	<meta property="og:site_name" content="大规模并行处理器编程（第5版）中文学习译稿">
+	<meta property="og:title" content="第14章 排序">
+	<meta property="og:description" content="第14章 排序 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="第14章 排序">
+	<meta itemprop="description" content="第14章 排序 — 《大规模并行处理器编程(第5版)》学习译稿">
+	<meta itemprop="wordCount" content="870">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="第14章 排序">
+	<meta name="twitter:description" content="第14章 排序 — 《大规模并行处理器编程(第5版)》学习译稿">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="/pmpp5-zh/" class="td-nav-brand" data-td-navbar-route
+         aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/14-ch14/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/14-ch14/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/" aria-label="大规模并行处理器编程（第5版）中文学习译稿 — 首页">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">大规模并行处理器编程（第5版）中文学习译稿</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/book/" title="大规模并行处理器编程（第5版）"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook"><span>全书目录</span></a>
+      
+    </div><div id="m-pmpp5-zhbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/00-preface/" title="前言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook00-preface"><span>前言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/01-ch1/" title="第1章 引言"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook01-ch1"><span>第1章 引言</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/02-ch2/" title="第2章 异构并行计算与 CUDA"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook02-ch2"><span>第2章 异构并行计算与 CUDA</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/03-ch3/" title="第3章 多维网格与数据"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook03-ch3"><span>第3章 多维网格与数据</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/04-ch4/" title="第4章 计算架构与调度"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook04-ch4"><span>第4章 计算架构与调度</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/05-ch5/" title="第5章 内存架构与数据局部性"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook05-ch5"><span>第5章 内存架构与数据局部性</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/06-ch6/" title="第6章 性能考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook06-ch6"><span>第6章 性能考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/07-ch7/" title="第7章 卷积"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook07-ch7"><span>第7章 卷积</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/08-ch8/" title="第8章 模板计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook08-ch8"><span>第8章 模板计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/09-ch9/" title="第9章 直方图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook09-ch9"><span>第9章 直方图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/10-ch10/" title="第10章 归约"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook10-ch10"><span>第10章 归约</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/11-ch11/" title="第11章 扫描"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook11-ch11"><span>第11章 扫描</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/12-ch12/" title="第12章 过滤器"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook12-ch12"><span>第12章 过滤器</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/13-ch13/" title="第13章 合并"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook13-ch13"><span>第13章 合并</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhbook14-ch14-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/book/14-ch14/" aria-current="page" title="第14章 排序"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhbook14-ch14"><span>第14章 排序</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/15-ch15/" title="第15章 高级矩阵乘法"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook15-ch15"><span>第15章 高级矩阵乘法</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/16-ch16/" title="第16章 动态规划与波纹模式"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook16-ch16"><span>第16章 动态规划与波纹模式</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/17-ch17/" title="第17章 稀疏矩阵计算"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook17-ch17"><span>第17章 稀疏矩阵计算</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/18-ch18/" title="第18章 图遍历"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook18-ch18"><span>第18章 图遍历</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/19-ch19/" title="第19章 卷积神经网络"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook19-ch19"><span>第19章 卷积神经网络</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/20-ch20/" title="第20章 大语言模型"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook20-ch20"><span>第20章 大语言模型</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/21-ch21/" title="第21章 静电势图"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook21-ch21"><span>第21章 静电势图</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/22-ch22/" title="第22章 算法选择、问题分解与问题表述"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook22-ch22"><span>第22章 算法选择、问题分解与问题表述</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/23-ch23/" title="第23章 多 GPU 编程"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook23-ch23"><span>第23章 多 GPU 编程</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/24-ch24/" title="第24章 总结与未来展望"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook24-ch24"><span>第24章 总结与未来展望</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/30-cha/" title="附录A 数值计算考量"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook30-cha"><span>附录A 数值计算考量</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/31-chb/" title="附录B 深度学习基础"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook31-chb"><span>附录B 深度学习基础</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/book/32-chc/" title="附录C CUDA 内存、地址空间与指针"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhbook32-chc"><span>附录C CUDA 内存、地址空间与指针</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="面包屑导航" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/book/">全书目录</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    第14章 排序</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="打开双列视图" aria-label="打开双列视图" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="操作"><span>操作</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/14-ch14.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>查阅编辑历史</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/14-ch14.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>编辑当前页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>添加子页面</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC14%E7%AB%A0&#43;%E6%8E%92%E5%BA%8F" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>提交文档议题</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>第14章 排序</h1>
+</div>
+
+	<div class="lead">第14章 排序 — 《大规模并行处理器编程(第5版)》学习译稿</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c14">排序<a class="td-heading-self-link" href="#c14" aria-label="标题锚点"></a>
+</h1>
+<div class="flushright">
+<p>Michael Garland 特别贡献</p>
+</div>
+<p>排序算法把列表中的数据元素排列成特定次序。如果数据集处于适当次序，从中检索信息的计算复杂度就能显著降低，因此排序是现代数据与信息服务的基础。例如，排序经常用于把数据转换为规范形式，以便快速比较并协调不同数据列表；许多数据处理算法也能因数据具有特定次序而提高效率。高效排序算法的重要性吸引了大量计算机科学研究。即使采用这些高效算法，对大型数据列表排序仍然很耗时，可以从并行执行中受益。高效排序算法的并行化颇具挑战，有时需要精巧的设计。</p>
+<p>本章介绍三种并行排序算法的设计：奇偶排序、归并排序和基数排序。奇偶排序十分简单，因此只作简要介绍；归并排序主要依赖第 13 章已经介绍的归并模式，也只作简述。本章大部分篇幅用于基数排序及其优化；这些方法依赖第 12 章稳定过滤模式的一种更一般形式。最后还会讨论双调排序、采样排序等其他流行的并行排序算法。</p>
+<p>排序算法把列表的数据元素排列成某种次序。排序是现代数据与信息服务的基石，因为如果数据集处于恰当次序，从数据集中检索信息的计算复杂度可以显著降低。例如，排序常被用来把数据规范化，以便在数据列表之间快速比较和对账。而且，许多数据处理算法在数据处于某种次序时效率更高。由于其重要性，高效排序算法一直是众多计算机科学研究的主题。即使有了这些高效算法，对大数据列表排序仍然耗时，并能从并行执行中获益。将高效排序算法并行化是有挑战的，有时需要精心设计。本章介绍三种并行排序算法的设计——奇偶交换排序、归并排序和基数排序。奇偶交换排序因简单而简略介绍；归并排序因主要依赖第 13 章已介绍的归并模式也简略介绍。本章大部分篇幅献给基数排序及其优化，后者依赖稳定过滤模式的一种更一般形式（第 12 章有更进一步的讨论）。我们还讨论其他流行的并行排序算法，如置换排序和采样排序。</p>
+<h2 id="sec-14-1">14.1 背景<a class="td-heading-self-link" href="#sec-14-1" aria-label="标题锚点"></a>
+</h2>
+<p>排序是计算机最早的应用之一。排序算法把列表元素排列成特定次序。应当采用什么次序，取决于元素本身的性质；常见例子包括数值的数值顺序和文本字符串的字典序。更形式化地说，任何排序算法都必须满足以下两个条件：</p>
+<ul>
+<li>
+<p>输出按非递减或非递增次序排列。对非递减次序，按照目标顺序，每个元素都不小于前一个元素；对非递增次序，每个元素都不大于前一个元素。</p>
+</li>
+<li>
+<p>输出是输入的一个排列。也就是说，算法在重新排列输入元素形成输出的同时，必须保留原输入中的所有元素。</p>
+</li>
+</ul>
+<p>最简单的情况下，列表元素可以按元素自身的值排序。例如，列表 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>5</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>7</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>8</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[5,2,7,1,3,2,8]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">7</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">8</span><span class="mclose">]</span></span></span></span> 可以按非递减次序排序为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>7</mn><mo separator="true">,</mo><mn>8</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,2,2,3,5,7,8]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">7</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">8</span><span class="mclose">]</span></span></span></span>。一种更复杂也更常见的情况是，每个元素由键字段和值字段组成，列表按键字段排序。假设每个元素都是二元组（年龄，以千美元计的收入），列表 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">(</mo><mn>30</mn><mo separator="true">,</mo><mn>150</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>32</mn><mo separator="true">,</mo><mn>80</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>22</mn><mo separator="true">,</mo><mn>45</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>29</mn><mo separator="true">,</mo><mn>80</mn><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[(30,150),(32,80),(22,45),(29,80)]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[(</span><span class="mord">30</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">150</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">32</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">80</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">22</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">45</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">29</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">80</span><span class="mclose">)]</span></span></span></span> 以收入为键按非递增次序排序后得到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">(</mo><mn>30</mn><mo separator="true">,</mo><mn>150</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>32</mn><mo separator="true">,</mo><mn>80</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>29</mn><mo separator="true">,</mo><mn>80</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>22</mn><mo separator="true">,</mo><mn>45</mn><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[(30,150),(32,80),(29,80),(22,45)]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[(</span><span class="mord">30</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">150</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">32</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">80</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">29</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">80</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord">22</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">45</span><span class="mclose">)]</span></span></span></span>。如果列表元素本身只是数值，那么排序时这些数值就充当键。</p>
+<p>排序算法可以分为稳定算法与不稳定算法。当两个元素的键值相等时，**稳定排序（stable sort）**会保留它们在输入中出现的先后次序。例如，以收入为键对上述列表按非递增次序排序时，稳定排序算法必须保证 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>32</mn><mo separator="true">,</mo><mn>80</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(32,80)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">32</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">80</span><span class="mclose">)</span></span></span></span> 出现在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>29</mn><mo separator="true">,</mo><mn>80</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(29,80)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">29</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">80</span><span class="mclose">)</span></span></span></span> 之前，因为前者在原输入中先出现；不稳定排序则不提供这种保证。若要用多个键以级联方式对列表排序，就需要稳定算法。例如，每个元素都有主键与次键时，可以先按次键排序，再按主键排序；第二次稳定排序会保留第一次排序在相同主键元素之间建立的次序。</p>
+<p>排序算法还可以分为基于比较与非基于比较的算法。对包含 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 个元素的列表，基于比较的排序算法必须完成一定数量的元素间比较，因此复杂度不可能优于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>。相比之下，某些非比较排序算法能取得优于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 的复杂度，但它们未必适用于任意类型的键。两类算法都可以并行化。本章将介绍两种基于比较的并行排序算法，即奇偶排序和归并排序，以及一种非比较并行排序算法，即基数排序。</p>
+<p>排序的重要性促使计算机科学研究界基于丰富的数据结构与算法策略，发展出了种类繁多的排序算法。因此，计算机科学导论课程经常用排序算法说明许多核心算法概念，包括大 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi></mrow><annotation encoding="application/x-tex">O</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span></span></span></span> 记号、分治算法、堆和二叉树等数据结构、随机算法、最好/最坏/平均情况分析、时间与空间权衡，以及上界与下界。本章延续这一传统，用三种排序算法说明若干重要的并行化和性能优化技术[1]。</p>
+<h2 id="sec-14-2">14.2 并行奇偶排序<a class="td-heading-self-link" href="#sec-14-2" aria-label="标题锚点"></a>
+</h2>
+<p>冒泡排序是最简单的基于比较的顺序排序算法之一。它的高层策略是比较列表中相邻的元素对；若顺序错误，就交换二者。不断重复这一过程，直到整个列表有序。冒泡排序的每次迭代都从头到尾顺序遍历元素列表并整理相邻元素对。不过，只要每次迭代覆盖所有相邻对，处理各对的次序并非算法正确性的必要条件。并行排序算法可以采用相似的迭代策略，但在每次迭代中并行而非顺序地整理各相邻对。</p>
+<p>并行处理元素对的挑战在于，被同时处理的各对必须相互独立，才能避免竞争条件。例如，若一个线程负责排序下标 0 和 1 处的元素，就不能再让另一个线程同时排序下标 1 和 2 处的元素。如果两个线程同时决定交换各自元素对，访问下标 1 处的元素时便会发生竞争。为了最大化同时处理的独立元素对数，可以先并行排序首元素下标为偶数的所有元素对（偶数对），再并行排序首元素下标为奇数的所有元素对（奇数对）。这种技术构成了 **奇偶换位排序（odd-even transposition sort）**的基础，简称奇偶排序。</p>
+<p>奇偶排序是一种基于比较的并行排序算法，它在相邻元素的奇数对与偶数对之间交替迭代。每次迭代比较所有奇数对或偶数对，若顺序错误就交换其中元素。图 14.1 给出对八个元素执行奇偶排序的例子。第一次迭代启动四个线程，每个线程负责一个偶数对。前两个线程发现其元素对已经有序，后两个线程发现顺序错误并交换元素。第二次迭代为每个奇数对启动一个线程，同样只有部分线程执行交换。第三次迭代重新处理偶数对。算法持续交替处理奇数对与偶数对，直到没有任何元素被交换，表明列表已有序。</p>
+<figure id="fig:14-1">
+<img src="/pmpp5-zh/figs/orig/fig-14-1.png" alt="图 14.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.1　并行奇偶排序</figcaption>
+</figure>
+<p>图 14.2 给出奇偶排序内核。列表中有多少元素，每次迭代就以其一半的线程数调用一次内核。参数 <code>isOddStep</code>（第 2 行）指明当前内核处理奇数对还是偶数对。内核首先确定线程负责的元素对中第一个元素的下标（第 3–4 行）。对偶数对（<code>isOddStep=0</code>），该下标就是线程全局下标的两倍，因此线程 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> 处理下标 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>t</mi><mo separator="true">,</mo><mn>2</mn><mi>t</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2t,2t+1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mord mathnormal">t</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>；对奇数对（<code>isOddStep=1</code>），再加 1，于是线程 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> 处理下标 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>t</mi><mo>+</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mi>t</mi><mo>+</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2t+1,2t+2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mclose">)</span></span></span></span>。通过边界检查后（第 5 行），每个线程比较自己负责的两个元素（第 6 行），若顺序错误就交换（第 7–9 行）。若交换成功，线程还会设置全局标志 <code>hasChanged</code>，表示列表次序已经变化，需要继续执行一次迭代（第 10 行）。</p>
+<figure id="fig:14-2">
+<img src="/pmpp5-zh/figs/orig/fig-14-2.png" alt="图 14.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.2　并行奇偶排序内核</figcaption>
+</figure>
+<p>多个线程同时向 <code>hasChanged</code> 写入 1 时，从严格意义上说存在竞争条件：多个线程无序访问同一内存位置，且至少一次访问为写入。实践中，这类竞争通常无害，因为所有线程都写入同一个值，无论多少线程执行写入，最终结果都相同。一个操作无论应用多少次效果都相同的性质称为<strong>幂等性（idempotence）</strong>。然而原则上，即使操作幂等，C++ 内存模型中的竞争条件仍可能导致未定义行为。因此，这段代码在实践中或许能工作，却违反 C++ 内存模型，不能保证正确。保守的程序员应当使用原子操作向 <code>hasChanged</code> 写入 1。</p>
+<p>奇偶排序易于实现，但时间复杂度和工作复杂度都很高。所需迭代次数为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 为输入列表大小；因为最坏情况下最大元素位于列表开头，需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 次迭代才能抵达末尾。若执行资源充足，使每次迭代都能完全并行执行，则时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>。每次迭代执行 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi mathvariant="normal">/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">N/2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord">/2</span></span></span></span> 次，即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 次比较，因此奇偶排序的工作复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>N</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。</p>
+<h2 id="sec-14-3">14.3 并行归并排序<a class="td-heading-self-link" href="#sec-14-3" aria-label="标题锚点"></a>
+</h2>
+<p>奇偶排序的时间与工作复杂度很高，因此需要复杂度更低、更高效的基于比较的并行排序算法。归并排序就是一种适合并行化的比较排序算法。它先把输入列表划分为若干区段，分别用归并排序或其他算法排好每个区段，再对有序区段执行有序归并。</p>
+<p>图 14.3 展示了并行化归并排序的一种方法。开始时，把输入列表划分为许多区段，每个区段用某种排序算法独立排序。随后，把每对区段归并成一个区段。不断重复这一过程，直到所有键都归入同一区段。在每一阶段，既可以并行执行不同归并操作，也可以从每个归并操作内部提取并行性。第 13 章已经介绍了如何并行化归并操作。</p>
+<figure id="fig:14-3">
+<img src="/pmpp5-zh/figs/orig/fig-14-3.png" alt="图 14.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.3　并行化归并排序的一种方式</figcaption>
+</figure>
+<p>随着图 14.3 的并行归并排序逐阶段推进，从归并操作之间与归并操作内部可提取的并行性之间存在权衡。较早阶段有更多独立归并操作可以并行执行；较晚阶段的独立归并操作较少，但每个操作归并更多键，因此内部暴露出更多并行性。例如，第一个归并阶段包含四个独立归并操作，一个由八个线程块构成的网格可以为每个归并操作分配两个线程块。下一阶段只有两个归并操作，但每个操作处理两倍的键，因此可以为每个操作分配四个线程块。这一并行归并排序的实现留作练习。</p>
+<p>图 14.3 的并行归并排序需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 次迭代，因为每次迭代都把待归并区段数减半。若执行资源充足，使每次迭代中的归并操作都能完全并行执行，则按照第 13 章的分析，每次迭代的时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>，工作复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>。因此，这里的并行归并排序总时间复杂度和总工作复杂度分别为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mrow><mi>log</mi><mo>⁡</mo></mrow><mn>2</mn></msup><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log^2 N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1484em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mop"><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8984em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><msup><mrow><mi>log</mi><mo>⁡</mo></mrow><mn>2</mn></msup><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log^2 N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1484em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8984em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>。请注意，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><msup><mrow><mi>log</mi><mo>⁡</mo></mrow><mn>2</mn></msup><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log^2 N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1484em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8984em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 略高于顺序归并排序的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>；原因是第 13 章所示的并行归并需要执行协同秩（co-rank）函数，工作复杂度高于顺序归并。 Cole 的并行归并排序算法[2]克服了这一限制，分别取得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 的时间复杂度和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 的工作复杂度。</p>
+<h2 id="sec-14-4">14.4 基数排序<a class="td-heading-self-link" href="#sec-14-4" aria-label="标题锚点"></a>
+</h2>
+<p>要取得优于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 的排序复杂度，必须使用非比较排序算法。基数排序是一种非常适合并行化的非比较排序算法。它根据基数值，即位值计数制中的底数，把待排序键分配到不同**桶（bucket）**中。如果键由多个数位组成，就对每一位重复分配，直到处理全部数位。每次迭代都是稳定的，会在每个桶内保留上次迭代形成的键次序。处理二进制表示的键时，选择 2 的幂作为基数很方便，因为这样易于遍历并提取数位；每次迭代本质上处理键中一个固定宽度的位片。本章先使用基数 2，即 1 位基数，之后再扩展到更大基数。</p>
+<figure id="fig:14-4">
+<img src="/pmpp5-zh/figs/orig/fig-14-4.png" alt="图 14.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.4　1 位基数的基数排序示例</figcaption>
+</figure>
+<p>图 14.4 展示了如何用 1 位基数对 4 位整数列表进行基数排序。键长为 4 位，每次迭代处理 1 位，所以总共需要四次迭代。第一次迭代考察最低有效位。最低位为 0 的所有键放到输出列表左侧，构成 0 桶；最低位为 1 的键放到右侧，构成 1 桶。输出列表的每个桶内都保留输入列表中的键次序。换句话说，进入同一桶的键在输出中必须保持它们在输入中的相对顺序。讨论下一次迭代时，就会看到为什么稳定性要求十分重要。</p>
+<p>第二次迭代把第一次迭代的输出作为新输入，并考察每个键的次低位。与第一次相同，键被分入次低位为 0 和为 1 的两个桶。由于保留了前一次迭代的次序，第二次迭代的输出已经按低 2 位有序：低 2 位为 00 的键在最前，然后依次为 01、10 和 11。</p>
+<p>第三次迭代对键的第 3 位重复这一过程。由于仍保留前几次迭代的次序，输出列表按低 3 位有序。最后一次迭代考察第 4 位，即最高有效位。迭代结束后，最终输出列表按全部 4 位完全有序。</p>
+<p>基数排序一次迭代执行的操作，应当使读者想到第 12 章的稳定过滤模式。稳定过滤把满足某个条件的输入键搬到输出列表开头，同时保持它们的次序。基数排序迭代执行一种更一般的操作：满足条件，即当前位为 0 的输入键被搬到输出列表开头；不满足条件的键被搬到列表末尾，同时两个子列表内部都保持键的次序。这一更一般的模式有时称为<strong>稳定划分（stable partition）</strong>，因为它把输入列表分成多个分区。下文将看到，基数排序迭代的并行化与优化技术同稳定过滤非常相似。</p>
+<h2 id="sec-14-5">14.5 并行基数排序<a class="td-heading-self-link" href="#sec-14-5" aria-label="标题锚点"></a>
+</h2>
+<p>基数排序的每次迭代都依赖上一次迭代的完整结果，因此各次迭代必须依次执行。并行化机会存在于每次迭代内部。本章余下部分集中讨论单次迭代的并行化与优化，并默认主机代码为每次迭代调用一次这样的内核。我们将介绍该基数排序内核的多项优化。感兴趣的读者还可参考 OneSweep[3]，它是目前先进的 GPU 基数排序实现。</p>
+<p>在 GPU 上并行化一次基数排序迭代，一种直接方法是让每个线程负责输入列表中的一个键。线程先确定自己的键在输出列表中的位置，再把键存到该位置。图 14.5 把这种方法应用于图 14.4 的第一次迭代。概念图以四个线程块处理 16 个键，每块四个线程，每个线程负责输入列表中对应的键。实际情况下，每块最多可以有 1024 个线程，输入也远大于本例，因而会产生更多线程块；这里使用小规模设置只是为了便于说明。</p>
+<figure id="fig:14-5">
+<img src="/pmpp5-zh/figs/orig/fig-14-5.png" alt="图 14.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.5　为每个输入键分配一个线程，并行化一次基数排序迭代</figcaption>
+</figure>
+<p>每个线程取得一个输入键后，剩余挑战是确定它在输出列表中的目标下标。求目标下标的方法取决于该键进入 0 桶还是 1 桶。对进入 0 桶的键，有</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>0 键的目标下标</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>此前 0 键数</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>此前键总数</mtext><mo>−</mo><mtext>此前 1 键数</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>键下标</mtext><mo>−</mo><mtext>此前 1 键数</mtext><mi mathvariant="normal">.</mi></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+  \text{0 键的目标下标}
+  &amp;=\text{此前 0 键数}\\
+  &amp;=\text{此前键总数}-\text{此前 1 键数}\\
+  &amp;=\text{键下标}-\text{此前 1 键数}.
+\end{aligned}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:4.2em;vertical-align:-1.85em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.35em;"><span style="top:-4.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">0 </span><span class="mord cjk_fallback">键的目标下标</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"></span></span><span style="top:-1.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.85em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.35em;"><span style="top:-4.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord text"><span class="mord cjk_fallback">此前</span><span class="mord"> 0 </span><span class="mord cjk_fallback">键数</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord text"><span class="mord cjk_fallback">此前键总数</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord cjk_fallback">此前</span><span class="mord"> 1 </span><span class="mord cjk_fallback">键数</span></span></span></span><span style="top:-1.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord text"><span class="mord cjk_fallback">键下标</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord cjk_fallback">此前</span><span class="mord"> 1 </span><span class="mord cjk_fallback">键数</span></span><span class="mord">.</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.85em;"><span></span></span></span></span></span></span></span></span></span></span></span><p>进入 0 桶的键的目标下标，等于它之前同样进入 0 桶的键数。每个键非入 0 桶即入 1 桶，所以此前 0 键数等于此前键总数减去此前 1 键数。此前键总数就是该键在输入列表中的下标，可以直接取得。因此，唯一不平凡的步骤是统计它之前进入 1 桶的键数；稍后将用排他扫描完成这一操作。</p>
+<p>对进入 1 桶的键，有</p>
+<span class="katex-display" tabindex="0"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>1 键的目标下标</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>0 键总数</mtext><mo>+</mo><mtext>此前 1 键数</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mo stretchy="false">(</mo><mtext>键总数</mtext><mo>−</mo><mtext>1 键总数</mtext><mo stretchy="false">)</mo><mo>+</mo><mtext>此前 1 键数</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>输入大小</mtext><mo>−</mo><mtext>1 键总数</mtext><mo>+</mo><mtext>此前 1 键数</mtext><mi mathvariant="normal">.</mi></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+  \text{1 键的目标下标}
+  &amp;=\text{0 键总数}+\text{此前 1 键数}\\
+  &amp;=(\text{键总数}-\text{1 键总数})+\text{此前 1 键数}\\
+  &amp;=\text{输入大小}-\text{1 键总数}+\text{此前 1 键数}.
+\end{aligned}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:4.2em;vertical-align:-1.85em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.35em;"><span style="top:-4.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">1 </span><span class="mord cjk_fallback">键的目标下标</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"></span></span><span style="top:-1.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.85em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.35em;"><span style="top:-4.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord text"><span class="mord">0 </span><span class="mord cjk_fallback">键总数</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord cjk_fallback">此前</span><span class="mord"> 1 </span><span class="mord cjk_fallback">键数</span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord cjk_fallback">键总数</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">1 </span><span class="mord cjk_fallback">键总数</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord cjk_fallback">此前</span><span class="mord"> 1 </span><span class="mord cjk_fallback">键数</span></span></span></span><span style="top:-1.51em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord text"><span class="mord cjk_fallback">输入大小</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord">1 </span><span class="mord cjk_fallback">键总数</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord text"><span class="mord cjk_fallback">此前</span><span class="mord"> 1 </span><span class="mord cjk_fallback">键数</span></span><span class="mord">.</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.85em;"><span></span></span></span></span></span></span></span></span></span></span></span><p>输出数组中，所有进入 0 桶的键都必须位于进入 1 桶的键之前。因此，1 键的目标下标等于 0 键总数加此前 1 键数。0 键总数又等于输入键总数减去 1 键总数，而输入键总数就是可直接取得的输入大小。于是，这里同样需要统计此前 1 键数；排他扫描还能顺便给出 1 键总数。</p>
+<figure id="fig:14-6">
+<img src="/pmpp5-zh/figs/orig/fig-14-6.png" alt="图 14.6" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.6　求每个输入键的目标位置</figcaption>
+</figure>
+<p>图 14.6 展示了本例中每个线程为确定目标下标而执行的操作，相应内核见图 14.7。每个线程先确定自己负责的键下标（第 3 行），进行边界检查（第 5 行），再从输入列表加载该键（第 6 行）。随后，线程从键中提取本轮考察的位，确定它是 0 还是 1（第 7 行）。迭代号 <code>iter</code> 给出目标位的位置。把键右移该位数，就把目标位移到最右端；再让移位后的键与 1 执行按位与，就把最低位以外的所有位清零， <code>bit</code> 最终得到目标位的值。</p>
+<figure id="fig:14-7">
+<img src="/pmpp5-zh/figs/orig/fig-14-7.png" alt="图 14.7" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.7　基数排序单次迭代内核代码</figcaption>
+</figure>
+<p>每个线程提取目标位后，把它写入内存（第 8 行），各线程再协作对这些位执行网格范围的排他扫描（第 10 行）。第 11 章已经介绍了网格级并行扫描。排他扫描结果数组的每个位置保存该位置之前所有位的和。位值只能是 0 或 1，因此这个和就等于此前 1 的数量，也就是此前进入 1 桶的键数。每个线程读取数组，取得自身位置之前的 1 键数（第 12 行）和输入列表中的 1 键总数（第 13 行），再用前面推导的表达式确定目标位置（第 14–15 行）。最后，线程把自己的键写到输出列表中的相应位置（第 16 行）。</p>
+<p>**译者注：**图 14.7 读取 <code>bits[N]</code> 作为 1 键总数，因此调用方需要为 <code>bits</code> 分配至少 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">N+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 个元素，并保证 <code>gridExclusiveScan(bits,N)</code> 按底本约定把总和写到该位置。该接口是本章用来表达算法结构的抽象调用，具体实现应与第 11 章扫描内核的接口约定保持一致。</p>
+<h2 id="sec-14-6">14.6 针对内存合并进行优化<a class="td-heading-self-link" href="#sec-14-6" aria-label="标题锚点"></a>
+</h2>
+<p>上述方法能有效并行化基数排序迭代，但一个主要低效来源是：对输出列表的写入访问模式难以充分合并。观察图 14.5 中各线程如何写入输出列表。第一个线程块中，第一个线程写 0 桶，第二个写 1 桶，第三个写 0 桶，第四个写 1 桶。因此，连续下标的线程不一定写入连续内存位置，内存合并效果较差，每个 warp 需要发出多个内存请求。</p>
+<p>对只有两个桶的 1 位基数，同一 warp 中的线程只会写入这两个桶之一。因此，一个 warp 写入的不同缓存行通常为两条，或因访问对齐而略多。但第 14.7 节将看到，更大的基数会产生更多桶，同一 warp 可能写入更多不同缓存行。因此，未合并的内存访问会严重妨碍基数排序迭代内核的性能。</p>
+<p>回忆第 6 章，改进内核内存合并有多种办法：（1）重新排列线程；（2）重新排列线程访问的数据；（3）在共享内存上执行无法合并的访问，再以合并方式在共享内存和全局内存之间传输数据。本章采用第三种方法。各线程不再以难以合并的方式直接把键写到全局内存桶，而是在共享内存中为每个线程块维护局部桶。也就是说，不再像图 14.7 那样直接执行全局排序。块内线程先完成块级局部排序，在共享内存中把进入 0 桶和 1 桶的键分开，再把各桶从共享内存以合并方式写入全局内存。</p>
+<figure id="fig:14-8">
+<img src="/pmpp5-zh/figs/orig/fig-14-8.png" alt="图 14.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.8　先在共享内存中局部排序，再写入全局内存，以改进内存合并</figcaption>
+</figure>
+<p>图 14.8 展示了如何改进图 14.5 示例中的内存合并。每个线程块先对自己拥有的键执行局部基数排序，并把输出列表存入共享内存。局部排序方式与先前的全局排序相同，只需每个线程块执行局部排他扫描，而不需要全局扫描。局部排序后，各块以更易合并的方式把局部桶写入全局桶。例如，第一个线程块写出 0 桶时，前两个线程写入全局内存相邻位置；写出 1 桶时，后两个线程也写入相邻位置。因此，大部分全局内存写入都能合并。</p>
+<p>该优化的主要挑战，是每个线程块必须确定自己的每个局部桶在对应全局桶中的起始位置。局部桶的起始位置取决于其他线程块中局部桶的大小。具体来说，某块的局部 0 桶位于所有先前线程块局部 0 桶之后；该块的局部 1 桶则位于所有线程块的局部 0 桶以及先前线程块的局部 1 桶之后。对各线程块的局部桶大小执行排他扫描，就能得到这些位置。</p>
+<figure id="fig:14-9">
+<img src="/pmpp5-zh/figs/orig/fig-14-9.png" alt="图 14.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.9　确定每个线程块的局部桶在全局输出中的目标位置</figcaption>
+</figure>
+<p>图 14.9 展示了如何用排他扫描求每个线程块的局部桶位置。局部基数排序完成后，各线程块确定每个局部桶中的键数，再把这些值存入图示表格。表格采用行主序：所有线程块的局部 0 桶大小连续排列在前，随后是所有局部 1 桶大小。表格建立后，对线性化表格执行排他扫描；结果表格就是每个线程块局部桶的起始位置。</p>
+<p>线程块知道局部桶在全局内存中的起点后，块内线程便可把键从局部桶写到全局桶。为此，每个线程需要掌握局部 0 桶与局部 1 桶的键数。写入阶段中，块内线程根据自己的线程下标写其中一个桶。例如图 14.9 的块 2 中，线程 0 写 0 桶中唯一的键，线程 1–3 写 1 桶中的三个键；块 3 中则由线程 0–2 写 0 桶的三个键，线程 3 写 1 桶的一个键。每个线程需要判断自己负责写局部 0 桶还是 1 桶。每块记录两个局部桶中的键数，让线程能据此确定自己的 <code>threadIdx</code> 落在哪个范围，并参与相应桶的写入。该优化的具体实现留作练习。</p>
+<h2 id="sec-14-7">14.7 基数值的选择<a class="td-heading-self-link" href="#sec-14-7" aria-label="标题锚点"></a>
+</h2>
+<p>目前一直以 1 位基数说明如何并行化基数排序。对示例中的 4 位键，需要四次迭代才能完全排序；一般而言，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 位键需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 次迭代。使用更大的基数值可以减少迭代次数。</p>
+<p>图 14.10 展示了使用 2 位基数的基数排序。每次迭代用 2 位把键分入各桶，所以只需两次迭代就能把 4 位键完全排好。第一次迭代考察低 2 位，分别把键分入低 2 位为 00、01、10、11 的四个桶。第二次考察高 2 位，再根据高 2 位分入四个桶。与 1 位示例一样，每个桶内都保留前一次迭代形成的键次序，因此第二次迭代后，所有键就按全部 4 位完全有序。</p>
+<figure id="fig:14-10">
+<img src="/pmpp5-zh/figs/orig/fig-14-10.png" alt="图 14.10" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.10　使用 2 位基数的基数排序示例</figcaption>
+</figure>
+<p>与 1 位示例相似，可以为输入列表中的每个键分配一个线程，让线程求键的目标下标并写入输出列表，从而并行化每次迭代。为优化内存合并，每个线程块可以先在共享内存中局部排序自己的键，再以合并方式把局部桶写入全局内存。图 14.11 给出这种方式的概念示例。</p>
+<figure id="fig:14-11">
+<img src="/pmpp5-zh/figs/orig/fig-14-11.png" alt="图 14.11" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.11　用共享内存并行化并优化 2 位基数的一次基数排序迭代</figcaption>
+</figure>
+<p>1 位示例与 2 位示例的关键区别，是如何把键分入四个桶而非两个。在线程块内部局部排序时，可以连续应用两次 1 位基数排序迭代来完成 2 位基数排序。两次 1 位迭代各自需要一次排他扫描，但扫描都局限在线程块内，两次迭代之间无须跨线程块协调。一般而言，对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 位基数，需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 次局部 1 位迭代，把键分入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>r</mi></msup></mrow><annotation encoding="application/x-tex">2^r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span></span></span></span></span></span></span></span></span></span></span> 个局部桶。</p>
+<p>局部排序结束后，每个线程块必须确定自己的每个局部桶在全局输出列表中的位置。图 14.12 展示了 2 位示例的求法，其过程与图 14.9 的 1 位示例相似。每块把各局部桶的键数存入表格，再扫描表格，取得各局部桶的全局位置。主要区别是每块有四个局部桶而不是两个，因此排他扫描处理四行而不是两行。一般而言，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 位基数的排他扫描表格有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>r</mi></msup></mrow><annotation encoding="application/x-tex">2^r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span></span></span></span></span></span></span></span></span></span></span> 行。</p>
+<figure id="fig:14-12">
+<img src="/pmpp5-zh/figs/orig/fig-14-12.png" alt="图 14.12" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.12　确定 2 位基数下每个线程块局部桶的目标位置</figcaption>
+</figure>
+<p>使用更大基数的优点，是减少完全排好全部键所需的迭代次数。迭代减少意味着网格启动、全局内存访问和全局排他扫描操作都更少。不过，更大基数也有缺点。第一，每个线程块拥有更多局部桶，每个桶中的键更少。因此，各块需要写入更多不同的全局内存桶区段，而每个区段的数据更少；基数越大，内存合并机会越少。第二，基数越大，应用全局排他扫描的表格越大，扫描开销也越高。因此，基数不能任意增大。选择基数值时，必须在迭代次数与内存合并行为、全局排他扫描开销之间取得平衡。多位基数排序的实现留作练习。</p>
+<h2 id="sec-14-8">14.8 用线程粗化改进内存合并<a class="td-heading-self-link" href="#sec-14-8" aria-label="标题锚点"></a>
+</h2>
+<p>在许多线程块间并行执行基数排序的代价之一，是全局内存写入的合并效果较差。每个线程块都要把自己的局部桶写入全局内存。线程块越多，每块负责的键越少，局部桶也越小，写入全局内存时暴露的合并机会便越少。如果这些线程块并行执行，这种代价或许值得；但如果硬件本来就要把它们串行化，这笔代价就没有必要。</p>
+<p>可以应用线程粗化解决这个问题：每个线程不再只负责输入列表中的一个键，而是负责多个键。图 14.13 展示了如何对 2 位基数的一次迭代应用线程粗化。与图 14.11 相比，每个线程块负责更多键，因而每块的局部桶更大，暴露出更多内存合并机会。比较两图可以看出，图 14.13 中连续线程更有可能写入连续内存位置。</p>
+<figure id="fig:14-13">
+<img src="/pmpp5-zh/figs/orig/fig-14-13.png" alt="图 14.13" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 14.13　对 2 位基数应用线程粗化，以改进内存合并</figcaption>
+</figure>
+<p>在许多线程块间并行化基数排序的另一项开销，是为了确定各线程块局部桶的目标位置而执行全局排他扫描。回忆图 14.12，扫描表格的大小与桶数和线程块数都成正比。应用线程粗化会减少线程块数，从而缩小表格，降低排他扫描开销。在线程粗化的基数排序实现留作练习。</p>
+<h2 id="sec-14-9">14.9 其他并行排序方法<a class="td-heading-self-link" href="#sec-14-9" aria-label="标题锚点"></a>
+</h2>
+<p>本章概述的算法只是并行排序数据的许多方法中的一部分。本节简要介绍读者可能感兴趣的其他方法。</p>
+<p>第 14.2 节的奇偶换位排序采用固定比较模式，在元素顺序错误时交换它们。它很容易并行化，因为每一步比较的键对互不重叠。有一整类排序方法都使用固定比较模式对序列排序，而且常常并行执行；它们通常称为<strong>排序网络（sorting network）</strong>。最著名的并行排序网络是 Batcher 的双调排序与奇偶归并排序 <a href="/pmpp5-zh/book/14-ch14/#bib-4">[4]</a>。Batcher 算法处理固定长度序列，比奇偶换位排序更高效；对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 个元素只需 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><msup><mrow><mi>log</mi><mo>⁡</mo></mrow><mn>2</mn></msup><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log^2N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1484em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8984em;"><span style="top:-3.1473em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 次比较。尽管这一渐近代价劣于归并排序等算法的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span>，实践中它们凭借简单性，经常成为短序列上最高效的方法。</p>
+<p>大多数不采用排序网络固定比较集合的并行比较排序，可以分为两大类。第一类把未排序输入划分为数据片，分别排好每片，再把大部分工作放在组合这些数据片以形成输出上。本章的归并排序就是例子：大部分工作发生于组合各有序数据片的归并树中。第二类把大部分工作放在划分未排序序列上，使最后组合各分区相对容易。<strong>采样排序（sample sort）</strong> <a href="/pmpp5-zh/book/14-ch14/#bib-5">[5]</a>是这一类的典型例子。采样排序先从输入中选择 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">p-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 个键（例如随机选择）并排好它们，再用这些键把输入划分成 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 个桶，使桶 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> 中的所有键都大于任意桶 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&lt;</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j&lt;k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> 中的键，并小于任意桶 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&gt;</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j&gt;k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> 中的键。这一步可以看作快速排序二路划分向 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 路的推广。如此划分数据后，各桶可以独立排序，最后只需按顺序连接各桶便能形成有序输出。</p>
+<p>对于极大的序列，尤其数据必须分布在多个物理内存中，甚至分布到同一节点中多块 GPU 的内存时，采样排序通常是最高效的选择。实践中经常对键进行过采样，因为适度过采样能以很高概率得到均衡分区[6]。</p>
+<p>正如归并排序和采样排序分别代表比较排序中的自底向上与自顶向下策略，基数排序也能按这两类策略设计。本章介绍的基数排序更完整地说是<strong>最低有效位（LSB）基数排序</strong>，更一般地称为<strong>最低有效数位（LSD）基数排序</strong>。算法从键的最低有效数位开始，逐步处理到最高有效数位。<strong>最高有效数位（MSD）基数排序</strong>采用相反策略：先用最高有效数位把输入划分成对应于该位各可能值的桶，再在每个桶内独立使用下一个最高有效数位继续划分；处理到最低有效数位时，整个序列便已排好。</p>
+<p>MSD 基数排序与采样排序一样，通常更适合超大序列。LSD 基数排序每一步都需要全局重排数据，而 MSD 基数排序的每一步会在逐渐变得更局部的数据区域上运行。</p>
+<h2 id="sec-14-10">14.10 小结<a class="td-heading-self-link" href="#sec-14-10" aria-label="标题锚点"></a>
+</h2>
+<p>本章介绍了如何在 GPU 上并行排序键及其关联值。首先介绍两种基于比较的并行排序算法：并行奇偶排序和并行归并排序。并行奇偶排序在奇数对与偶数对之间交替，反复交换列表中次序错误的相邻元素对，直到列表有序，从而避免竞争条件。并行归并排序并行执行不同输入区段间的独立归并操作，同时利用第 13 章的并行归并方法，在每个归并操作内部继续并行化。</p>
+<p>随后，本章重点讨论工作复杂度低于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(N\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span> 的非比较算法基数排序。基数排序反复把键分配到各桶中，对键的每个数位都重复分配，并保留上次数位迭代形成的次序，最终保证键按全部数位有序。每次迭代为输入列表中的每个键分配一个线程，让线程与其他线程协作执行排他扫描，找出该键在输出列表中的目标位置。</p>
+<p>优化基数排序的一项关键挑战，是写入输出列表时实现合并内存访问。一项重要优化，是让每个线程块先在共享内存的局部桶中执行局部排序，再以合并方式把每个局部桶写入全局内存。另一项优化是增大基数，减少所需迭代数和网格启动数；但基数不能过大，否则会恶化内存合并，并增加全局排他扫描开销。最后，线程粗化既能改进内存合并，也能降低全局排他扫描开销。</p>
+<p>在 GPU 上实现并优化并行排序算法很复杂，建议程序员使用 Thrust [7,8] 或 CUB[9] 等 GPU 并行排序库，而不是从头编写排序内核。即便如此，并行排序仍是研究并行模式优化权衡的一个有趣案例。</p>
+<h2 id="sec-14-11">14.11 练习<a class="td-heading-self-link" href="#sec-14-11" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li>
+<p><a id="bib-1"></a> 扩展图 14.7 的内核，使用共享内存改进内存合并。</p>
+</li>
+<li>
+<p><a id="bib-2"></a> 扩展图 14.7 的内核，使其支持多位基数。</p>
+</li>
+<li>
+<p><a id="bib-3"></a> 扩展图 14.7 的内核，应用线程粗化改进内存合并。</p>
+</li>
+<li>
+<p><a id="bib-4"></a> 使用第 13 章的并行归并实现并行归并排序。</p>
+</li>
+</ol>
+<h2 id="sec-refs">本章参考文献<a class="td-heading-self-link" href="#sec-refs" aria-label="标题锚点"></a>
+</h2>
+<ol>
+<li><a id="bib-1"></a>N. Satish, M. Harris, M. Garland, Designing efficient sorting algorithms for manycore GPUs, in: <em>2009 IEEE International Symposium on Parallel &amp; Distributed Processing</em>, IEEE, 2009, pp. 1–10.</li>
+<li><a id="bib-2"></a>R. Cole, Parallel merge sort, <em>SIAM Journal on Computing</em> 17 (4) (1988) 770–785.</li>
+<li><a id="bib-3"></a>A. Adinets, D. Merrill, OneSweep: a faster least significant digit radix sort for GPUs, arXiv preprint arXiv:2206.01784, 2022.</li>
+<li><a id="bib-4"></a>K.E. Batcher, Sorting networks and their applications, in: <em>Proceedings of the April 30–May 2, 1968, Spring Joint Computer Conference</em>, 1968, pp. 307–314.</li>
+<li><a id="bib-5"></a>W.D. Frazer, A.C. McKellar, Samplesort: a sampling approach to minimal storage tree sorting, <em>Journal of the ACM</em> 17 (3) (1970) 496–507.</li>
+<li><a id="bib-6"></a>G.E. Blelloch, C.E. Leiserson, B.M. Maggs, C.G. Plaxton, S.J. Smith, M. Zagha, A comparison of sorting algorithms for the Connection Machine CM-2, in: <em>Proceedings of the Third Annual ACM Symposium on Parallel Algorithms and Architectures</em>, 1991, pp. 3–16.</li>
+<li><a id="bib-7"></a>N. Bell, J. Hoberock, Thrust: a productivity-oriented library for CUDA, in: <em>GPU Computing Gems Jade Edition</em>, Elsevier, 2012, pp. 359–371.</li>
+<li><a id="bib-8"></a>NVIDIA, Thrust: the C++ parallel algorithms library, 2025. <a href="https://nvidia.github.io/cccl/thrust/index.html">https://nvidia.github.io/cccl/thrust/index.html</a>.</li>
+<li><a id="bib-9"></a>NVIDIA, CUB, 2025. <a href="https://nvidia.github.io/cccl/cub/index.html">https://nvidia.github.io/cccl/cub/index.html</a>.</li>
+</ol>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/book/13-ch13/"
+    aria-label="上一页 - 第13章 合并" title="第13章 合并" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">第13章 合并</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/book/15-ch15/"
+    aria-label="下一页 - 第15章 高级矩阵乘法" title="第15章 高级矩阵乘法" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">第15章 高级矩阵乘法</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-14-1">14.1 背景</a></li>
+    <li><a href="#sec-14-2">14.2 并行奇偶排序</a></li>
+    <li><a href="#sec-14-3">14.3 并行归并排序</a></li>
+    <li><a href="#sec-14-4">14.4 基数排序</a></li>
+    <li><a href="#sec-14-5">14.5 并行基数排序</a></li>
+    <li><a href="#sec-14-6">14.6 针对内存合并进行优化</a></li>
+    <li><a href="#sec-14-7">14.7 基数值的选择</a></li>
+    <li><a href="#sec-14-8">14.8 用线程粗化改进内存合并</a></li>
+    <li><a href="#sec-14-9">14.9 其他并行排序方法</a></li>
+    <li><a href="#sec-14-10">14.10 小结</a></li>
+    <li><a href="#sec-14-11">14.11 练习</a></li>
+    <li><a href="#sec-refs">本章参考文献</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/en/book/14-ch14/"
+    lang="en-US" hreflang="en-US" dir="ltr"
+    title="切换语言: English"
+    aria-label="切换语言: English" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>English</span>
+  </a>
+  <ul aria-label="选择语言">
+    <li>
+      <span class="td-language-selector__item active" lang="zh-CN" dir="ltr" aria-current="page">简体中文</span>
+    </li>
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/en/book/14-ch14/" lang="en-US" hreflang="en-US" dir="ltr">English</a>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>双列视图</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>切换语言</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"复制 Markdown 文本","disabledReason":"复制 Markdown 文本: 暂不可用","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":""},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://codingpracticegroup.github.io/pmpp5-zh/book/14-ch14/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":false,"description":"查阅 Markdown 源码","disabledReason":"查阅 Markdown 源码: 暂不可用","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":""},{"available":true,"description":"查阅编辑历史","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/14-ch14.md"},{"available":true,"description":"编辑当前页面","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/14-ch14.md"},{"available":true,"description":"添加子页面","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"提交文档议题","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=%E7%AC%AC14%E7%AB%A0+%E6%8E%92%E5%BA%8F"},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"切换语言","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/14-ch14/"},{"active":false,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/14-ch14/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":false,"description":"外观","disabledReason":"暂不可用","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"打开双列视图","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["双列视图","打开双列视图","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"双列视图","url":""}],"commands":[],"language":"zh","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/pmpp5-zh/third_party/katex/katex.min.180c2d77d434d7da51d6625c50a964d4fd6fdbdb9bc8796a0a016c30c49931fb.css" integrity="sha256-GAwtd9Q019pR1mJcUKlk1P1v29ubyHlqCgFsMMSZMfs=" crossorigin="anonymous">
+<script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"简体中文","url":"/pmpp5-zh/book/14-ch14/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"两页的部分标题不同，匹配标题之间的位置为估算结果。","close":"关闭","error":"无法加载此页面。","language":"选择语言","loading":"正在加载……","open":"打开","progress":"没有可用于对齐两页的共同标题，将按全文阅读进度同步。","retry":"重试","sync":"同步滚动","title":"双列视图","unavailable":"标题重复或顺序不一致，无法同步。"},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"en-US","direction":"ltr","label":"English","url":"/pmpp5-zh/en/book/14-ch14/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

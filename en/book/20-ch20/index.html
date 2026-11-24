@@ -1,0 +1,838 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/20-ch20/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/19-ch19/">
+<link rel="next" href="/pmpp5-zh/en/book/21-ch21/"><meta name="robots" content="index, follow">
+
+<title>Chapter 20 Large language models | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/20-ch20/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/20-ch20/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/20-ch20/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/20-ch20/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 20 Large language models">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 20 Large language models">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="15016">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 20 Large language models">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/20-ch20/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/20-ch20/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/09-ch9/" title="Chapter 9 Histogram"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/20-ch20/" aria-current="page" title="Chapter 20 Large language models"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 20 Large language models</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/20-ch20.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/20-ch20.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;20&#43;Large&#43;language&#43;models" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 20 Large language models</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c20">Chapter 20 Large language models<a class="td-heading-self-link" href="#c20" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>Large language models</p>
+<p>With special contributions from Juan Gómez-Luna CONTENTS 20.1 Transformer architecture. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 478 20.2 Multi-head attention . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 482 20.3 Implementing attention in CUDA . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 486 20.4 KV caching . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 488 20.5 Flash attention . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 492 20.6 KV cache arithmetic intensity and memory requirement . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 504 20.7 Alleviating the memory requirements of the attention mechanism. . . . . . . . . . . . . . . . . . . . 508 20.8 Summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 510 20.9 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 511 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 511 Before Google Researchers introduced Transformers [1] in 2017, language tasks had been predominantly based on statistical language modeling techniques pioneered by IBM (e.g., [2]). In 2018, Google introduced the BERT language model based on Transformers and achieved unprecedented results in natural language tasks. Since then, the Transformer architecture1 has become the backbone of the deep learning approaches to natural language processing (NLP) based on neural networks. Since then, LLMs have captured the attention of the industry and advanced rapidly, demonstrating human-level performance in diverse tasks such as text generation, summarization, translation, and conversation. These language models have grown by orders of magnitude in size compared to BERT to accommodate more training data. The term Large Language Models (LLMs) has been coined to distinguish them from previous generations of language models. While LLMs were originally developed to process and generate information in text form, multi-modal models (i.e., trained with and used for different types of visual, audio, and other types of data such as scientific data) started to appear. The core idea of LLMs is to predict the next token (e.g., a word, sub-word, character) given a sequence of previous tokens. In chatbot applications such as OpenAI 1 In this chapter, the term <code>architecture'' refers to </code>neural network architecture&rsquo;&rsquo;, not ``hardware architec ture&rsquo;&rsquo; as we do through the rest of the book. Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00031-7">https://doi.org/10.1016/B978-0-44-343900-1.00031-7</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<p>ChatGPT [3], the sequence of previous tokens, collectively called the context, is composed of the system prompt, user input, and the tokens already generated by the model. In order for LLMs to generate accurate results,2 they contain billions of parameters (i.e., tens of layers with hundreds of millions of parameters each) that must be trained on huge datasets. During inference, large contexts help to provide more accurate responses. A mechanism, referred to as attention is needed to maintain the context and to identify the parts of the large context that are the most relevant to the generation of the next token. It is therefore important to understand the attention mechanism as well as the Transformer Architecture [1] which is the most popular approach to incorporating attention mechanisms into LLMs.3 20.1 Transformer architecture Most LLMs today employ the transformer architecture and its attention mechanism to capture dependencies between tokens and their relative importance in generating the next token. The attention mechanism resembles a classification process within a neural network. It uses the softmax function to generate probabilities. The probability assigned to each token in the sequence of previous tokens serves as an indication of the relative importance of that token to the generation of the next token. The transformer architecture was originally proposed for transduction tasks, such as machine translation. As such, it was designed with two types of layers. The encoder layers contextualize (or mix) the input tokens by generating a sequence of continuous representations, i.e., floating-point embedding vectors, from a sequence of symbols (e.g., tokens) in the source language. The decoder layers take the sequence of continuous representations from the encoder and generate output tokens (one at a time) in the target language. The decoder does not only take the output of the encoder as input but also the most recent output tokens generated by itself. For this reason, the transformer models are auto-regressive models. Since its first introduction, transformers have been adapted to other types of tasks. Depending on the specific task being performed, a transformer may not need both types of layers. For example, models that perform discriminative tasks such as classification do not need a decoder because they do not generate text in a target language. On the other hand, decoder-only models can perform generative tasks, such as text generation. This is the case of LLMs, where text is generated as a response to a user’s query but not as a sequence-to-sequence transformation. Such generative tasks 2 For some LLM tasks (e.g., text summarization), accuracy may not be the right metric, since many dif ferent answers can be correct. However, in this chapter, we use <code>accurate'' with the more general meaning of </code>correct&rsquo;&rsquo;, <code>valid'', or </code>useful&rsquo;&rsquo;. 3 Although we focus on Transformers and the attention mechanism in this chapter, the research community keeps actively exploring other approaches to LLMs that provide different advantages. Notable examples are state-space models (e.g., Mamba [4]), convolutional models (e.g., Hyena [5]), and hybrid models. They may provide certain advantages over transformers, e.g., less memory requirements.</p>
+<p>Before Google Researchers introduced Transformers [1] in 2017, language tasks had been predominantly based on statistical language modeling techniques pioneered by IBM (e.g., [2]). In 2018, Google introduced the BERT language model based on Transformers and achieved unprecedented results in natural language tasks. Since then, the Transformer architecture has become the backbone of the deep learning approaches to natural language processing (NLP) based on neural networks.</p>
+<p>Since then, LLMs have captured the attention of the industry and advanced rapidly, demonstrating human-level performance in diverse tasks such as text generation, summarization, translation, and conversation. These language models have grown by orders of magnitude in size compared to BERT to accommodate more training data. The term Large Language Models (LLMs) has been coined to distinguish them from previous generations of language models. While LLMs were originally developed to process and generate information in text form, multi-modal models (i.e., trained with and used for different types of visual, audio, and other types of data such as scientific data) started to appear.</p>
+<p>The core idea of LLMs is to predict the next token (e.g., a word, sub-word, character) given a sequence of previous tokens. In chatbot applications such as ChatGPT [3], the sequence of previous tokens, collectively called the context, is composed of the system prompt, user input, and the tokens already generated by the model. In order for LLMs to generate accurate results, they contain billions of parameters (i.e., tens of layers with hundreds of millions of parameters each) that must be trained on huge datasets. During inference, large contexts help to provide more accurate responses. A mechanism, referred to as attention is needed to maintain the context and to identify the parts of the large context that are the most relevant to the generation of the next token. It is therefore important to understand the attention mechanism as well as the Transformer Architecture [1] which is the most popular approach to incorporating attention mechanisms into LLMs.</p>
+<h2 id="sec-20-1">20.1 Transformer architecture<a class="td-heading-self-link" href="#sec-20-1" aria-label="Link to this heading"></a>
+</h2>
+<img src="/pmpp5-zh/figs/orig/fig-20-1.png" alt="Figure 20.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.1.</strong> Decoder-only transformer architecture. This is a baseline architecture without KV caching.</p>
+<p>execute the model multiple times. Each time, the model predicts the likelihood of candidates for a new output token following a sequence of previous tokens. In this section, we focus on the architecture of decoder-only transformers. For more details on the encoder-decoder transformer architecture, we refer the reader to [1]. A sample LLM design based on the decoder-only transformer architecture is shown in Fig. 20.1. We briefly describe its main components as follows. The Tokenizer ➊ converts the text for the input document or query into a sequence of tokens, i.e., integer IDs that represent a character or a short sequence of characters. The mapping of text into tokens is based on the concept that a finite vocabulary can be learned from any given set of training documents in the target language. The collection of unique tokens thus learned and recognized by the tokenizer in an LLM form the vocabulary of the LLM. Each tokenizer has its own definition of tokens and approach to translating text input into tokens. When an LLM is trained, unique IDs are assigned to the tokens as they are encountered in the training document. That is, each time the tokenizer decides to form a token from the next text fragment, it will check if the same text fragment was previously encountered. If not, a new text fragment has been discovered and a new ID number is assigned to this text segment and will be used as the token representation of the text fragment. A mapping from the text fragment to its assigned token ID is recorded for future lookup. If the text fragment was encountered earlier in the training process, the previously assigned token ID is found through the mapping and will be used to represent the text fragment. The mapping from text fragments to token IDs is part of the outcome of training. During inference, each time the tokenizer decides to form a token from a text fragment, the mapping is used to look up the token ID assigned to the text fragment. This token ID becomes the next output of the tokenizer. Strictly speaking, tokens are the text fragments that form the vocabulary of an LLM whereas token IDs are the integer representation of the tokens inside the LLM. When we describe the operations of an LLM, we will use the terms token and token ID interchangeably unless there is a need to be precise. The Embedding layer ➋ implements a function that converts tokens, i.e., token IDs generated by the tokenizer, into embeddings, i.e., their floating-point vector representation. We will use the terms <code>embedding'' and </code>embedding vector&rsquo;&rsquo; interchangeably. This is done via a lookup into an embedding table. The embedding value for each token is also learned from the documents during training. The reason for this conversion is that LLMs are machine learning models that are trained using numerical methods. The training process typically employs gradient-descent approaches that require all functions of the model to be differentiable and all input and parameter values to be in continuous form which is approximated by the floating-point representation. The Positional Encoding layer ➌ adds sequence order information to the input embedding vectors of the input tokens. Positional encoding informs the attention mechanism of the physical position and proximity of tokens in the input, a factor that is considered when determining the relevance of previous input and output tokens to the generation of the next output token. The embeddings of the entire sequence of tokens of the current conversation between the user and the system (user input, system added input, and output) are accumulated into a matrix according to their order of generation. Each row of the matrix is the embeddings of one token. This matrix is the input of the first transformer layer. The Transformer layers ➍ transform the embeddings to extract dependencies among tokens. Each transformer layer contains a multi-head attention sub-layer, an addition and normalization sub-layer, a feed-forward sub-layer, and another addition and normalization sub-layer. The multi-head attention sub-layer ➎ consists of a parallel array of attention heads, each of which performs a linear projection of the embeddings using matrix multiplication. The matrices used in the linear projection are learned in the training process and effectively perform a coordinate transformation on the embedding vectors to make subsequent similarity comparisons more effective. The projections then go through another matrix multiplication that measures the similarity between a token and all the tokens that were generated before it. The outputs from the multiple attention heads are concatenated together and then usually linearly transformed to produce the combined output of the multi-head attention sub-layer. An Addition and Normalization (Add &amp; Norm) sub-layer ➐ follows the multihead attention sub-layer. The addition operator after each feed-forward sub-layer orattention sub-layer enforces a residual connection to help retain information from the original input. The normalization operator stabilizes the process and improves convergence by normalizing the resulting vectors to fit the desired numerical range of input values to the next layer. Its formula takes the mean (μ) and the standard deviation (σ ) of its input embedding vector elements and learned parameters (γ , β). The Feed-forward sub-layer ➏ typically consists of two linear transformations with a ReLU activation in between.4 Intuitively, the attention layers identify similarities/dependencies between tokens and produce new versions of the token embeddings based on similarity-weighted linear combination of token embeddings generated before them. The feed-forward sub-layers add semantic meaning to these new versions of the token embeddings. Another Addition and Normalization sub-layer follows the feed-forward sublayer to help retain the information from the original input to the feed-forward sub-layer and improve convergence while finalizing the output of the transformer layer. The number of transformer layers is referred to as the model depth and varies across LLMs. The attention heads, which perform large-scale matrix multiplications, are the most computationally expensive components of the transformer architecture and will be the focus of the remaining parts of this chapter. The Un-embedding layer ➑ converts the embeddings from the last transformer layer into probability distributions among tokens, which is used to generate the next output token. Model dimensions are critical for generating accurate answers. First, model depth specifies the number of transformer layers in the model. Deeper models provide levels of classifiers and thus can capture more general patterns of dependencies as explained in Appendix B. The second dimension of the model is the number of elements in each embedding vector, called head dimension. Wide embedding vectors, i.e., large head dimensions, capture more semantic information, disambiguate across different concepts, and identify more meaningful dependencies. The third model dimension is the number of heads in each attention sub-layer. These heads capture different types of dependencies between tokens. The size of the model in terms of the number of parameters is the product of the three model dimensions and can be very large, reaching billions or even trillions of parameters (i.e., model weights) in practice. While LLMs require long context for accurate responses, the user inputs are typically too terse and implicit to provide adequate contextual information. As a remedy, the user input is often extended with additional contextual information using a technique called retrieval-augmented generation (RAG). RAG enhances the generation of responses by retrieving relevant documents that provide more specific and up-todate contextual information and concatenate them with the user input to form a much larger, richer context for the LLMs.</p>
+<p>4 See Appendix B for the definition of ReLU and activation.</p>
+<p>During LLM training, the most relevant computation is large-scale matrix-matrix multiplication, which is performed by the attention heads and feed-forward sublayers and can take advantage of the advanced optimization strategies covered in Chapter 15. These matrix multiplications make the attention heads the most computationally expensive computational components of LLM models. We will elaborate on the design of attention heads and the nature of the matrix multiplications that they perform in Section 20.2.</p>
+<h2 id="sec-20-2">20.2 Multi-head attention<a class="td-heading-self-link" href="#sec-20-2" aria-label="Link to this heading"></a>
+</h2>
+<p>Each attention sub-layer contains multiple heads which collectively perform multiple classification tasks simultaneously and capture different types of dependencies such as positional (e.g., distance between tokens), semantic (e.g., synonyms or topics), contextual (e.g., connecting articles to names), and syntactic (e.g., connecting verb and object) dependencies. This specialization of attention heads happens during training. The weight matrices of different heads are initialized differently. Then, the gradient descent during back propagation avoids overlap between different heads and prevents overfitting by amplifying gradient variance with techniques such as dropout (i.e., randomly zeroing outputs/probabilities) and layer normalization (i.e., normalizing activations). Attention heads are independent of each other, so they can be easily concurrently computed over multiple thread blocks. They are identical in their design and thus we show the design of one head in this chapter. The computation of an attention head is illustrated in Fig. 20.2. It starts with input matrix X, whose rows correspond to the embedding vectors for the sequence of tokens generated by the LLM so far. Recall that this includes all the tokens generated from the system prompt, the user input, any system augmentation to the user input, and the output tokens. For the attention sublayer of the first transformer layer, each row of X contains an embedding generated by the Position Encoding component. For the attention sub-layer of a subsequent transformer layer, the input X is simply the output of the preceding transformer layer. The number of tokens generated so far, and thus the number of rows in matrix X, is referred to as the sequence length or context length and is represented by the symbol N for the remainder of this chapter. For example, in chatbot applications, N grows as the conversation between the user and the system progresses. Models that support large N provide token generation with longer contexts and are more reliable because the additional context information can be used to disambiguate terms and phrases, identify contextual relevance, maintain consistency across successive responses, etc. The attention sub-layers typically enforce a causality policy that the generation of the current token depends only on the tokens that were generated before, and ignores future tokens. The number of elements in each embedding vector, i.e., the head dimension, is represented by the symbol d. Thus, X is an N×d matrix. The head dimension and the number of heads in each sub-layer are often referred to as the hidden dimensions of FIGURE 20.2 Matrices (2D tensors) involved in the computation of an attention head. For simplicity, a scaling factor √1 that is multiplied to all elements of S = QK T is omitted from this figure d and those derived from this figure. Recall that d is the head dimension or the number of elements in each embedding vector. This scaling factor is applied to the elements of S to prevent the matrix multiplication results from becoming too large and causing converging issues for training processes based on gradient-descent methods. We will include the scaling factor in the CUDA implementations later in this chapter.</p>
+<p>an LLM as they are internal design parameters and are typically not exposed to the users of the LLM. The first computational step of an attention sub-layer is to calculate three matrices called the query (Q), key (K), and value (V) matrices. These matrices are obtained with linear projection or coordinate transformation of the row vectors of X, i.e., multiplying the input matrix X by three weight matrices, which we call WQ , WK , and WV , as shown on the left side of Fig. 20.2. These d×d coordinate transformation matrices are obtained from the training process.5 Mathematically, each element in a row of the Q, K, and V matrices is a linear combination of the d elements in the same row in X. The difference between the transformations performed on Q, K, and V is defined by the difference in the weight values of WQ, WK , and WV . The second step of an attention sub-layer is specified by Eq. (20.1) and illustrated on the right side of Fig. 20.2. QK T O = sof tmax( √ + M)V d (20.1)</p>
+<p>5 For simplicity, in this chapter, we assume that the weight matrices are square. In the general case, W , Q WK , and WV are, respectively, of sizes dx × dq , dx × dk , and dx × dv . However, as per QK T , dq isalways equal to dk .</p>
+<p>Since Q is an N × d matrix and K T (transposed matrix K) is a d × N matrix, the matrix multiplication QK T generates an N×N matrix, which we call S in Fig. 20.2. Element (i, j) of QK T is an inner product between a linearly projected embedding vector for token i (i.e., row i of matrix Q) and that for token j (i.e., column j of matrix K T or row j of K). Mathematically, an inner product calculates the cosine similarity between its two input vectors assuming that both vectors are of unit length, which can be enforced with the normalization mechanism. Recall that the more similar the two vectors, i.e., the smaller the angle between them, the larger the value of the cosine similarity. Therefore, the N×N product matrix is a map of similarity between embedding vectors. The scaling factor √1 is applied to all elements of S = QK T to prevent the dot d products of the matrix multiplication from growing too large for large head dimensions. Excessively large S elements may cause the softmax function to saturate and produce tiny (vanishing) gradients during training [1]. We omit the scaling factor from Fig. 20.2 as well as its associated discussions for simplicity. As we show later in this chapter, it is straightforward to incorporate the scaling factor into the CUDA implementation of the softmax function. T √ The mask matrix M adds −∞ to all elements of QK whose column indices are d greater than their row indices. This transformation enforces the causality policy that the generation of a token should not be influenced by the tokens that are generated after the token. The softmax function in Eq. (20.1) translates each row of QK T + M into a probability distribution. Let us denote element (r, c) at column c in row r of the QK T + M matrix as logit lr,c that the softmax function takes as inputs to generate probabilities pr,c , as Eq. (20.2) shows: elr,c elr,c −mr pr,c = ∑︁N = ∑︁N lr,j lr,j −mr j =1 e j =1 e (20.2)</p>
+<p>where mr is the maximum element value of row r. Note that lr,c can be large, so elr,c can overflow. For this reason, we subtract mr = maxN j =1 (lr,j ), from lr,c before applying the exponential function, which prevents the exponential function from overflowing and thus maintains numerical stability. Because the subtraction of mr from lr,c is equivalent to multiplying elr,c by e−mr and both the numerator and the denominator are multiplied by e−mr , the resulting p elements are mathematically equivalent. With the causality mask matrix, any logit element whose row index r is smaller than the column index c becomes −∞. This makes elr,c −mr = e−∞−mr = e−∞ = 0. That is, each row of the output matrix of P = sof tmax(QK T + M) in Fig. 20.2, is a probability distribution based on similarity between token r’s embedding vector in Q and those for the tokens that were generated before token r in K. All remaining elements of the row are 0s after softmax. That is, the N×N matrix generated by sof tmax(QK T + M) is a lower-triangular matrix where all elements with indices (r, c) are zeros if r &lt; c.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-3.png" alt="Figure 20.3" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.3.</strong> LLM stages: summarization and generation.</p>
+<p>The final step of the attention sub-layer is the matrix multiplication of the N × N probability matrix P and the V matrix. For each token, this matrix multiplication generates a new embedding vector where each element is a similarity/probability weighted sum of the same element of all embeddings in the V matrix. That is, the new embedding vector for each token in the output matrix O is a similarity-weighted sum of the embedding vectors of all previously generated tokens. The output O matrix then goes through the addition-and-normalization and feed-forward sub-layers to become the input matrix X for the next attention sub-layer. Inferencing with an LLM based on the decoder-only architecture in Fig. 20.1 starts with a summarization phase where the system prompt tokens, the user input tokens, and the system-augmented (e.g., RAG) tokens are concatenated to form the X input matrix of the first transformer layer. During the summarization phase, the matrices involved and the computation for each attention head are as shown in Fig. 20.2. The accumulated X matrix is fed to the transformer layers. Each transformer layer generates the input for the next transformer layer. Upon completion of the last transformer layer, the un-embedding layer is used to generate an output token as a text fragment. The next inference iteration starts the autoregression phase, which is also called the decoding phase or the generation phase. The generated output text fragment is fed to the tokenizer, appending the generated embedding vector to the X matrix of the first transformer layer, and activating the transformer layers to generate the next text fragment. Fig. 20.3 illustrates the two phases of LLM inference. During the summarization phase, the initial sequence of the system’s prompt as well as the initial user’s prompt is processed by the tokenizer and embedding layers and accumulated into the X matrix ➊. For simplicity, we omit the systems’ prompt and the typical preamble of the user input in this toy example. As shown in Fig. 20.3, the user wants the LLM to complete the title of this book by entering a prompt <code>The title of this book is Programming''. For simplicity, we assume that the LLM in this example uses entire words as tokens. Thus, during the summarization phase, the tokenizer layer, the embedding layer, and the position encoding layer accumulate the embedding vectors for the seven tokens generated from the user input into the X matrix of the first transformer layer. The LLM then invokes the first transformer layer whose completion activates the second transformer layer, etc. When activated, each transformer layer calculates its K, V , Q, QK T , and O before activating the next transformer layer. After all transformer layers and the final un-embedding layer complete their calculation, the LLM produces the first output token (</code>Massively&rsquo;&rsquo; in our example ➋). With the generation of the first output token, the LLM enters the generation phase. During the generation phase, each output token is generated based on the tokens of the initial prompt and the output tokens of all previous iterations. In our example, the token produced at the end of the summarization phase (<code>Massively'') becomes part of the input to the first iteration of the generation phase, which will produce the next output token. For each new output token, the LLM generates a corresponding new embedding vector (i.e., a new row of matrix X) that will go through the transformer layers ➌. At the end of the first iteration, we obtain a new output token (</code>Parallel&rsquo;&rsquo;), which will be the input of the next iteration of the generation phase ➎. The generation phase continues iterating until an end-of-sequence (EOS) token is generated ➏.</p>
+<h2 id="sec-20-3">20.3 Implementing attention in CUDA<a class="td-heading-self-link" href="#sec-20-3" aria-label="Link to this heading"></a>
+</h2>
+<p>Attention computation in the transformer architecture shown in Fig. 20.1 consists of two matrix multiplications, one matrix element-wise scaling, one matrix addition, and the softmax computation. The matrix multiplications can be performed with either custom CUDA matrix multiplication kernels or calls to the highly optimized GEMM functions in available libraries such as cuBLAS. The scaling factor √1 can be applied d to the QK T multiplication in the same custom kernel, or as the scaling factor α of cuBLAS’s GEMM API. The only new aspect of attention computation is the implementation of the softmax function. We will thus focus on the CUDA implementation of the softmax function and leave the rest as an exercise. Fig. 20.4 shows a CUDA kernel that fuses the matrix addition with M and the softmax computation within the same kernel. The fused kernel avoids an additional pass through its input S matrix before the softmax computation and improves the arithmetic intensity and thus GPU utilization. The execution configuration of this kernel (not shown in Fig. 20.4) is a 1D grid of thread blocks. The kernel assumes that the number of thread blocks (i.e., gridDim.x)</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-4.png" alt="Figure 20.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.4.</strong> A CUDA kernel implementation for the softmax function.</p>
+<p>is set to the number of rows in matrix S, i.e., the sequence length N. Both gridDim.y and gridDim.z are 0. This assumption limits the kernel to a context length that is less than or equal to the maximal number of thread blocks allowed in the x dimension. If a larger context length is needed, one can make the code more general by adding an outer loop to the kernel code so that the threads in the grid iterate until all rows of S are processed. Each thread block is assumed to be 1D with BLOCK_SIZE threads. BLOCK_SIZE is a compile-time constant that is set by the programmer. Since all threads in the block collaboratively process a row of S, one should choose a BLOCK_SIZE value that minimizes the number of expected iterations for a thread block to process its assigned row while maximizing the occupancy of the SMs in the GPU. With the scaling factor applied as part of the matrix multiplication QK T and the causality fused on the softmax, each S element of a row can be viewed as lr,c in Eq. (20.2). Lines 6-14 in Fig. 20.4 obtain the maximum element value in the row assigned to the thread block, i.e., mr in Eq. (20.2), and deposit it into local variablemax_val_row. In each iteration of the for loop in lines 7-8, each thread in the blockexamines one S element in a section of blockDim.x elements of the assigned row and update a thread-private variable max_val_thread. Note that the exit condition of the for loop in 7-8 is idx &lt;= blockIdx.x. This way, the code ignores row elements whose row index (blockIdx.x) is less than their column index (idx), which implements the causality policy without explicitly adding matrix M in Eq. (20.1), i.e., adding −∞ to all elements of S with column indices greater than their row indices. After the threads exit the for loop in lines 7-8, each thread holds a thread-private maximal value among the S elements examined by the thread. In line 10, all threads of the block synchronize to ensure that all completed examining their assigned S elements. In line 11, all threads in the block collaborate to obtain the maximum of the entire row by calling the BlockReduce function of the CUB library. The total reduction result is obtained by the thread with threadIdx.x == 0. Thus, this thread needs to share the result with all other threads via the shared memory variable max_or_sum (line 12). After synchronizing (line 13), all threads read max_or_sum (line 14). Note that the code in lines 7-14 is essentially a reduction with thread coarsening, which we already introduced in Chapter 10. Next, lines 15-23 obtain the denominator of Eq. (20.2). In lines 16-17, the threads calculate a thread-private sum. The exit condition of the for loop implements the causality policy. After synchronizing (line 19), CUB’s BlockReduce function computes the total sum for the row. In lines 21-23, thread 0 broadcasts the final sum result via max_or_sum in shared memory. As we have mentioned above for the max reduction, lines 15-23 implement a sum reduction with coarsening, similar to the one covered in Chapter 10. Finally, lines 24-25 calculate the softmax output for each element of S and store them in memory (in output matrix P). Note that this for loop iterates over all elements of a row, and those elements with column index greater than row index are set to 0, per the causality policy. The denominator is also stored in output vector D (line 27) for reuse during training. In summary, the softmax kernel in Fig. 20.4 implements the causality policy and the softmax function within one kernel. No global barriers are needed (i.e., no additional kernel for adding M); only the block-level __syncthreads() barrier is used. The reader is encouraged to complete the implementation of the attention sub-layer by adding the matrix multiplication for generating S and the matrix multiplication for generating O.</p>
+<h2 id="sec-20-4">20.4 KV caching<a class="td-heading-self-link" href="#sec-20-4" aria-label="Link to this heading"></a>
+</h2>
+<p>The transformer architecture shown in Fig. 20.1 has an obvious inefficiency, if it is implemented in the straightforward way that Fig. 20.3 illustrates. In each iteration, five matrix multiplications are performed in each transformer layer. Since the sequence length N can grow to the level of tens of thousands of tokens or more, these matrix multiplications can be very expensive. Since there is only one additional row FIGURE 20.5 Optimization opportunities for reducing the matrix multiplication work from one LLM iteration to the next.</p>
+<p>in the input matrix X from one iteration of the decoding phase to the next, one should ask if we really need to perform full matrix multiplications in every iteration. The answer is no. Fig. 20.5 highlights the new parts of each matrix generated from iteration i (N = i) to iteration i + 1 (N = i + 1). For input matrix X, one new row, i.e., the embedding vector of the new token, is attached to the bottom, which increases the dimensions of X from N×d to (N + 1)×d. The effect of this new row of X on Q, K, and V is straightforward. Each of them becomes an (N + 1)×d matrix. The new row in the bottom of each matrix is generated by performing a vector-matrix multiplication between the new bottom row of X and WQ , WK and WV , respectively. The step of generating QK T is a bit more complicated. The new product is an (N + 1) × (N + 1) matrix. The contents of the matrix are largely the same as the previous iteration, except for the (N +1)th row and the (N +1)th column (highlighted with darker color in Fig. 20.5). For example, element (0, 0) of the product matrix is generated with an inner product between the 0th row of Q and the 0th row of K (i.e., the 0th column of K T ). Note that both of them are the same as the previous iteration so there is no change in the element (0, 0) of the product matrix. In general, the value of any element (r, c) of QK T remains the same as the previous iteration as long as both r and c are less than N since the element is generated from rows of Q and K that remain the same as the previous iteration. The new N th row of QK T is calculated as a vector-matrix multiplication between the (new) N th row of matrix Q and matrix K T . The new N th column of QK T consists of all zero elements because of the zero-masking performed under the causality policy: the tokens generated by the LLM should not be influenced by the token generated after them. The only exception is the N th element of the N th column. This element value is not zero and is covered by the generation of the new N th row.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-6.png" alt="Figure 20.6" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.6.</strong> Vectors and matrices involved in the generation phase of the attention computation with KV caching.</p>
+<p>The output of the softmax function can also be incrementally updated from the previous iteration. Recall that softmax is applied to each row of the QK T matrix. Since the new N th element of each row (except for the new N th row) is 0, these new elements do not impose any change to the elements in these rows from iteration N to iteration N + 1 as they do not dilute any of the probabilities from these previous elements. The reader should verify that all first N (0th through (N − 1)th ) rows of the O matrix in iteration N + 1 remain the same as the previous iteration. One simply needs to perform a vector-matrix multiplication between the new row of sof tmax(QK T ) and the new V . The vectors and matrices involved in generating the new parts of Q, K, V , and O are shown in Fig. 20.6. Note that for each iteration, a multi-head attention sub-layer only needs to receive one new row of X. Therefore, each of them only needs to deliver a new row of its output O to the next layer. Note that the attention computation during the generation phase still requires the entire K and V . This requirement can be met by memoizing K and V (i.e., storing and reusing later) in the form of the so-called KV cache,6 which is a common optimization of attention sub-layers.</p>
+<p>6 Note that the term KV in LLM inference should not be confused with the term key-value in the key value store literature but they are analogous terms. LLM inference produces an output that is a weighted sum of values (V), where the weight is proportional to how close a query (Q) and the keys (K) are [1].</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-7.png" alt="Figure 20.7" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.7.</strong> LLM stages: summarization and generation with KV caching.</p>
+<p>Fig. 20.7 revises Fig. 20.3 to illustrate the two phases of LLM inference with KV caching. In order to avoid recomputation in each iteration of the LLM inference, the K and V generated by each transformer layer are entered into the layer’s KV cache to be reused for the generation of future tokens. During the summarization phase, all transformer layers generate their initial K and V matrices and fill their KV caches ➊. With KV caching, the summarization phase is also called the prefill phase as the transformer layers prefill their KV caches with the initial contents of their K and V matrices during this phase. Then, during the generation phase, each output token is generated based on the last output token as well as the K and V matrices of all previous iterations. The last generated text fragment is used to obtain a new embedding vector that is fed to the first transformer layer ➋. In each transformer layer, three vector-matrix multiplications are first performed to generate one new row for Q, K, and V respectively. These new rows are shown as vectors Q′ , K ′ , and V ′ in Fig. 20.6. The LLM attaches these new rows to the K and V matrices from the previous iteration in the KV cache ➌ to form the new K and V matrices for the current iteration and use them to calculate O’ and send it through the rest of the layer to generate the new input vector for the next transformer layer. It should be clear to the reader that the prefill (summarization) phase still requires one transformer pass for a large number of tokens and invokes several large matrix-matrix multiplications (GEMMs). It is typically compute-bound (high arithmetic intensity) and can achieve high GPU utilization. In Section 20.5, we present flash attention, a technique to further improve the speed of the prefill phase by reducing the consumption of global memory bandwidth during the transitions between these matrix multiplications and the softmax operation.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-8.png" alt="Figure 20.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.8.</strong> Tiling approach used in flash attention. Note that we use the same tile in shared memory S_i to store the tile of P.</p>
+<p>In contrast, the generation phase invokes one transformer pass per output token. With KV caching, each pass performs mostly vector-matrix multiplications (GEMVs) and is typically memory bandwidth bound (low arithmetic intensity). Thus, it tends to under-utilize the GPU compute resources. In Section 20.6, we introduce some optimization techniques to increase the arithmetic intensity of the generation phase (namely, batching and speculative decoding).</p>
+<h2 id="sec-20-5">20.5 Flash attention<a class="td-heading-self-link" href="#sec-20-5" aria-label="Link to this heading"></a>
+</h2>
+<p>The reader may observe that the implementation of attention with a separate softmax kernel, as the one presented in Fig. 20.4, implies global barriers at kernel boundaries as well as several loads/stores of entire matrices from/to the global memory. These global barriers and global memory accesses create a major performance bottleneck that the flash attention formulation [6] alleviates. Flash attention mathematically reformulates the attention heads so that the operations in each attention head can be reordered and fused into a single kernel, and reorganized in a tiled manner. Within the fused kernel, as shown in Fig. 20.8, each thread block takes a horizontal panel (contiguous rows) of Q ➊, the entire K T ➋, and the entire V ➑ to compute their contribution to a horizontal panel of O ➏. The inputs and output for each thread block are shaded gray in Fig. 20.8.</p>
+<p>Furthermore, flash attention enables each thread block to iterate through the K T and V matrices in a tiled manner while calculating their contribution to the O tile. These tiles are illustrated in Fig. 20.8 and they are small enough to fit into the onchip memory. In each iteration, each thread block loads a vertical panel (contiguous columns) of K T ➋ and a horizontal panel of V ➑ to compute their contribution to the O tile. All thread blocks execute in parallel, without any global barrier. This iterative approach allows the kernel to keep all intermediate matrices ➌➎ only in the on-chip memory in tiled form and eliminate the global memory traffic for these intermediate matrices. Flash attention is an exact reformulation of the attention mechanism in transformers. It is mathematically identical to the original formulation. flash attention is applicable to training (both forward pass and backward pass) and inference (forward pass). In this chapter, we focus on the forward pass. The backward pass is conceptually simpler because it does not require softmax rescaling, but it requires five matrix multiplications while the forward pass requires only two. For details on applying flash attention to the backward pass, we refer the reader to the original flash attention paper [6]. The key idea of flash attention is tiling. However, tiling in attention head implementations is not as straightforward as in matrix multiplication, because the formulation of softmax in Eq. (20.2) requires multiple passes through each row of its input. The reason is that the computation (see Eq. (20.2)) depends on mr , which is the maximum ∑︁ of all values in a row r of the matrix that results from QK T + M, and the sum lr,j −mr , which is used as the denominator when generating p elements Dr = N j =1 e in Eq. (20.2). With this formulation, one would need to scan through the row at least once to gather both the max value and the sum before doing another pass to calculate the elements of the row in the output P . We would need a global barrier synchronization to ensure that all elements of the QK T + M matrix are available before calling the softmax kernel. In CUDA, a global barrier synchronization can be done by terminating a kernel and launching a new one. Alternatively, one could launch a persistent grid and use grid-level cooperative group synchronization API to avoid kernel call overheads. However, good thread grid configurations for matrix multiplication are likely different from those for the softmax operation. This is an important reason for launching separate kernels, each with its own grid configuration, for matrix multiplications and the softmax in the baseline CUDA implementation of the transformer architecture. However, regardless of which global synchronization strategy we choose, the multiple passes through the rows of S of the softmax incurs global memory traffic that can significantly limit the throughput of our implementation. Fortunately, we can remove the need for multiple passes of softmax through entire rows of S by defining a partial series for the denominator, as Eq. (20.3) shows: Dr,A = ∑ j ∈Aelr,j −mr,A (20.3)</p>
+<p>where A is a subset of column positions in row r. Note that when A encompasses all column positions of row r, Dr,A is equal to Dr . If we can derive a composition rule for merging the partial series for A with the partial series for another subset of column positions B into a partial series for subset A ∪ B, we have a path to compute the partial series for subsets independently (potentially, in parallel) and simply merge them together as they become available [7]. Once the merged subset contains all column positions of the row r, we have the correct value for Dr . Eq. (20.4) shows the composition rule for merging Dr,A and Dr,B into Dr,A∪B : ∑ Dr,A∪B = elr,j −mr,A∪B = j ∈A∪B ( ∑ ∑ elr,j −mr,A∪B + j ∈Aelr,j −mr,A )emr,A −mr,A∪B + ( j ∈A ∑ ∑ elr,j −mr,A∪B = j ∈Belr,j −mr,B )emr,B −mr,A∪B = j ∈B Dr,A emr,A −mr,A∪B + Dr,B emr,B −mr,A∪B (20.4)</p>
+<p>where mr,A∪B is the larger one between mr,A and mr,B . Note that the second step of the derivation is correct as long as A and B do not have common elements. With this composition rule, we can easily merge two partial series sums as long as we also keep the maximal values with each subset, i.e., mr,A and mr,B . In the CUDA implementation of flash attention that we present below, the subsets A and B are tiles of each row of matrix S, and are guaranteed to have no common elements. Flash attention [6] takes this approach one step further: it applies the composition rule to the output matrix O as well. Let’s first focus on the computation of an O matrix element or,c , which is an inner product between row r of P and column c of V . We express the contribution of the subset A of row r to or,c as or,c,A in Eq. (20.5): or,c,A = ∑ pr,j,A vj,c = j ∈A 1 ∑ lr,j −mr,A e vj,c Dr,A (20.5)</p>
+<p>j ∈A</p>
+<p>where pr,j,A is defined as the intermediate value of the P matrix element pr,j when considering only the subset of elements in A. Similarly, mr,A is defined as the maximal value among the elements in A, not the entire row. The difference between pr,j,A and pr,j is that the denominator and the maximal value are both based on only the elements in A, not all the elements in row r. As more elements are merged into A, it will eventually contain all elements of row r. The following composition rule is derived to guarantee that pr,j,A will become pr,j when A contains all elements of row r. or,c,A∪B = ∑ j ∈A∪Bpr,j,A∪B vj,c = ∑ elr,j −mr,A∪B vj,c Dr,A∪Bj ∈A∪B = ∑ elr,j −mr,A∪B j ∈A = ∑ elr,j −mr,A∪B +mr,A −mr,A Dr,A∪Bj ∈Aj ∈A = Dr,A∪B Dr,A Dr,A Dr,A∪Bj ∈Bvj,c + vj,c + vj,c + Dr,A∪Bvj,c ∑ elr,j −mr,A∪B +mr,B −mr,B Dr,A∪Bvj,c ∑ elr,j −mr,A∪B +mr,B −mr,B Dr,B j ∈B ∑ elr,j −mr,A emr,A −mr,A∪B Dr,A j ∈A ∑ elr,j −mr,Bj ∈B ∑ elr,j −mr,A∪B +mr,A −mr,A Dr,A = = Dr,A∪Bvj,c + Dr,A∪B Dr,B ∑ elr,j −mr,B emr,B −mr,A∪B Dr,B j ∈B Dr,B Dr,A∪Bvj,c vj,c Dr,A emr,A −mr,A∪B ∑ elr,j −mr,A Dr,B emr,B −mr,A∪B ∑ elr,j −mr,B vj,c + vj,c Dr,A∪B Dr,A Dr,A∪B Dr,B = Dr,Aj ∈A m −m ∑ r,A r,A∪B e Dr,A∪Bj ∈Apr,j,A vj,c + Dr,Bj ∈B m −m ∑ r,B r,A∪B e Dr,A∪Bpr,j,B vj,cj ∈B Dr,A emr,A −mr,A∪B Dr,B emr,B −mr,A∪B = or,c,A + or,c,B Dr,A∪B Dr,A∪B (20.6)</p>
+<p>where or,c,A and or,c,B are versions of the or,c that account for the contributions of subsets A and B of row r of P . In particular, the Dr and mr values used to calculate these P element values in these subsets also only account for their respective subset elements. Thus, the composition rule calls for rescaling or,c,A and or,c,B before merging them into or,c,A∪B , as shown in the final step of the derivation in Eq. (20.6). While the composition rule in Eq. (20.6) applies to any subset of a row of P , it is especially useful when the subset is a contiguous segment of P that is generated from tiles of Q and K T . Fig. 20.8 illustrates the flash attention tiling approach [8] that is enabled by the composition rule. Fig. 20.9 shows a kernel that implements this tiling approach. The code corresponds to the computation of the forward pass of the attention layer of one head. The entire grid is involved in this computation. In a more complete implementation, multiple heads can be computed in the same kernel by launching additional dimensions of thread blocks in the grid. The same tiling approach also applies to the summarization phase in LLM inference. The code in Fig. 20.9 computes on 32-bit floating point values, but state-of-the-art implementations typically operate on 16-bit floating point (half precision) or even 8-bit floating point values. Such implementations can benefit from the sheer performance of GPU tensor cores. The flash attention kernel code assumes that the input matrices Q, K, and V are of dimensions N × d, as shown in Fig. 20.8. The host code (not shown and left as an exercise) allocates global memory space, initializes the contents of these matrices in the global memory and passes them by reference as kernel arguments. The host code also allocates space in the global memory for the output matrix O (out_O in the code in Fig. 20.9) whose contents will be generated by the execution of the kernel. The FIGURE 20.9 A CUDA kernel implementation of the forward pass of flash attention [8].</p>
+<p>kernel generates an N-element output vector D (out_D in the code). Each element of D contains the final value of the denominator used to calculate the probability values in a row of P. This output vector is needed for training, not inference, and is included in the kernel code so that the kernel can be used in training as well.</p>
+<p>At the high level, the flash attention kernel is designed to be executed by a 1D grid of thread blocks, i.e., only the x-dimension is used. Each block is responsible for generating a horizontal panel (a tile of a contiguous collection of rows) ➏ of the output matrix O. The horizontal dimension of the output tile is d, the width of the attention head. The vertical dimension of the output tile, i.e., the number of rows in the horizontal panel, is specified by B_r whose value is set to maximize the level of data reuse in the on-chip memory as limited by the amount of on-chip memory available as well as the number of thread blocks needed to fully utilize the GPU. The value of B_r_warp is B_r divided by the number of warps per thread block. The outer-most for loop in line 16 ensures that all O panels are generated. In each iteration, every thread block processes one panel of Q and generates one panel of O. Thus, all blocks in the grid collectively generate gridDim.x panels of O in each N iteration of the for loop. All thread blocks iterate until all the T_r = B_r (line 10) panels of O are generated. For each panel of Q, its designated thread block generates the corresponding O tile in three conceptual steps that the code in Fig. 20.9 shows between lines 25 and 40. First, each thread block performs a matrix multiplication between a B_r × d horizontal panel of Q ➊ and the entire KT matrix ➋ to generate a B_r × N horizontal panel of S ➌. The code of the device function compute_S_and_max() (line 31) is in Fig. 20.12. We will discuss it shortly. In the second step, the S panel is translated by softmax into its corresponding B_r × N horizontal panel of P. The code of the device function compute_P_and_update_D() (line 35) is in Fig. 20.15. The P panel is then multiplied with the entire V matrix to generate its B_r × d output tile of O. The code of the device function compute_O() (line 37) is in Fig. 20.13. As we discussed at the beginning of this section, a naive implementation of these three steps could use three kernels. These kernels would write and read S and P to and from the global memory, resulting in low arithmetic intensity as well as kernel invocation overhead. The flash attention formulation in Eq. (20.6) allows the three conceptual steps to be fused into one kernel and performed in a piece-meal, iterative manner in on-chip memory, which eliminates the need to materialize S and P in the global memory as well as the corresponding undesirable global memory traffic. We will apply both shared memory tiling and register tiling to matrix-matrix multiplication, which take advantage of the bandwidth of both the register file and the shared memory. We will choose registers for Q and O tiles and the shared memory for K T , S/P , and V tiles. Line 14 of the code declares S_i in the shared memory to hold both the input S and output P tiles of softmax. Lines 13 and 15 allocate space in shared memory for panels of the input matrices, KT_j and V_j, as illustrated in Fig. 20.8. In lines 17-21, each thread allocates registers for values of the row maximum (i.e., m_i ➍ in Fig. 20.8), the denominator of the softmax (i.e., D_i ➍ in Fig. 20.8), and the output (O_i), and the device function called in line 21 initializes them. We leave the implementation of this device function as an exercise for the reader. Line 22 allocates registers for Q_i and the device function load_Q() (line 24) loads the corresponding panel from global memory. Note that the total number of registers needed to host FIGURE 20.10 Flash attention: device function to load Q into registers.</p>
+<p>the tiles of Q and O, as well as D_i and m_i, is determined by the dimension d and B_r. Furthermore, each thread only holds a portion of these tiles and exchange the elements with each other through the warp-shule API. As shown in Fig. 20.8, each panel of Q ➊ for a thread block is further divided into sub-panels of size B_r_warp × d. Each sub-panel is assigned to a warp in the thread block. The device function load_Q() that loads a sub-panel of Q into registers is shown in Fig. 20.10. Within a sub-panel, each row ii is assigned to the threads in the warp in an interleaved manner (note that in this device function and later ones in this chapter, we use the device functions laneIdx() and warpIdx() defined in Chapter 10). That is, a row is divided into sections of WARP_SIZE elements. The elements of a section are assigned sequentially to the threads in the warp. This way, each section of the Q rows can be loaded by the warp in a coalesced manner. With this arrangement, each thread holds B_r_warp × (d/WARP_SIZE) elements of Q in its registers. For simplicity, we assume that d is a multiple of WARP_SIZE for our example kernel. Interested readers are encouraged to extend the kernel to handle arbitrary d values.7 For simplicity, let us first ignore softmax. Without softmax, it is conceptually easier to fuse the three steps of each thread block. In a fused kernel, the thread blocks take an iterative approach to performing the two conceptual matrix multiplications. Each thread block loads its Q tile into registers (line 24) and initializes its O tile elements to zero by calling device function initialize() in line 21 before going into the iterative process that implements the two conceptual steps (matrix-matrix multiplications) in a tiled manner. The iterative process for a thread block to perform the two conceptual matrix multiplications has two levels: the block level and the warp level. Each iteration at the block level is an iterative process at the warp level. At the block level, each thread 7 This distribution of Q corresponds to the second version of flash attention [8]. It is different from thefirst version [6] that distributes K and V across warps (a scheme called split-K), which is inefficient because warps need to write intermediate results to shared memory, synchronize, and reduce them. In the second version [8], warps do not need to exchange any intermediate data with each other. All data exchanges are between threads within the same warp.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-11.png" alt="Figure 20.11" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.11.</strong> flash attention: device function to load KT and V into shared memory.</p>
+<p>block starts from the left end of KT ➋ and the top of V ➑. All thread blocks iterate from left to right for KT and from top to bottom for V. Each iteration covers B_c columns of KT and B_c rows of V. Since there are N columns in KT and N rows in V, each thread N block will take T_c = B_c (line 11) iterations to complete the process. Each iteration requires a merge operation on all elements in the block’s O tile. Therefore, the value of B_c is set by the host code to minimize the number of iterations and thus the number of merges required to produce the O elements (Eq. (20.6)). The value of B_c is constrained by the available shared memory. For simplicity, we only allow B_c value to be multiples of WARP_SIZE, which avoids the need for checking boundary conditions or data padding. The reader is encouraged to extend the code to allow more general B_c values. In a block-level iteration, each block starts by loading B_c columns of KT ➋ and T B_c rows of V ➎ into the shared memory (lines 27-28). These are the tiles of K and V to be used by the block for the iteration. The device function load_KTV() called in line 27 is shown in Fig. 20.11. For efficiency, we load the tile of KT from K in a transposed manner (line 4). To avoid shared memory bank conflicts, we pad each column of KT_j when allocating it in the shared memory in line 13 of Fig. 20.9. With padding, the index used in each access to KT_j is transformed by the addr(x) = x + (x » LOG_NUM_BANKS) introduced in Chapter 16. The barrier synchronization in line 28 of Fig. 20.9 ensures that all the tiles are in place before proceeding with the first matrix multiplication. The generation of each O tile is implemented by the nested for loop from line 29 to 38 as a warp-level iterative process. The reader should refer to Fig. 20.8 for better understanding of the code. In an iteration, each warp of the block takes a row of its Q sub-panel ➊, performs a vector-matrix multiplication between the row and the current panel of KT ➋ to generate the corresponding row of S_i ➌ (compute_S_and_max() in line 31), uses softmax to transform the row of S_i into a segment of P in place ➎ (compute_P_and_update_D() in line 35), and performs a vector-matrix multiplication between the row of S_i and the current panel V ➑ to generate a subset contribution to be merged into its panel of O ➏ (compute_O() in line 37). Since we are ignoring the softmax step for now, we will focus on the two vector-matrix multiplications.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-12.png" alt="Figure 20.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.12.</strong> flash attention: device function to compute a tile of S and its maximum.</p>
+<p>For the first vector-matrix multiplication, the kernel calls compute_S_and_max(), which Fig. 20.12 shows. The current panel of KT is further divided into sub-panels of WARP_SIZE columns each. The for loop in line 5 iterates through the sub-panels. In each iteration, each thread in the warp performs an inner product between the current row of the warp’s Q sub-panel and a column of the current KT sub-panel (lines 7-10 in Fig. 20.12). The columns of the KT sub-panel are assigned to the threads in the warp sequentially. Thus, in each iteration of the for loop, the warp performs a vectormatrix multiplication between the current row of the Q sub-panel and a d × WARP_SIZE T K sub-panel. The result of the iteration is a segment of WARP_SIZE elements in the corresponding row in the S tile (see ➌ in Fig. 20.8). In each iteration of the for loop in line 5 of Fig. 20.12, each thread executes the for loop in line 7 to sequentially perform an inner product. In each iteration, all threads in the warp need the same Q element to multiply with their respective KT elements. Recall that the row of Q elements is stored in an interleaved manner in the registers of threads in the warp (➊ in Fig. 20.8). Thus, each in iteration, the thread who has the Q element for that iteration broadcasts the element to all other threads in the same warp using the __shfl_sync() intrinsic function in line 8. Line 13 implements the causality policy. It compares the row index and the column index in the entire S matrix. If the column index is greater than the row index, we store −∞ in the corresponding shared memory position. If not, we multiply the element S_ij by a scaling factor ( √1 ) and dstore the result into the S tile element in the shared memory (line 14).8 8 Note that the shuffle instruction in line 8 broadcast a value of Q from one thread register to threads in the warp. This implementation of matrix multiplication uses tiling in shared memory and registers, but it FIGURE 20.13 flash attention: device function to compute O.</p>
+<p>Since we are ignoring softmax for the moment, we will skip to line 37 of Fig. 20.9. In this line, the kernel calls the compute_O() device function, which is shown in Fig. 20.13. This device function consists of a nested for loop where each warp multiplies its current row of S_i with the sub-panel of V to produce their contribution to the elements in the output tile of O. This is performed as a warp-level iterative process similar to the first vector-matrix multiplication (Fig. 20.12). In the outer for loop (line 2 of Fig. 20.13), the warps iterate through the sub-panels of V. In each iteration of the outer for loop, all threads in the warp collectively perform a vector-matrix multiplication between the row of S_i and the current sub-panel of V. Each thread executes the inner for loop (line 5) to perform an inner product between the row of S_i and a column of V. Note that each element of the output matrix O is an inner product of one full row of the S matrix and one full column of the V matrix. Each row in the S tile and column in the V sub-panel only accounts for a B_c section of the inner product for one O element. Thus, the warp accumulates the vector-matrix multiplication result between the S_i row and the V sub-panel into the elements of the O tile at the end of each block-level iteration (line 8 of Fig. 20.13). At the exit of the for loop in line 29 of Fig. 20.9, each warp completes an iteration of the block-level iterative process. Each warp has completed the contribution of its assigned sub-panel of Q, the current sub-panel of KT , and the current sub-panel of V to its assigned sub-panel of O. We are now ready to add softmax back into each iteration. After generating each row of S_i, all threads in a warp collaborate to derive the maximum of the row (m_i) and the denominator of the row (D_i) ➍. The thread block then uses m_i and D_i to obtain a P row ➎, by applying the softmax function to the row of S_i ➌. The S_i could benefit from more sophisticated optimizations (e.g., hierarchical tiling, tensor cores) as shown in Chapter 15.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-14.png" alt="Figure 20.14" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.14.</strong> flash attention: device function to update m and D.</p>
+<p>elements can be updated into the corresponding P elements in the shared memory. The P row is then multiplied with the V sub-panel and merged into the O tile ➐, using the composition rule in Eq. (20.6). Lines 15-18 of Fig. 20.12 compute the maximum of the S row. First, each thread obtains the current maximum of the S elements that it has computed (line 15). Second, we use CUB’s WarpReduce to compute the maximum inside a warp in line 17. Third, because only thread 0 of a warp receives the result of WarpReduce, the shuffle instruction in line 18 broadcasts the maximum to all threads of the warp. Each thread of the warp saves the maximum in curr_max_warp (line 31 of Fig. 20.9) and call update_m_and_D() (line 33), which is a device function that is shown in Fig. 20.14. This function updates the maximum and the denominator of the row. Inside update_m_and_D() (Fig. 20.14), the threads save the current row maximum m_i into last_m (line 2), and update it if the maximum curr_max_warp calculated for the row is greater than m_i[ii] (line 4). Note that these three values correspond to mr,A (last_m), mr,B (curr_max_warp), and mr,A∪B (m_i[ii]) in Eqs. (20.4) and (20.6), where A is the previous subset of column positions in an S row, and B corresponds to the new subset (i.e., the results of the last matrix multiplication). Next, line 6 computes the term Dr,B emr,B −mr,A∪B of Eq. (20.4). After updating the maximum and the denominator, the threads call compute_P_and_update_D() in line 35 of Fig. 20.9. Fig. 20.15 shows the code of this device function. This function computes the exponential step of softmax and applies the causality policy (line 8) stores them in S_i in shared memory ∑︁(line 9), and accumulates them into D (lines 10-14). This corresponds to the sum j ∈B elr,j −mr,B in Eq. (20.4). In line 10, each thread accumulates the exponentials that it has computed into curr_sum. Line 12 computes the sum reduction in a warp using CUB’s WarpReduce. The subsequent shuffle instruction (line 13) broadcasts the reduction result to all threads of the warp, since they will need to use the denominator for the calculation of their O elements. Line 14 updates the denominator D_i[ii]. Each element or,c should receive contributions from all elements of row r of P. However, each element of the matrix multiplication between the P tile and the V tile FIGURE 20.15 flash attention: device function to compute P and update D.</p>
+<p>only carries the contributions from a segment of the row. Thus, one needs to scale the current content of the O tile elements, i.e., A in Eq. (20.6), and the matrix multiplications results, i.e., B in Eq. (20.6), using Eq. (20.6) before accumulating the matrix multiplication result into the output tile. The compute_O() device function, called in line 37 of Fig. 20.9, performs the merge operation that corresponds to Eq. (20.6). This function is in Fig. 20.13 and we discussed the vector-matrix multiplication of S_i and V above. To perform the merge operation, line 3 multiplies O_i[ii][ddd] by exp(last_m - m_i[ii]), which corresponds to the numerator of the first addend of the equation. As we discussed above, the inner for loop (line 5 of Fig. 20.13) performs the inner product between the row of the S_i and a column of V and merges the second addend of the equation. Note that the new contributions are computed based on the maximal of all S elements up to the new row in line 8 of Fig. 20.15. There is no need to rescale these P elements when merging them into O. At the end of the iterative process for a thread block, its output tile contains the full contributions from the conceptual S and P matrices although they were never fully generated and only existed in tiled form in the shared memory. In line 42, the threads call the store_O device function, which stores the output tile O_i and the denominators of softmax D_i into out_O and out_D in global memory. This function is shown in Fig. 20.16. Note that we divide the output values by the denominator, same as in Eq. (20.6), right before storing into global memory (line 6). Note that the iterative process described in this section is only one of the many possibilities. One would use a different process, for example, if the tensor cores are used to compute the two matrix multiplications performed by each warp. We encourage interested readers to explore these potential variations.</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-16.png" alt="Figure 20.16" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.16.</strong> flash attention: device function to store O and the denominator into global memory.</p>
+<p>The flash attention kernel in Fig. 20.9 applies to the baseline transformer implementation without KV caching. It also applies to the prefill phase of inference with KV caching. For the generation (decode) phase, with KV caching, Q, S, P , and O matrices become vectors Q′ , S ′ , P ′ , and O ′ . Thus, the computations inside a single head change from matrix multiplications to vector-matrix multiplications. To maintain a similar work distribution to that in Fig. 20.8, we can batch multiple requests, i.e., multiple Q_i, into a single matrix. We will discuss batching in the next section. The most recent version of flash attention [9] takes advantage of new capabilities of the Hopper GPU architecture for an additional performance boost. These capabilities are (1) the Tensor Memory Accelerator (TMA), which can asynchronously move tiles from global memory to shared memory for use by the tensor cores without involving compute threads, (2) the tensor core WarpGroup-wide Matrix Multiply Accumulate (WGMMA) instructions, which are asynchronous in contrast to prior architectures, and (3) FP8 precision of the tensor cores. By using warp specialization, this flash attention version achieves better overlap of data movement and computation, and hides softmax execution with asynchronous block-wise GEMMs.</p>
+<h2 id="sec-20-6">20.6 KV cache arithmetic intensity and memory requirement<a class="td-heading-self-link" href="#sec-20-6" aria-label="Link to this heading"></a>
+</h2>
+<p>Fig. 20.2 illustrates the generation of the K and V matrices during the prefill phase of an LLM inference with KV caching. K and V elements are calculated and cached in memory. Then, during the generation phase (Fig. 20.6), one new row of K and one new row of V are generated for each new token and appended to the KV cache. These K and V rows are generated with vector-matrix operations, which have low arithmetic intensity and underutilize GPU compute resources (see Chapter 5). For this reason, there are a number of optimizations, such as batching and speculative decoding that aim to increase the arithmetic intensity of the generation phase. Batching is a common optimization in all types of DNNs, and has traditionally been used to increase their arithmetic, i.e., computational, intensity. For example, a FIGURE 20.17 Batching in LLM inference.</p>
+<p>linear layer with 1024 inputs and 4096 outputs (in 16-bit precision) has a very low arithmetic intensity of 1 floating point operation per byte (FLOPS/B) when the batch size is 1, but its arithmetic intensity increases to 315 FLOPS/B with batch size 512.9 The increased arithmetic intensity is due to the reuse of weights across input vectors. Such a high arithmetic intensity is critical for high GPU utilization. However, LLMs impose a tradeoff between batch size and context length (i.e., KV cache size). In LLM inference, since input queries from multiple users use the same model (e.g., in a chatbot LLM), the weights can be shared among them. This increases the utilization of the GPU in different parts of the computation. For example, the left part of Fig. 20.17 illustrates batching in the fully-connected layers that generate matrices Q, K, and V . Batching increases the arithmetic intensity of the QKV projection by as many times as the batch size. However, note that the KV cache is dependent on the user’s prompt and context. Thus, attention layers do not benefit from batching because they need to maintain and access separate KV caches for different user’s conversations. As a result, batching in LLMs is limited due to the memory requirements of the model weights and the KV cache. Let’s analyze the memory requirements of LLM inference with KV caching and batching. The two main contributors are the model weights (e.g., matrices WQ, WK , and WV ) and the KV cache. The memory size of the model weights depends on the number of parameters of the model (typically, an order of magnitude of several 9 This is the theoretical increase of the arithmetic intensity. In practice, it depends on the tile size used for the implementation.</p>
+<p>billions). For example, a model with 7 billion parameters loaded in 16-bit format (FP16 or BF16) takes about 14 GB. Interested readers are referred to the literature for details on the memory requirements of model weights (e.g., [10,11]). The size of the KV cache depends on the number of transformer layers (l) and the hidden dimension. Recall that the hidden dimension is defined as the product of number of (attention) query heads (hq ) and the embedding dimension (d). Eq. (20.7) shows the size of the KV cache per token in bytes for multi-head attention (MHA). Note that we multiply by 2 to include both K and V matrices. p is the precision in bytes. KV _cache_size_MH A = 2 × l × hq × d × p (20.7)</p>
+<p>To estimate the memory requirements in a real scenario, we need to consider the KV cache size across all tokens of the sequences in a batch. Eq. (20.8) show the total size of the KV cache across a batch of b sequences of a certain length N. T otal_KV _cache_size_MH A = b × N × 2 × l × hq × d × p (20.8)</p>
+<p>For example, let us find the total KV cache size in 16-bit precision for 1 sequence of 4096 tokens for different example LLMs. For the PaLM 2 LLM from Google, the total KV cache size is 1 × 4096 × 2 × 64 × 8192 × 2 = 8 GB, where 64 is the number of transformer layers (l) and 8192 is the hidden dimension (hq × d). For the GPT-3 LLM from OpenAI, the total size is 1 × 4096 × 2 × 96 × 12288 × 2 = 18 GB. For the Llama 2 7B LLM from Meta, the total size is 1 × 4096 × 2 × 32 × 4096 × 2 = 2 GB. With such large KV cache sizes, memory requirements for batching multiple queries in LLM inference can easily exceed the memory capacity of a single GPU. As a result, multi-GPU and multi-node systems are commonly necessary for LLM inference. Note that in the previous analysis, we assume that all sequences of a batch are of the same length. However, in reality, since queries from different users are different, the input sequences as well as the generated output sequences will likely have very different lengths across different users. Thus, batching in LLM inference may cause imbalance across thread blocks, which would result in under-utilization of the GPU resources. To avoid this situation, state-of-the-art LLM model serving systems apply inflight batching mechanisms [12], which schedule and execute batches of multiple requests at a time and schedule a new request to a batch with the lowest workload as soon as a previous one is served. As mentioned before, while batching is effective at increasing the arithmetic intensity (AI) of linear projection operations, batching is not effective at increasing the arithmetic intensity of MHA during inference. We can estimate the arithmetic intensity of MHA by approximating the amount of data movement and the number of floating point operations [13]. For one layer and sequence length N (and assuming p = 1), from Eq. (20.7), the KV cache size is 2 × hq × d × N . The amount of data movement for reading Q’ and writing O’ is 2 × hq × d. The number of floating point FIGURE 20.18 Speculative decoding.</p>
+<p>operations to compute (Q′ K T )V is 2 × N × hq × d (we ignore softmax in this estimate). Eq. (20.9) shows that the AI of MHA is approximately as low as 1 floating point operation per byte. AIMH A ≈ 2 × N × hq × d N = ≈1 2 × hq × d + 2 × hq × d × N 1+N (20.9)</p>
+<p>A different approach to increase the arithmetic intensity of LLM inference is speculative decoding [14]. This is a model service optimization where a tiny model called the draft model, predicts the output tokens of a large model called the target model. The target model verifies the predictions by the draft model. While the target model has much longer latency, it performs verification on batches of tokens produced by the draft model in parallel. Fig. 20.18 shows an example of speculative decoding. In this example, the speculation depth is 3, i.e., the draft model predicts three consecutive output tokens. Then, the target model verifies the three tokens in parallel. In the first iteration of this example, the target model accepts <code>Programming'' and </code>Massively&rsquo;&rsquo; but rejects ``Efficient&rsquo;&rsquo;. After the verification by the target model, the accepted tokens are incorporated to the input tokens for the second iteration of the draft model, which will predict three new tokens. Speculative decoding is similar to batching, which is why it increases the arithmetic intensity of the linear projection operations. However, it is a special form of batching where all the tokens in the batch have a common initial set of tokens. For this reason, when applying the attention mechanism, the same KV cache data for these common input tokens is loaded and reused to compute all the output tokens. This reuse of KV cache data is what results in the increase in arithmetic intensity. Without speculative decoding, this KV cache data would have been loaded multiple times, once for each output token.</p>
+<h2 id="sec-20-7">20.7 Alleviating the memory requirements of the attention mechanism<a class="td-heading-self-link" href="#sec-20-7" aria-label="Link to this heading"></a>
+</h2>
+<p>As discussed above, the attention mechanism employs multiple heads. Each of them uses different matrices of weights to perform different projections of Q, K, and V matrices. This is a main reason for the large memory requirements of multi-head attention (MHA) that Eq. (20.8) shows. Two approaches have been proposed to reduce the memory requirements while maintaining an acceptable model accuracy: multi-query attention (MQA) and grouped-query attention (GQA). Figs. 20.19(a), (b), and (c) depict in a simplified way the memory requirements of MHA, MQA, and GQA, respectively. MQA shares keys and values across the attention heads. This reduces the size of the hidden dimension. Eq. (20.10) shows the total KV cache size for MQA. The reduction with respect to Eq. (20.8) is inversely proportional to the number of heads. T otal_KV _cache_size_MQA = b × N × 2 × l × d × p (20.10)</p>
+<p>As a result of this reduction in the KV cache size, the AI of MQA is approximately hq times higher than that of MHA, as Eq. (20.11) shows. AIMQA ≈ 2 × N × hq × d N × hq = ≈ hq hq + N 2 × hq × d + 2 × d × N (20.11)</p>
+<p>GQA [15] balances between MHA and MQA by using a few groups (gq ) of query heads. Eq. (20.12) shows the total memory requirements of GQA. T otal_KV _cache_size_GQA = b × N × 2 × l × hq ×d ×p gq (20.12)</p>
+<img src="/pmpp5-zh/figs/orig/fig-20-19.png" alt="Figure 20.19" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 20.19.</strong> Q, K, and V matrices in multi-head attention, multi-query attention, grouped-query attention, and multi-head latent attention.</p>
+<p>In the case of GQA, the AI increases by the number of groups gq , as Eq. (20.13) shows. AIGQA ≈ 2 × N × hq × d h 2 × hq × d + 2 × gqq × d × N = N × hq hhq + gqq × N ≈ gq (20.13)</p>
+<p>All three of MHA, GQA, and MQA can take advantage of the flash attention tiling approach explained in Section 20.5. The three alternatives entail different tradeoffs in terms of computation, memory requirements, and model accuracy. Although MQA and GQA alleviate the memory requirements of the KV cache, the batch size and the context length can be still constrained by the limited GPU memory capacity. This limitation is worsened by the fact that the memory reserved for KV caches is typically over-provisioned for the largest possible input. As a result, memory tends to be fragmented and wasted. An example attempt to overcome this scenario is the PagedAttention algorithm [12], which is inspired by the traditional paging mechanisms of operating systems. PagedAttention partitions the KV cache into blocks of equal size that are loaded into the GPU memory (from the larger system memory) when they are needed for computation. Another approach to managing the KV cache is Multi-head Latent Attention (MLA) [16], which employs low-rank joint compression of K and V to reduce memory usage drastically. The key idea of MLA is to compress both K and V vectors for each token into a compressed latent vector (Fig. 20.19(d)). This compression is done in all heads and layers so the reduction in the KV caching memory requirement can be very significant, as Eq. (20.14) shows. T otal_KV _cache_size_MLA = b × N × l × d × p (20.14)</p>
+<p>The arithmetic intensity (Eq. (20.15)) increases due to sharing a single latent head across a large number of query heads. AIMLA ≈ 2 × N × hq 2 × N × hq × d = ≈ 2 × hq 2 × hq × d + d × N hq + N (20.15)</p>
+<p>The projection matrices used in the compression scheme are learned during training. During inference, K and V are generated (decompressed) by multiplying their latent representations by two up-projection matrices before they are used in the attention calculation. As a result, K and V only need to be preserved in their latent, compressed form between iterations in KV caches of all attention heads and decompressed only when a head is active during the generation phase of an LLM inference. A different, orthogonal technique for scaling LLMs is the Mixture of Experts technique (MoE, e.g., Mixtral [17]). MoE is a sparsely activated architecture where a gating mechanism decides what small subset of specialized sub-networks is used for each input. This allows models to be huge in parameter count but have reduced computational needs per token.</p>
+<h2 id="sec-20-8">20.8 Summary<a class="td-heading-self-link" href="#sec-20-8" aria-label="Link to this heading"></a>
+</h2>
+<p>In this chapter, we introduced the operations that underlie Large Language Models (LLMs). As the leading LLMs are based on the Transformer Architecture, we focus on the unique computational components of Transformers, namely attention heads. We start with a naive, multi-kernel approach with emphasis on the softmax kernel, which is the most novel component of the attention heads. We then discuss KV caching, an important optimization that reduces the redundant computation in each iteration of the generation phase of an LLM inference. We further presented the flash attention formulation and the resulting attention head kernel that improves the arithmetic intensity and reduces the latency of the prefill phase of the LLM inference. The chapter ends with a discussion of the memory requirements of KV caching and techniques to alleviate such requirements when batching is used to improve the GPU utilization during inference. It should be clear that this chapter is designed to provide the reader with a clear understanding of the fundamentals of LLM implementations on GPUs. There is a very large design space that the reader is ready to explore after reading this chapter.</p>
+<p>References</p>
+<h2 id="sec-20-9">20.9 Exercises<a class="td-heading-self-link" href="#sec-20-9" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Complete the host code for invoking the flash attention kernel in Fig. 20.9. Refer to Fig. 20.8 when setting the sizes of the input and output arrays based on the dimensions of the matrices they hold. 2. Read the CUB document for details of the data types in the WarpReduce namespace and the semantics of the arguments when calling the Reduce function. Pay special attention to the variety of arithmetic functions available to the reduction. 3. Write the initialization device function in line 21 in Fig. 20.9. Explain the reasons why O_i and D_i elements need to be initialized to 0.f. 4. Show that all the loads from K and V in the nested for loop in the device function of Fig. 20.11 are coalesced.</p>
+<p>References [1] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A.N. Gomez, L. Kaiser, I. Polosukhin, Attention is all you need, in: Proceedings of the 31st International Conference on Neural Information Processing Systems, 2017, pp. 6000&ndash;6010. [2] D. Ferrucci, E. Brown, J. Chu-Carroll, J. Fan, D. Gondek, A.A. Kalyanpur, A. Lally, J.W. Murdock, E. Nyberg, J. Prager, et al., Building Watson: an overview of the DeepQA project, AI Magazine 31 (3) (2010) 59&ndash;79. [3] OpenAI, ChatGPT, <a href="https://chat.openai.com/">https://chat.openai.com/</a>, 2025. (Accessed 25 January 2025). [4] A. Gu, T. Dao, Mamba: linear-time sequence modeling with selective state spaces, arXiv preprint, arXiv:2312.00752, 2023. [5] M. Poli, S. Massaroli, E. Nguyen, D.Y. Fu, T. Dao, S. Baccus, Y. Bengio, S. Ermon, C. Ré, Hyena hierarchy: towards larger convolutional language models, in: International Conference on Machine Learning, PMLR, 2023, pp. 28043&ndash;28078. [6] T. Dao, D. Fu, S. Ermon, A. Rudra, C. Ré, FlashAttention: fast and memory-eicient exact attention with IO-awareness, Advances in Neural Information Processing Systems 35 (2022) 16344&ndash;16359. [7] M. Milakov, N. Gimelshein, Online normalizer calculation for softmax, arXiv preprint, arXiv:1805.02867, 2018. [8] T. Dao, FlashAttention-2: faster attention with better parallelism and work partitioning, arXiv preprint, arXiv:2307.08691, 2023. [9] J. Shah, G. Bikshandi, Y. Zhang, V. Thakkar, P. Ramani, T. Dao, FlashAttention-3: fast and accurate attention with asynchrony and low-precision, arXiv preprint, arXiv:2407. 08608, 2024. [10] Z. Zhang, D. Zhao, X. Miao, G. Oliaro, Q. Li, Y. Jiang, Z. Jia, Quantized side tuning: fast and memory-eicient tuning of quantized large language models, arXiv preprint, arXiv:2401.07159, 2024. [11] J. Zhao, Z. Zhang, B. Chen, Z. Wang, A. Anandkumar, Y. Tian, Galore: memory-eicient llm training by gradient low-rank projection, arXiv preprint, arXiv:2403.03507, 2024. [12] W. Kwon, Z. Li, S. Zhuang, Y. Sheng, L. Zheng, C.H. Yu, J. Gonzalez, H. Zhang, I. Stoica, Efficient memory management for large language model serving with PagedAttention, in: Proceedings of the 29th Symposium on Operating Systems Principles, 2023, pp. 611&ndash;626.</p>
+<p>CHAPTER</p>
+<p>Electrostatic potential map</p>
+<p>With special contributions from John Stone</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[13] T. Zadouri, H. Strauss, T. Dao, Hardware-eicient attention for fast decoding, arXiv preprint, arXiv:2505.21487, 2025. [14] Y. Leviathan, M. Kalman, Y. Matias, Fast inference from transformers via speculative decoding, in: International Conference on Machine Learning, PMLR, 2023, pp. 19274&ndash;19286. [15] J. Ainslie, J. Lee-Thorp, M. de Jong, Y. Zemlyanskiy, F. Lebrón, S. Sanghai, GQA: training generalized multi-query transformer models from multi-head checkpoints, arXiv preprint, arXiv:2305.13245, 2023. [16] A. Liu, B. Feng, B. Wang, B. Wang, B. Liu, C. Zhao, C. Dengr, C. Ruan, D. Dai, D. Guo, et al., Deepseek-v2: a strong, economical, and efficient mixture-of-experts language model, arXiv preprint, arXiv:2405.04434, 2024. [17] A.Q. Jiang, A. Sablayrolles, A. Roux, A. Mensch, B. Savary, C. Bamford, D.S. Chaplot, D.d.l. Casas, E.B. Hanna, F. Bressand, et al., Mixtral of experts, arXiv preprint, arXiv: 2401.04088, 2024.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/19-ch19/"
+    aria-label="Previous - Chapter 19 Convolutional neural networks" title="Chapter 19 Convolutional neural networks" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 19 Convolutional neural networks</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/21-ch21/"
+    aria-label="Next - Chapter 21 Electrostatic potential map" title="Chapter 21 Electrostatic potential map" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 21 Electrostatic potential map</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-20-1">20.1 Transformer architecture</a></li>
+    <li><a href="#sec-20-2">20.2 Multi-head attention</a></li>
+    <li><a href="#sec-20-3">20.3 Implementing attention in CUDA</a></li>
+    <li><a href="#sec-20-4">20.4 KV caching</a></li>
+    <li><a href="#sec-20-5">20.5 Flash attention</a></li>
+    <li><a href="#sec-20-6">20.6 KV cache arithmetic intensity and memory requirement</a></li>
+    <li><a href="#sec-20-7">20.7 Alleviating the memory requirements of the attention mechanism</a></li>
+    <li><a href="#sec-20-8">20.8 Summary</a></li>
+    <li><a href="#sec-20-9">20.9 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/20-ch20/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/20-ch20/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/20-ch20/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/20-ch20.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/20-ch20.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+20+Large+language+models"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/20-ch20/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/20-ch20/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/20-ch20/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/20-ch20/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>

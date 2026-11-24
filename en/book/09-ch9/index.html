@@ -1,0 +1,799 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head><meta charset="utf-8">
+<meta name="oink-compare-page" content="/pmpp5-zh/en/book/09-ch9/">
+<script>
+  (function () {
+    try {
+      var frame = window.frameElement;
+      if (new URL(location.href).searchParams.get('oink_compare_pane') === '1' &&
+          frame && frame.hasAttribute('data-td-compare-frame') &&
+          frame.closest('dialog[data-td-compare][open]')) {
+        window.OinkComparePane = true;
+        document.documentElement.setAttribute('data-td-compare-pane', '');
+        
+        document.addEventListener('DOMContentLoaded', function () {
+          try { frame.dispatchEvent(new Event('td:compare-pane-ready')); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  })();
+</script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<link rel="prev" href="/pmpp5-zh/en/book/08-ch8/">
+<link rel="next" href="/pmpp5-zh/en/book/10-ch10/"><meta name="robots" content="index, follow">
+
+<title>Chapter 9 Histogram | Programming Massively Parallel Processors (5th Edition)</title>
+<meta name="description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="canonical" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/09-ch9/">
+<link rel="alternate" hreflang="zh-CN" href="https://codingpracticegroup.github.io/pmpp5-zh/book/09-ch9/">
+<link rel="alternate" hreflang="en-US" href="https://codingpracticegroup.github.io/pmpp5-zh/en/book/09-ch9/">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:url" content="https://codingpracticegroup.github.io/pmpp5-zh/en/book/09-ch9/">
+	<meta property="og:site_name" content="Programming Massively Parallel Processors (5th Edition)">
+	<meta property="og:title" content="Chapter 9 Histogram">
+	<meta property="og:description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="book">
+
+	<meta itemprop="name" content="Chapter 9 Histogram">
+	<meta itemprop="description" content="Programming Massively Parallel Processors 5e — English original">
+	<meta itemprop="wordCount" content="8617">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Chapter 9 Histogram">
+	<meta name="twitter:description" content="Programming Massively Parallel Processors 5e — English original">
+<link rel="preload" href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" as="style" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/pmpp5-zh/scss/main.min.2aee91f4f229e66df66a1964231fc5355b0e6228bdceeae717caa55c4a033e1d.css" rel="stylesheet" integrity="sha256-Ku6R9PIp5m32ahlkIx/FNVsOYii9zurnF8qlXEoDPh0=" crossorigin="anonymous">
+<script>
+  (function () {
+    if (window.OinkComparePane) return;
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script></head>
+  <body class="td-page td-book td-book-content--normal td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">Skip to content</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="Main navigation">
+      <a href="/pmpp5-zh/en/" class="td-nav-brand" data-td-navbar-route
+         aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Programming Massively Parallel Processors (5th Edition)</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link" href="/en/pmpp5-zh/book/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="全书目录"
+  data-td-navbar-region="desktop" data-td-navbar-label="全书目录"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-link" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">全书目录</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+          <div class="td-language-selector td-language-selector--menu td-nav-util td-site-nav__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/09-ch9/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false">
+    <i class="fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/09-ch9/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+        <a href="https://github.com/CodingPracticeGroup/pmpp5-zh" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i></a><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="Open navigation" aria-label="Open navigation"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none"><div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="/pmpp5-zh/en/" aria-label="Programming Massively Parallel Processors (5th Edition) — Home">
+        <img src="/pmpp5-zh/icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Programming Massively Parallel Processors (5th Edition)</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="Collapse sidebar" aria-label="Collapse sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <span class="td-shell-sidebar__header-spacer"></span>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="Close navigation" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="Section navigation"
+      data-td-sidebar-icon-policy="all" data-td-sidebar-root-id="/pmpp5-zh/en/book/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-pmpp5-zhenbook-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="/pmpp5-zh/en/book/" title="Books"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook"><span>Books</span></a>
+      
+    </div><div id="m-pmpp5-zhenbook-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook00-preface-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/00-preface/" title="Preface"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook00-preface"><span>Preface</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook01-ch1-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/01-ch1/" title="Chapter 1 Introduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook01-ch1"><span>Chapter 1 Introduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook02-ch2-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/02-ch2/" title="Chapter 2 Heterogeneous data-parallel computing"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook02-ch2"><span>Chapter 2 Heterogeneous data-parallel computing</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook03-ch3-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/03-ch3/" title="Chapter 3 Multidimensional grids and data"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook03-ch3"><span>Chapter 3 Multidimensional grids and data</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook04-ch4-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/04-ch4/" title="Chapter 4 Compute architecture and scheduling"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook04-ch4"><span>Chapter 4 Compute architecture and scheduling</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook05-ch5-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/05-ch5/" title="Chapter 5 Memory architecture and data locality"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook05-ch5"><span>Chapter 5 Memory architecture and data locality</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook06-ch6-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/06-ch6/" title="Chapter 6 Performance considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook06-ch6"><span>Chapter 6 Performance considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook07-ch7-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/07-ch7/" title="Chapter 7 Convolution"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook07-ch7"><span>Chapter 7 Convolution</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook08-ch8-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/08-ch8/" title="Chapter 8 Stencil computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook08-ch8"><span>Chapter 8 Stencil computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-pmpp5-zhenbook09-ch9-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="/pmpp5-zh/en/book/09-ch9/" aria-current="page" title="Chapter 9 Histogram"
+        class="td-shell-tree__link active"
+        id="m-pmpp5-zhenbook09-ch9"><span>Chapter 9 Histogram</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook10-ch10-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/10-ch10/" title="Chapter 10 Reduction"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook10-ch10"><span>Chapter 10 Reduction</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook11-ch11-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/11-ch11/" title="Chapter 11 Scan"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook11-ch11"><span>Chapter 11 Scan</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook12-ch12-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/12-ch12/" title="Chapter 12 Filter"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook12-ch12"><span>Chapter 12 Filter</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook13-ch13-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/13-ch13/" title="Chapter 13 Merge"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook13-ch13"><span>Chapter 13 Merge</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook14-ch14-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/14-ch14/" title="Chapter 14 Sorting"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook14-ch14"><span>Chapter 14 Sorting</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook15-ch15-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/15-ch15/" title="Chapter 15 Advanced optimizations for matrix multiplication"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook15-ch15"><span>Chapter 15 Advanced optimizations for matrix multiplication</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook16-ch16-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/16-ch16/" title="Chapter 16 Dynamic programming and wavefront parallelism"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook16-ch16"><span>Chapter 16 Dynamic programming and wavefront parallelism</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook17-ch17-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/17-ch17/" title="Chapter 17 Sparse matrix computation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook17-ch17"><span>Chapter 17 Sparse matrix computation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook18-ch18-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/18-ch18/" title="Chapter 18 Graph traversal"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook18-ch18"><span>Chapter 18 Graph traversal</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook19-ch19-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/19-ch19/" title="Chapter 19 Convolutional neural networks"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook19-ch19"><span>Chapter 19 Convolutional neural networks</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook20-ch20-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/20-ch20/" title="Chapter 20 Large language models"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook20-ch20"><span>Chapter 20 Large language models</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook21-ch21-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/21-ch21/" title="Chapter 21 Electrostatic potential map"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook21-ch21"><span>Chapter 21 Electrostatic potential map</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook22-ch22-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/22-ch22/" title="Chapter 22 Algorithm selection, problem decomposition, and problem formulation"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook22-ch22"><span>Chapter 22 Algorithm selection, problem decomposition, and problem formulation</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook23-ch23-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/23-ch23/" title="Chapter 23 Multi-GPU programming"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook23-ch23"><span>Chapter 23 Multi-GPU programming</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook24-ch24-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/24-ch24/" title="Chapter 24 Conclusion and future outlook"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook24-ch24"><span>Chapter 24 Conclusion and future outlook</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook30-cha-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/30-cha/" title="Appendix A Numerical considerations"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook30-cha"><span>Appendix A Numerical considerations</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook31-chb-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/31-chb/" title="Appendix B Deep learning basics"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook31-chb"><span>Appendix B Deep learning basics</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-pmpp5-zhenbook32-chc-li">
+    <div class="td-shell-tree__row">
+      <a href="/pmpp5-zh/en/book/32-chc/" title="Appendix C CUDA memories, address spaces, and pointers"
+        class="td-shell-tree__link"
+        id="m-pmpp5-zhenbook32-chc"><span>Appendix C CUDA memories, address spaces, and pointers</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+</aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="Expand sidebar" aria-label="Expand sidebar"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            
+            <div class="td-shell-topline">
+              <nav aria-label="Breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="/pmpp5-zh/en/book/">Books</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    Chapter 9 Histogram</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span><button type="button" class="td-compare-entry d-print-none" data-td-compare-open hidden
+  title="Open duo view" aria-label="Open duo view" aria-keyshortcuts="B" aria-haspopup="dialog">
+  <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+</button>
+<span class="visually-hidden" role="status" data-td-compare-error></span><div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="Markdown copied" data-td-t-copy-error="Could not copy Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__toggle td-page-actions__toggle--solo"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      aria-label="Actions"><span>Actions</span><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="Actions">
+    <li><a class="td-page-actions__item" data-td-action="view_history" href="https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/09-ch9.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>View edit history</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="edit_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/09-ch9.en.md" target="_blank" rel="noopener">
+      <i class="fa-solid fa-pencil" aria-hidden="true"></i><span>Edit this page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_child_page" href="https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md&amp;value=---%0Atitle%3A&#43;%22Long&#43;Page&#43;Title%22%0AlinkTitle%3A&#43;%22Short&#43;Nav&#43;Title%22%0Aweight%3A&#43;100%0Adescription%3A&#43;%3E-%0A&#43;&#43;&#43;&#43;&#43;Page&#43;description&#43;for&#43;heading&#43;and&#43;indexes.%0A---%0A%0A%23%23&#43;Heading%0A%0AEdit&#43;this&#43;template&#43;to&#43;create&#43;your&#43;new&#43;page.%0A%0A%2A&#43;Give&#43;it&#43;a&#43;good&#43;name%2C&#43;ending&#43;in&#43;%60.md%60&#43;-&#43;e.g.&#43;%60get-started.md%60%0A%2A&#43;Edit&#43;the&#43;%22front&#43;matter%22&#43;section&#43;at&#43;the&#43;top&#43;of&#43;the&#43;page&#43;%28weight&#43;controls&#43;how&#43;its&#43;ordered&#43;amongst&#43;other&#43;pages&#43;in&#43;the&#43;same&#43;directory%3B&#43;lowest&#43;number&#43;first%29.%0A%2A&#43;Add&#43;a&#43;good&#43;commit&#43;message&#43;at&#43;the&#43;bottom&#43;of&#43;the&#43;page&#43;%28%3C80&#43;characters%3B&#43;use&#43;the&#43;extended&#43;description&#43;field&#43;for&#43;more&#43;detail%29.%0A%2A&#43;Create&#43;a&#43;new&#43;branch&#43;so&#43;you&#43;can&#43;preview&#43;your&#43;new&#43;file&#43;and&#43;request&#43;a&#43;review&#43;via&#43;Pull&#43;Request.%0A" target="_blank" rel="noopener">
+      <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i><span>Create child page</span>
+    </a></li>
+    <li><a class="td-page-actions__item" data-td-action="create_issue" href="https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter&#43;9&#43;Histogram" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Create docs issue</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>Chapter 9 Histogram</h1>
+</div>
+
+	<div class="lead">Programming Massively Parallel Processors 5e — English original</div>
+	<header class="td-article-meta">
+		
+</header>
+	<h1 id="c9">Chapter 9 Histogram<a class="td-heading-self-link" href="#c9" aria-label="Link to this heading"></a>
+</h1>
+<p>CHAPTER</p>
+<p>Histogram An introduction to atomic operations and privatization CONTENTS 9.1 Background . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 202 9.2 Atomic operations and a basic histogram kernel. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 203 9.3 Latency and throughput of atomic operations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 209 9.4 Privatization . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 211 9.5 Thread coarsening . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 214 9.6 Thread-level privatization . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 217 9.7 Summary. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 219 9.8 Exercises . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 220 References. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 220 The parallel computation patterns that we have presented so far all allow the task of computing each output element to be exclusively assigned to, or owned by, a thread. Therefore, these patterns are amenable to the owner-computes rule, where every thread can write into their designated output element(s) without any concern about interference from other threads. This chapter introduces the parallel histogram pattern, where each output element can potentially be updated by any thread. As such, one must take care to coordinate among threads as they update output elements and avoid any interference that corrupts the final result. In practice, there are many other important parallel computation patterns where output interference cannot be easily avoided. The parallel histogram pattern provides an example of such output interference. We will first examine a baseline approach that uses atomic operations to serialize the updates to each element. This baseline approach is simple but inefficient, often resulting in disappointing execution speed. We will then present some widely used optimization techniques, most notably privatization, to significantly enhance execution speed while preserving correctness. The cost and benefit of these techniques depend on the underlying hardware as well as the characteristics of the input data. It is therefore important for a developer to understand the key ideas of these techniques and reason about their applicability under different circumstances. Programming Massively Parallel Processors. <a href="https://doi.org/10.1016/B978-0-44-343900-1.00019-6">https://doi.org/10.1016/B978-0-44-343900-1.00019-6</a> Copyright © 2027 Elsevier Inc. All rights are reserved, including those for text and data mining, AI training, and similar technologies.</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-1.png" alt="Figure 9.1" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.1.</strong> An example of an image histogram.</p>
+<p>The parallel computation patterns that we have presented so far all allow the task of computing each output element to be exclusively assigned to, or owned by, a thread. Therefore, these patterns are amenable to the owner-computes rule, where every thread can write into their designated output element(s) without any concern about interference from other threads. This chapter introduces the parallel histogram pattern, where each output element can potentially be updated by any thread. As such, one must take care to coordinate among threads as they update output elements and avoid any interference that corrupts the final result. In practice, there are many other important parallel computation patterns where output interference cannot be easily avoided. The parallel histogram pattern provides an example of such output interference. We will first examine a baseline approach that uses atomic operations to serialize the updates to each element. This baseline approach is simple but inefficient, often resulting in disappointing execution speed. We will then present some widely used optimization techniques, most notably privatization, to significantly enhance execution speed while preserving correctness. The cost and benefit of these techniques depend on the underlying hardware as well as the characteristics of the input data. It is therefore important for a developer to understand the key ideas of these techniques and reason about their applicability under different circumstances.</p>
+<h2 id="sec-9-1">9.1 Background<a class="td-heading-self-link" href="#sec-9-1" aria-label="Link to this heading"></a>
+</h2>
+<p>A histogram is a display of occurrences of data values in a data set. In the most common form of a histogram, the value intervals are plotted along the horizontal axis and the frequency of data values in each interval is represented as the height of a rectangle, or bar, rising from the horizontal axis. For example, Fig. 9.1(b) shows the histogram of pixel intensity values of the grayscale image of a tree in Fig. 9.1(a). Grayscale images typically consist of pixels with intensity values ranging between 0 and 255 where 0 is black and 255 is white. The histogram in Fig. 9.1(b) splits this range into four intervals with 64 values each. The six black pixels depicting the trunk of the tree are counted in the range [0-63]. The 12 dark gray pixels depicting the leaves of the tree are counted in the range [64-127]. The 14 light gray pixels depicting the grass around the tree are counted in the range [128-191]. The 32 white pixels depicting the sky are counted in the range [192-255]. Histograms provide useful summaries of data sets. In our example, we can see that the image being represented consists of pixels that are heavily concentrated in the bright (higher) intensity intervals and lightly concentrated in the dark (lower) intensity intervals. Such a shape of the histogram is sometimes referred to as a feature of the data set and provides a quick way to determine if there are significant phenomena in the data set, such as if an image has low or high light exposure. As another example, the shape of a histogram of the purchase categories and locations of a credit card account can be used to detect fraudulent usage. When the shape of the histogram deviates significantly from the norm, the system raises a flag of potential concern. Many application domains rely on histograms to summarize data sets for data analysis. One such area is computer vision. Histograms of different types of object images, such as faces vs. cars, tend to exhibit different shapes. One can plot the histogram of pixel intensity values in an image or an area of an image, as we have seen. A histogram of the sky on a sunny day might have only a small number of very tall bars in the high-intensity intervals of the luminous spectrum. By dividing an image into FIGURE 9.2 A simple C function for calculating the histogram of a grayscale image.</p>
+<h2 id="sec-9-2">9.2 Atomic operations and a basic histogram kernel<a class="td-heading-self-link" href="#sec-9-2" aria-label="Link to this heading"></a>
+</h2>
+<p>subareas and analyzing the histograms for these subareas, one can quickly identify the interesting subareas of an image that potentially contain the objects of interest. The process of computing histograms of image subareas is an important approach to feature extraction in computer vision, where a feature refers to a pattern of interest in images. In practice, whenever there is a large volume of data that needs to be analyzed to distill interesting events, histograms are likely used as a foundational computation. Credit card fraudulence detection and computer vision obviously meet this description. Other application domains with such needs include speech recognition, website purchase recommendations, and scientific data analysis such as correlating heavenly object movements in astrophysics. Histograms can be easily computed in a sequential manner. Fig. 9.2 shows a sequential function that calculates an image histogram. The C code assumes that the input image comes in the unsigned char array image where each element specifies the grayscale intensity of a pixel (line 01). Additionally, the histogram is to be generated into the unsigned int array bins (line 01). The number of pixels in the image is specified by the function parameters width and height (line 02). The for-loop (line 03) sequentially iterates over the image pixels. The image is treated as a 1D array of size width*height since the 2D indices of the pixels are not relevant to the computation. It loads the pixel value from the image (line 04) and increments the histogram bin corresponding to that pixel value (line 05). Here, we assume that each histogram bin represents a single pixel value. If the bins represent an interval of pixel values as in Fig. 9.1, then we would divide the pixel value by the interval width before indexing the array of bins. The C code in Fig. 9.2 is quite simple and efficient. The computational complexity of the algorithm is O(N ) where N is the number of input data elements. The image array elements are accessed sequentially in the for-loop so the CPU cache lines are well used whenever they are fetched from the system DRAM. The bins array is so small that it fits well in the level-one (L1) data cache of the CPU, which ensures fast updates to the bins elements. For most modern CPUs, one can expect that execution speed of this code to be memory bound, i.e., limited by the rate at which the data elements can be brought from DRAM into the CPU cache.</p>
+<p>The most straightforward approach to parallelizing a histogram computation is to launch as many threads as input elements and have each thread to process one input FIGURE 9.3 Basic parallelization of image histogram.</p>
+<p>element. Each thread reads its assigned pixel value and increments the appropriate bin for that pixel value. Fig. 9.3 illustrates an example of this parallelization strategy. Note that multiple threads may be assigned to pixels with the same value and need to update the same bin, which is a conflict referred to as output interference. Programmers must understand the concepts of race conditions and atomic operations in order to confidently handle such output interferences in their parallel code. An increment to an interval counter in the bins array is an update, or read-modifywrite, operation on a memory location. The operation involves reading the memory location (read), adding one to the original value (modify), and writing the new value back to the memory location (write). Read-modify-write is a frequently used operation for coordinating collaborative activities. For example, when we make a flight reservation with an airline, we bring up the seat map and look for available seats (read), we pick a seat to reserve (modify), and change the seat status to unavailable in the seat map (write). A bad potential scenario can happen as follows: • Two customers simultaneously bring up seat map of the same flight. • Both customers pick the same seat, say 9C. • Both customers change the status of seat 9C to unavailable. After the sequence, both customers thought that they have seat 9C. We can imagine that they will have an unpleasant situation when they board the flight and find out that one of them cannot take the reserved seat! Believe it or not, such unpleasant situation indeed happens in real life due to flaws in airline reservation software. For another example, some stores allow customers to wait for service without standing in line. They ask each customer to take a number from one of the kiosks. There is a display that shows the number that will be served next. When a service agent becomes available, the agent asks the customer to present the ticket that matches the number, verify the ticket, and update the display number to the next higher number. Ideally, all customers will be served in the order they enter the store.</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-4.png" alt="Figure 9.4" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.4.</strong> Race condition in updating a bins array element.</p>
+<p>An undesirable outcome would be that two customers simultaneously sign in at two kiosks and both receive tickets with the same number. When a service agent calls for that number, both customers expect that they are the one who should receive service. In both examples, undesirable outcomes are caused by a phenomenon called a read-modify-write race condition, where the outcome of two or more simultaneous update operations varies depending on the relative timing of the operations involved. Some outcomes are correct, and some are incorrect. Fig. 9.4 illustrates a race condition when two threads attempt to update the same bins element in our image histogram example. Each row in Fig. 9.4 shows the activity during a time period, with time progressing from top to bottom. Fig. 9.4(a) depicts a scenario where Thread 1 completes all three parts of its readmodify-write sequence during time periods 1 through 3 before Thread 2 starts its sequence at time period 4. The value in the parenthesis in front of each operation shows the value being written into the destination, assuming the value of bins[x] was initially 0. Under this scenario, the value of bins[x] afterwards is 2, exactly what one would expect. That is, both threads successfully incremented bins[x]. The element value starts with 0 and becomes 2 after the operations complete. In Fig. 9.4(b), the read-modify-write sequences of the two threads overlap. Note that Thread 1 writes the new value into bins[x] at time period 4. When Thread 2 reads bins[x] at time period 3, it still has the value 0. As a result, the new value it calculates and eventually writes to bins[x] is 1 rather than 2. The problem is that Thread 2 read bins[x] too early, before Thread 1 completes its update. The net outcome is that the value of bins[x] afterwards is 1, which is incorrect. The update by Thread 1 is lost. During parallel execution, threads can run in any order relative to each other. In our example, Thread 2 can easily start its update sequence ahead of Thread 1. Fig. 9.5 shows two such scenarios. In Fig. 9.5(a), Thread 2 completes its update before Thread 1 starts its. In Fig. 9.5(b), Thread 1 starts its update before Thread 2 completes its. It should be obvious that the sequences in Fig. 9.5(a) result in correct outcome for bins[x] but those in Fig. 9.5(b) produce incorrect outcome. The fact that the final value of bins[x] varies depending on the relative timing of the operations involved indicates that there is a race condition. We can eliminate such variation by eliminating the possible interleaving of operation sequences of Thread 1 and Thread 2. That is, we would like to allow the timings shown in Figs. 9.4(a)</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-5.png" alt="Figure 9.5" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.5.</strong> Race condition scenarios where Thread 2 runs ahead of Thread 1.</p>
+<p>and 9.5(a) while eliminating the possibilities shown in Figs. 9.4(b) and 9.5(b). This can be accomplished using atomic operations. An atomic operation on a memory location is an operation that performs a readmodify-write sequence on the memory location in such a way that no other readmodify-write sequence to the location can overlap with it. That is, the read, modify, and write parts of the operation form an undividable unit, thus the name atomic operation. In practice, atomic operations are realized with hardware support to lock out other operations to the same location until the current operation is complete. In our example, such support eliminates the possibility depicted in Figs. 9.4(b) and 9.5(b) since the trailing thread cannot start its update sequence until the leading thread completes its. It is important to remember that atomic operations do not enforce particular execution order between threads. In our example, both orders shown in Figs. 9.4(a) and 9.5(a) are allowed by atomic operations. Thread 1 can run either ahead of or behind Thread 2. The rule being enforced is that if both threads perform atomic operations on the same memory location, the atomic operation performed by the trailing thread cannot start until the atomic operation of the leading thread completes. This effectively serializes the atomic operations being performed on a memory location. Atomic operations can be performed in CUDA using C++ atomic objects or atomic reference objects and functions on those objects.1 CUDA extends the C++ atomic library, and these extensions can be accessed by including the relevant library as follows: #include &lt;cuda/atomic&gt; 1 We encourage readers who are not familiar with the concepts of the C++ objects, classes, and names paces to refer to the C++ documentation [1] for a deeper understanding. Broadly, a C++ class defines how to create a reference to an object that consists of a collection of data and a set of method functions that can operate on the data. The class is generic as it is defined as a template. Intuitively, defining a class as a template enables library developers to specify generic objects that can be specialized to meet the needs of user applications in terms of the types of data and the options for the functions in the objects thus created.</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-6.png" alt="Figure 9.6" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.6.</strong> A CUDA kernel for calculating a histogram.</p>
+<p>With the atomic library included, the first step for performing an atomic operation on an object is to create an atomic reference to that object using the cuda::atomic_ref class.2 An atomic reference enables us to perform atomic operations on the object. The cuda::atomic_ref class is defined in the CUDA C++ library as follows: template &lt;typename T, cuda::thread_scope&gt; class cuda::atomic_ref;</p>
+<p>The template for the atomic_ref class takes two parameters that reside between angle brackets (<code>&lt;'' and </code>&gt;&rsquo;&rsquo;). The first template parameter T specifies the type of the object. Examples of commonly used types are int, unsigned int, and float. The second template parameter cuda::thread_scope specifies the scope of threads that can synchronize with one another using the method functions defined for the class. Common examples of scopes include within the same thread block, within the same GPU device, and across all GPU devices within the same multi-GPU system. The &ldquo;cuda::&rdquo; prefix indicates that atomic_ref is declared in the CUDA namespace. Interested readers are referred to the CUDA programming guide for more details. We are now ready to implement a basic parallel histogram approach as illustrated in Fig. 9.3. Fig. 9.6 shows such a CUDA kernel that uses atomic operations to ensure the correctness of concurrent increments to the bins elements. The code is similar to the sequential code in Fig. 9.2 with two key distinctions. The first distinction is that the loop over input elements is replaced with a thread index calculation (line 03) and a boundary check (line 04) to assign a thread to each input image element. The second distinction is that the following increment expression in Fig. 9.2: ++bins[b];</p>
+<p>is replaced with the code on lines 06-07 of Fig. 9.6. This code ensures that any simultaneous updates to the same bins array element by different threads are performed atomically and properly serialized. 2 Alternatively, an object can be declared atomic from the moment it is created using the cuda::atomicclass. Using cuda::atomic ensures that all accesses to the object are atomic from its creation. In our case, we use atomic references because we may wish to access the bins in non-atomic ways in other parts of the code.</p>
+<p>The first step in performing the update operation atomically is to construct an atomic reference to bins[b] named bins_ref (line 06). Recall that the cuda::atomic_ref class is defined as a template. On line 06, the first template parameter, unsigned int specifies that the atomic operation is to be performed on an unsigned integer object. In this case, the unsigned integer object is one of the elements of the bins array. The second template parameter, cuda::thread_scope_device, is a predefined compiletime constant indicating that the atomic operation needs to allow threads in different thread blocks to synchronize with each other. That is, the increments to the same bins element are serialized, whether these increments are performed by threads within the same block or across different blocks in the same GPU device. As a result, an atomic reference bins_ref is constructed for performing atomic operations on the selected bins[b]. Although the constructor on line 06 appears to be complex, it actually just serves as a means to instruct the CUDA C++ compiler on how to generate code for line 07 and adds little execution cost at run time. Having constructed the atomic reference, we can invoke its method functions to perform atomic operations on the object that it references. The CUDA atomic reference class provides functions that perform different kinds of operations such as: addition, minimum, maximum, and, or, xor, etc. In our histogram kernel, we need to perform an integer increment operation, i.e., fetching the old value, adding 1 to generate the new value, and writing the new value to the bins elements. The method function that performs atomic addition operations is fetch_add, which is defined as a generic method function of the cuda::atomic_ref class in the CUDA C++ library as follows: T fetch_add(T arg, cuda::std::memory_order order)</p>
+<p>The fetch_add function takes two parameters. The first parameter arg specifies the value to be added, which is 1 on our case. Note that the value must be of the same type (T) as specified for the first template parameter of the atomic reference class that defines the fetch_add function. This ensures that the value to be added to the object is of the same type as the object itself. On line 07 of Fig. 9.6, the fetch_add function is invoked on an unsigned integer object bins[b]. The compiler will treat the first argument passed, i.e., the constant value 1, as an unsigned integer constant. The second parameter order is a compile-time constant defined in the C++ standard library for specifying the restrictions on how the atomic operation may be reordered with respect to other memory accesses performed by the invoking thread. The compiler or the hardware may reorder the execution of memory accesses to optimize the performance of the code. The order parameter specifies which kind of reordering is allowed based on the intent of the programmer. In our case, there is only one other memory access performed by the invoking thread: the one that reads the image[i] element into local variable b. Since b is used to select the object on which the atomic operation is to be performed, the compiler will not be able to reorder the atomic operation with respect to the memory access. At run time, the use of b to select the object presents instruction-level data dependencies to the hardware scheduler. That is, the atomic operation will naturally be forced to wait for the completion of the memory access that reads the image[i] element. Thus, there is no need to specify any additional restriction to prevent them from being reordered with respect to each other. The compile-time constant cuda::memory_order_relaxed used in line 07 of Fig. 9.6 indicates that there is no further restrictions beyond what is already present at the instruction-level. In Chapter 11, we will encounter a use case where specifying additional restrictions on reordering memory accesses is needed. The fetch_add function is defined to return a value, which is of the same type (T) as the first template parameter. The returned value is the old value of the object before the first parameter value is atomically added to it. This return value is not used on line 07 of Fig. 9.6 because the thread is only tasked to increment the selected bins element. It is not concerned with the old value of the element before the increment operation. In Chapter 12 and Chapter 18, we will see other use cases where the return value of the fetch_add function may be needed.</p>
+<h2 id="sec-9-3">9.3 Latency and throughput of atomic operations<a class="td-heading-self-link" href="#sec-9-3" aria-label="Link to this heading"></a>
+</h2>
+<p>The atomic operation used in the kernel of Fig. 9.6 ensures the correctness of updates by serializing any simultaneous updates to a location. As we all know, serializing any portion of a massively parallel program can drastically increase the execution time and reduce the execution speed of the program. Therefore, it is important that such serialized operations account for as little execution time as possible. As we learned in Chapter 5, the access latency to data in DRAMs can take hundreds of clock cycles. In Chapter 4, we learned that GPUs use zero-cycle context switching to tolerate such latency. In Chapter 6, we learned that as long as we have many threads whose memory access latencies can overlap with each other, the execution speed is limited by the throughput of the memory system. Thus, it is important that GPUs make full use DRAM bursts, banks, and channels to achieve high memory access throughput. It should be clear to the reader at this point that the key to high memory access throughput is to have many DRAM accesses that are simultaneously in progress. Unfortunately, this strategy breaks down when many atomic operations update the same memory location. In this case, the read-modify-write sequence of a trailing thread cannot start until the read-modify-write sequence of a leading thread is complete. As shown in Fig. 9.7, the execution of atomic operations at the same memory location is such that there can be only one in progress. The duration of each atomic operation is approximately the latency of a memory load (left section of the atomic operation time) plus the latency of a memory store (right section of the atomic operation time). The length of these time sections of each read-modify-write operation, usually hundreds of clock cycles, defines the minimal amount of time that must be dedicated to servicing each atomic operation and limits the throughput, or the rate at which atomic operations can be performed. For example, assume a memory system with 64-bit (8-byte) Double Data Rate DRAM interface per channel, 8 channels, 1 GHz clock frequency, and typical access latency of 200 cycles. The peak access throughput of the memory system is FIGURE 9.7 Throughput of atomic operation is determined by the memory access latency.</p>
+<p>8 (bytes/transfer)*2 (transfers per clock per channel)* 1 G (clocks per second) * 8 (Channels) = 128 GB/sec. Assuming each data accessed is 4 bytes, the system has a peak access throughput of 32 G data elements per second. However, when performing atomic operations on a particular memory location, the highest throughput one can achieve is one atomic operation every 400 cycles (200 cycles for the read and 200 cycles for the write). This translates into a throughput of 1/400 atomics/clock * 1 G (clocks/second) = 2.5 M atomics/second. This is dramatically lower than most users expect from a GPU memory system. Furthermore, the long latency of the sequence of atomic operations will likely dominate the kernel execution time and can dramatically lower the execution speed of the kernel. In practice, not all atomic operations will be performed on a single memory location. In our image histogram example, the histogram has 256 bins. If the input pixels are uniformly distributed in brightness, the atomic operations are evenly distributed among the bins elements. This would boost the throughput to 256*2.5 M = 640 M atomic operations per second. In reality, the boost factor tends to be much lower than the number of intervals in the histogram because the pixels tend to have biased distribution in brightness. For example, in Fig. 9.1, we see that pixels in the example image are heavily biased towards the brighter levels. The heavy contention traffic to update these high-brightness bins will likely cause significant reduction to the achievable throughput. One approach to improving the throughput of atomic operations is to reduce the access latency to the heavily contended locations. Cache memories are the primary tool for reducing memory access latency. For this reason, modern GPUs allow atomic operations with device scope to be performed in the last-level cache, which is shared among all SMs. During an atomic operation, if the updated variable is found in the last-level cache, it is updated in the cache. If it cannot be found in the last level cache, it triggers a cache miss and is brought into the cache where it is updated. Since the variables updated by atomic operations tend to be heavily accessed by many threads, these variables tend to remain in the cache while the threads perform atomic operations on them. Because the access time to the last-level cache is in tens of cycles rather than hundreds of cycles, the throughput of atomic operations is improved by at least an order of magnitude with this approach. This is an important reason why most modern GPUs support atomic operations in the last-level cache.</p>
+<h2 id="sec-9-4">9.4 Privatization<a class="td-heading-self-link" href="#sec-9-4" aria-label="Link to this heading"></a>
+</h2>
+<img src="/pmpp5-zh/figs/orig/fig-9-8.png" alt="Figure 9.8" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.8.</strong> Private copies of the histogram reduce contention of atomic operations.</p>
+<p>Another approach to improving the throughput of atomic operations is to alleviate the contention by directing the traffic away from the heavily contended locations. This can be achieved with a technique referred to as privatization that is commonly used to address problems in parallel computing with heavy output interference. The idea is to replicate highly contended output data structures into private copies so that each subset of threads can update its private copy. The benefit is that the private copies can be accessed with much less contention and often at much lower latency. These private copies can dramatically increase the throughput for updating the data structures. The downside is that the private copies need to be merged into the final output data structure after the computation completes. One must carefully balance between the level of contention and the merging cost. Therefore, in massively parallel systems, privatization is typically done for subsets of threads rather than individual threads. In our text histogram example, we can create multiple private histograms and designate a subset of threads to update each of them. For example, we can create two private copies and have even-index blocks to update one of them and odd-index blocks to update the other. As another example, we can create four private copies and have blocks with index i update the private copy numbered i mod 4. A common approach is to create a private copy for each thread block. This approach has multiple advantages that we will see later. Regardless of the approach, once the private histograms have been computed, they are merged into the public copy by being added together. This merger is facilitated by the fact that addition is commutative and associative, so the order in which the private copies are added into the public copy does not matter. Fig. 9.8 shows an example of how privatization is applied to the image histogram example from Fig. 9.3. In this example, the threads are organized into thread blocks, where each thread block consists of 8 threads (in practice, thread blocks are much FIGURE 9.9 Histogram kernel with private bins per thread block in global memory.</p>
+<p>larger). Each thread block receives a private copy of the histogram that it updates. As shown in the figure, rather than having contention across all the threads that update the same histogram bin, contention will only be experienced between threads in the same block, and across blocks when merging the private copies at the end. Fig. 9.9 presents a simple kernel that creates and associates a private copy of the histogram to every block. Under this scheme, up to 1024 threads (the maximum allowed per block on current hardware) would work on the same private copy of the histogram. In this kernel, the private histograms are in the global memory. These private copies will likely be cached for reduced latency and improved throughput. The kernel in Fig. 9.9 takes an additional parameter bins_pool (line 02) that points to a pool of global memory allocated by the host to hold all the private copies of the histogram, which amounts to gridDim.x*NUM_BINS integers. Each thread adds an offset of blockIdx.x*NUM_BINS to the bins_pool array to find the location of its block’s private bins bins_priv. This offset shifts the position to the private copy for the block to which the thread belongs. The next part of the kernel in Fig. 9.9 (lines 06-12) is similar to the kernel in Fig. 9.6 with two key distinctions. The first distinction is that bins_priv is used instead of bins such that each thread block updates its own private set of bins. In this case, the level of contention is reduced by a factor that is approximately the number of active blocks across all SMs. The effect of reduced contention can result in a significant improvement in the update throughput for the kernel. The second distinction is that the atomic reference has a scope of cuda::thread_ scope_block (line 09), i.e., a block scope instead of a device scope. In other words, the atomic operations invoked with this reference only need to be synchronized with other threads in the same thread block, not the entire device. Depending on thehardware implementation of atomic operations, such narrower scope may be able to achieve shorter latencies and thus higher throughput. This narrower scope is possible because only threads in the same block contend on the bins in the block’s private histogram. At the end of the execution, each thread block will commit the values in its private copy to the public copy pointed to by bins (lines 15-21). The threads in the block first wait for each other to finish updating the private copy (line 13). Next, the threads iterate over the private histogram bins (line 15), each thread being responsible for committing one or more of the private bins. This iterative approach is used to accommodate an arbitrary number of bins that may be larger than the number of threads in the block. During each iteration, each thread reads the value of the private bin it is responsible for and checks if the bin is non-zero (line 16). If so, the thread commits the value by atomically adding it to the public copy (lines 17-19). Note that the addition needs to be performed atomically because threads from multiple blocks can be simultaneously performing the addition on the same location. Since only one thread from each block will be updating any given bins array element during this phase of the kernel execution, the level of contention for each location is modest. One benefit of creating a private copy of the histogram on a per-thread-block basis is that the threads can use __syncthreads() to wait for each other before committing the private copy to the public copy. Another benefit is that, if the number of bins in the histogram is small enough, the private copy of the histogram can be declared in the block’s shared memory. Recall that any reduction in latency directly translates into improved throughput of atomic operations on the same memory location. Hence, the latency for accessing memory can be dramatically reduced by placing bins in the shared memory. Shared memory is private to each SM and has very short access latency (a few cycles). This reduced latency directly translates into dramatic increase in the throughput of atomic operations. In GPUs that support thread block clusters and distributed shared memory, it is also possible to create a private copy of the histogram on a per-cluster basis. In this case, thread blocks in the same cluster can use cluster-level barrier synchronization to wait for each other before committing the private copy to the public copy. They can also place the private copy of the histogram in their distributed shared memory, which allows them to support a larger number of bins. Fig. 9.10 shows a privatized histogram kernel that stores the private copies of the histogram in the shared memory instead of global memory. The key difference from the kernel code in Fig. 9.9 is that the private copy of the histogram is allocated in shared memory in the bins_s array (line 04) and initialized to 0 in parallel by the threads of the block (line 05-07). The barrier synchronization (line 08) ensures that all bins of the private histogram have been properly initialized before any thread starts to update them. The remaining code is identical to Fig. 9.9, except for one distinction. The distinction is that the first atomic operation is performed on the elements of the shared memory array bins_s (line 14) and the private bin value is later read from there (line 20).</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-10.png" alt="Figure 9.10" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.10.</strong> Histogram kernel with private bins per thread block in shared memory.</p>
+<h2 id="sec-9-5">9.5 Thread coarsening<a class="td-heading-self-link" href="#sec-9-5" aria-label="Link to this heading"></a>
+</h2>
+<p>We have seen that privatization is effective at reducing the contention of atomic operations, and that storing the privatized histogram in the shared memory reduces the latency of each atomic operation. However, the overhead of privatization is the need to initialize private copies of the histogram and commit these private copies to the public copy. These initialize and commit operations are done once per thread block. Hence, the more thread blocks we use, the larger this overhead is. The overhead is usually worth paying when the thread blocks are executed in parallel. However, if the number of thread blocks launched exceeds the number that can be executed simultaneously by the hardware, the hardware scheduler will serialize these thread blocks. In this case, the privatization overhead is incurred unnecessarily. We can reduce the overhead of privatization via thread coarsening. In other words, we can reduce the number of private copies that need to be initialized and committed to the public copy by reducing the number of blocks and having each thread process multiple input elements. In this section, we look at two strategies for assigning multiple input elements to a thread: contiguous partitioning and interleaved partitioning. Fig. 9.11 shows an example of the contiguous partitioning strategy. The input is partitioned into contiguous segments and each segment is assigned to a thread. Fig. 9.12 shows the histogram kernel with coarsening applied using the contiguous partitioning strategy. The difference from Fig. 9.10 is on lines 10-12. In Fig. 9.10, the FIGURE 9.11 Contiguous partitioning of input elements.</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-12.png" alt="Figure 9.12" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.12.</strong> Histogram kernel with coarsening using contiguous partitioning.</p>
+<p>input element index i corresponds to the global thread index, so that each thread received one input element. In Fig. 9.11, each thread block is assigned to a contiguous block segment whose size is the coarsening factor COARSE_FACTOR times the number of threads in the block blockDim.x. The offset of the segment, segment, is found by multiplying the block index by the segment size (line 10). Within each block segment, each thread is assigned to a contiguous thread segment whose size is COARSE_FACTOR. A coarsening loop iterates through the thread segment (line 11). In each loop itera FIGURE 9.13 Interleaved partitioning of input elements.</p>
+<p>tion, the input element index i for a thread is found by adding the offset of the block segment, segment, the offset of the thread’s segment within the block, i.e., threadIdx.x*COARSE_FACTOR, and the coarsening counter c (line 12). Therefore, each thread accesses a contiguous segment of input elements. Partitioning data into contiguous segments is conceptually simple and intuitive. On a CPU, where parallel execution typically involves a small number of threads, contiguous partitioning is often the best performing strategy since the sequential access pattern by each thread makes good use of cache lines. Since each CPU cache typically supports only a small number of threads, there is little interference in cache usage by different threads. The data in cache lines, once brought in for a thread, can be expected to remain for the subsequent accesses. In contrast, contiguous partitioning on GPUs results in a sub-optimal memory access pattern. As we learned in Chapter 6, the large number of simultaneously active threads in an SM typically causes so much interference in the cache that one cannot expect data to remain in the cache for all the sequential accesses by a single thread. Instead, we need to make sure that threads in a warp access consecutive locations to enable memory coalescing. This observation motivates interleaved partitioning. Fig. 9.13 shows an example of the interleaved partitioning strategy. During the first iteration, the eight threads access pixels 0 through 7. With memory coalescing, the elements will be fetched with the smallest number of memory transactions. During the second iteration, the four threads access characters 8 through 15 in a coalesced manner as well. It should be clear why this is called interleaved partitioning: the partitions to be processed by different threads are interleaved with each other. Obviously, this is a toy example, and in reality, there will be many more threads. There are also more subtle performance considerations. For example, each thread should process four pixels (a 32-bit word) in each iteration to fully utilize the interconnect bandwidth between the caches and the SMs. Fig. 9.14 shows the histogram kernel with coarsening applied using the interleaved partitioning strategy. The difference from Fig. 9.12 is only on line 12. In the first iteration of the loop, when c is 0, each thread access data within its block segment using its local thread index (threadIdx.x): thread 0 accesses element segment + 0, thread 1 accesses element segment + 1, thread 2 accesses element segment + 2, etc.</p>
+<h2 id="sec-9-6">9.6 Thread-level privatization<a class="td-heading-self-link" href="#sec-9-6" aria-label="Link to this heading"></a>
+</h2>
+<img src="/pmpp5-zh/figs/orig/fig-9-14.png" alt="Figure 9.14" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.14.</strong> Histogram kernel with coarsening using interleaved partitioning.</p>
+<p>Thus, all threads jointly process the first blockDim.x elements of the block segment. In the second iteration, when c is 1, all threads add blockDim.x to their indices and jointly process the next section of blockDim.x elements. In general, in iteration c, each thread adds c*blockDim.x to the index of its first element (segment + threadIdx.x) to find the element it should process in that iteration.</p>
+<p>Applying thread coarsening to the histogram kernel creates the opportunity for another level of privatization at the level of the thread. Since each thread processes multiple input elements after coarsening, we can create a copy of the histogram that is private to the thread which the thread can update without using atomic operations. When the thread finishes processing all its input elements, it can then commit its thread-level private histogram to the block-level private histogram using atomic operations. One limiting factor for this optimization is the number of bins in the histogram. If the number of bins is very small, then it would be feasible to allocate a copy of the histogram for each thread. The thread may even place this copy in the shared memory or its own registers. However, if the number of bins in the histogram is large, allocating a private copy of the histogram for each thread would be prohibitively expensive.</p>
+<img src="/pmpp5-zh/figs/orig/fig-9-15.png" alt="Figure 9.15" loading="lazy" style="max-width:100%;height:auto;" />
+<p><strong>FIGURE 9.15.</strong> Histogram kernel with thread-level privatization.</p>
+<p>One workaround is to not store a private copy of every bin, but rather, only the frequently accessed bins. This workaround is possible because some data sets have a large concentration of identical data values in localized areas. For example, in pictures of the sky, there can be large patches of pixels of identical value. Such high concentration of identical values causes heavy contention and reduced throughput of parallel histogram computation. However, it presents a great opportunity for threadlevel privatization. For such data sets, a simple and yet effective optimization is for each thread to aggregate consecutive updates into a single update if they are updating the same element of the histogram. Thread-level privatization reduces the number of atomic operations to the highly contended histogram bins by having each thread to accumulate the count in a threadprivate bin, thus improving the effective throughput of the computation. Fig. 9.15 shows an image histogram kernel where each thread privatizes a single bin of the histogram: the most recently accessed one. The key changes compared to the kernel in Fig. 9.14 are as follows. The first pixel that a thread is responsible for is loaded (line 12) after a boundary check (line 11) and a thread-level private bin bin_r is initialized to 1 (line 13). Next, the coarsening loop starts at c = 1 (line 14) since the first input pixel has already been loaded. Whenever a new pixel is loaded to bNext (line 17), it is compared to the pixel value corresponding to the thread-level private bin (line 18). If they are the same, the thread simply increments the thread-level private bin (line 19). If they are different, the thread uses an atomic operation to add the thread-level private bin’s old value to the block-level private bin (lines 21-23). It then updates the thread-level private bin’s pixel value to the one it just loaded (line 24) and resets the bin’s counter to 1 (line 25). With this scheme, the update is always at least one element behind. In the extreme case where there are no similar pixels found by the thread, all the updates will simply be always one loop iteration behind. For this reason, after a thread has completed processing all input pixels and exited the loop, the thread needs to perform one more atomic operation for the last pixel (lines 29-31). One important observation is that the kernel with thread-level privatization requires more statements and variables. Thus, if the similarity between consecutive pixel values is low, the kernel may execute at slower speed than the previous kernel. However, if the data distribution exhibits high repetitiveness, thread-level privatization may result in significantly higher speed. The added if-statement can potentially exhibit control divergence. However, if there is either no similarity or heavy similarity, there will be little control divergence since the threads would be all either incrementing the private bin or performing the atomic operation. In the case where control divergence does occur, the control divergence is likely compensated by the reduced contention.</p>
+<h2 id="sec-9-7">9.7 Summary<a class="td-heading-self-link" href="#sec-9-7" aria-label="Link to this heading"></a>
+</h2>
+<p>Computing histograms is important for analyzing large data sets. It also represents an important class of parallel computation patterns where the output location of each thread is data-dependent, which makes it infeasible to apply owner-computes rule. It is therefore a natural vehicle for introducing the concept of read-modify-write race conditions, and the practical use of atomic operations that ensure the integrity of concurrent read-modify-write operations to the same memory location. Unfortunately, as we explained in this chapter, atomic operations have much lower throughput than simpler memory read or write operations because their throughput is approximately the inverse of two times the memory latency. Thus, in the presence of heavy contention, histogram computation can have surprisingly low computation throughput. Privatization is introduced as an important optimization technique that systematically reduces contention and can further enable the use of shared memory which supports low latency and thus high throughput. In fact, supporting fast atomic operations among threads in a block is an important use case of the shared memory. Thread coarsening is also applied to reduce the number of private copies that need to be merged, and different coarsening strategies that use contiguous partitioning and interleaved partitioning were compared. Finally, thread-level privatization can also lead to further reduction in contention of atomic operations, especially for data sets with high similarity between different data elements.</p>
+<h2 id="sec-9-8">9.8 Exercises<a class="td-heading-self-link" href="#sec-9-8" aria-label="Link to this heading"></a>
+</h2>
+<p>\1. Assume that each atomic operation in a DRAM system has a total latency of 100 ns. What is the maximal throughput we can get for atomic operations on the same global memory variable? 2. For a processor that supports atomic operations in L2 cache, assume that each atomic operation takes 4 ns to complete in L2 cache and 100 ns to complete in DRAM. Assume that 90% of the atomic operations hit in L2 cache. What is the approximate throughput for atomic operations on the same global memory variable? 3. In Question 1, assume that a kernel performs 5 floating-point operations per atomic operation. What is the maximal floating-point throughput of the kernel execution as limited by the throughput of the atomic operations? 4. In Question 1, assume that we privatize the global memory variable into shared memory variables in the kernel and the shared memory access latency is 1 ns. All original global memory atomic operations are converted into shared memory atomic operation. For simplicity, assume that the additional global memory atomic operations for accumulating privatized variables into the global variable add 10% to the total execution time. Assume that a kernel performs 5 floating-point operations per atomic operation. What is the maximal floating-point throughput of the kernel execution as limited by the throughput of the atomic operations? 5. Consider a histogram kernel that processes an input with 524,288 elements to produce a histogram with 128 bins. The kernel is configured with 1024 threads per block. a. What is the total number of atomic operations performed on global memory by the kernel in Fig. 9.6 where no privatization, shared memory, and thread coarsening are used? b. What is the maximum number of atomic operations that may be performed on global memory by the kernel in Fig. 9.10 where privatization and shared memory are used, but not thread coarsening? c. What is the maximum number of atomic operations that may be performed on global memory by the kernel in Fig. 9.14 where privatization, shared memory, and thread coarsening are used with a coarsening factor of 4?</p>
+<p>References [1] C++ reference, <a href="https://cppreference.com">https://cppreference.com</a>, 2025.</p>
+<p>CHAPTER</p>
+<p>Reduction And mitigating control divergence</p>
+<h2 id="sec-refs">References<a class="td-heading-self-link" href="#sec-refs" aria-label="Link to this heading"></a>
+</h2>
+<p>[1] C++ reference, <a href="https://cppreference.com">https://cppreference.com</a>, 2025.</p>
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="Previous / Next">
+  <a class="td-pager__link td-pager__link--prev" href="/pmpp5-zh/en/book/08-ch8/"
+    aria-label="Previous - Chapter 8 Stencil computation" title="Chapter 8 Stencil computation" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">Chapter 8 Stencil computation</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="/pmpp5-zh/en/book/10-ch10/"
+    aria-label="Next - Chapter 10 Reduction" title="Chapter 10 Reduction" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">Chapter 10 Reduction</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="Content">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="Hide table of contents" aria-label="Hide table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="Collapse section: Content"
+            data-td-label-expand="Expand section: Content"
+            data-td-label-collapse="Collapse section: Content"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">Content</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#sec-9-1">9.1 Background</a></li>
+    <li><a href="#sec-9-2">9.2 Atomic operations and a basic histogram kernel</a></li>
+    <li><a href="#sec-9-3">9.3 Latency and throughput of atomic operations</a></li>
+    <li><a href="#sec-9-4">9.4 Privatization</a></li>
+    <li><a href="#sec-9-5">9.5 Thread coarsening</a></li>
+    <li><a href="#sec-9-6">9.6 Thread-level privatization</a></li>
+    <li><a href="#sec-9-7">9.7 Summary</a></li>
+    <li><a href="#sec-9-8">9.8 Exercises</a></li>
+    <li><a href="#sec-refs">References</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="Show table of contents" aria-label="Show table of contents"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors"><a href="https://github.com/CodingPracticeGroup">CodingPracticeGroup</a></span>
+  </span><span class="td-footer__all_rights_reserved">All Rights Reserved</span></div>
+  <div class="td-shell-footline__center">Powered by <a href="https://oink.pgsty.com">Oink</a></div>
+  <div class="td-shell-footline__right">
+    <div class="td-language-selector td-language-selector--menu td-shell-footline__language">
+  <a class="td-language-selector__trigger" href="/pmpp5-zh/book/09-ch9/"
+    lang="zh-CN" hreflang="zh-CN" dir="ltr"
+    title="Switch language: 简体中文"
+    aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="false"><i class="td-shell-icon td-shell-icon--languages fa-solid fa-language" aria-hidden="true"></i>
+    <span>简体中文</span>
+  </a>
+  <ul aria-label="Choose language">
+    <li>
+      <a class="td-language-selector__item" href="/pmpp5-zh/book/09-ch9/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
+    </li>
+    <li>
+      <span class="td-language-selector__item active" lang="en-US" dir="ltr" aria-current="page">English</span>
+    </li>
+  </ul>
+</div>
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">Appearance</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">Color mode</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="Keyboard shortcuts" aria-label="Keyboard shortcuts"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="Keyboard shortcuts">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>Keyboard shortcuts</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">Section navigation</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>Move through sidebar</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>Collapse or expand section</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>Open focused page</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>Previous or next heading</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>Previous or next page</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">Actions</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>Reading mode</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>B</kbd></span></dt>
+          <dd>Duo View</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>L</kbd><kbd>Y</kbd></span></dt>
+          <dd>Switch language</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>Switch theme</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>Cycle top-level pages</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://codingpracticegroup.github.io/pmpp5-zh/en/book/09-ch9/"},{"available":false,"description":"Open in ChatGPT","disabledReason":"Open in ChatGPT: unavailable","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":""},{"available":false,"description":"Open in Claude","disabledReason":"Open in Claude: unavailable","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":""},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/commits/main/content/book/09-ch9.en.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/edit/main/content/book/09-ch9.en.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/new/main/content/book?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/CodingPracticeGroup/pmpp5-zh/issues/new?title=Chapter+9+Histogram"},{"available":false,"description":"Create project issue","disabledReason":"Create project issue: unavailable","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":""},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/pmpp5-zh/book/09-ch9/"},{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/pmpp5-zh/en/book/09-ch9/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/CodingPracticeGroup/pmpp5-zh"},{"available":true,"description":"Open duo view","disabledReason":"","icon":"fa-solid fa-code-compare","id":"compare_translations","keywords":["Duo View","Open duo view","duo","bilingual","compare","side by side","translation","language"],"kind":"invoke","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Duo View","url":""}],"commands":[],"language":"en","quickLinks":[],"rootOrder":["book"],"version":1}</script>
+
+<script src="/pmpp5-zh/js/actions.min.2aeb63bf48018c2d5fced00395caa4fe7f5b0191aeeb7dff548179af5dc43975.js" integrity="sha256-Kutjv0gBjC1fztADlcqk/n9bAZGu633/VIF5r13EOXU=" crossorigin="anonymous"></script>
+<script src="/pmpp5-zh/js/core.min.b6f34c1986b5fb1128c12e10b05fb74dbfe585b0f18775e5b887eef087655f74.js" integrity="sha256-tvNMGYa1&#43;xEowS4QsF&#43;3Tb/lhbDxh3XluIfu8IdlX3Q=" crossorigin="anonymous"></script>
+  <script src="/pmpp5-zh/js/chunks/shell.min.25c0499cabbfae18a2beb8af398703e74b0ad6fe7d6b95052c218673c73dede1.js" integrity="sha256-JcBJnKu/rhiivrivOYcD50sK1v59a5UFLCGGc8c97eE=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/keyboard.min.8f875d60d4dc1b7914f96b2368c9dd3c3b44e49cd45ac2cff53dc2e1c318cf23.js" integrity="sha256-j4ddYNTcG3kU&#43;WsjaMndPDtE5JzUWsLP9T3C4cMYzyM=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="/pmpp5-zh/js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script type="application/json" id="td-compare-config">{"current":{"label":"English","url":"/pmpp5-zh/en/book/09-ch9/"},"integrity":"sha256-2eGAtZCLtHlal7jq3R+ygreZhrXW2lzICBgnMIvMlWw=","labels":{"approximate":"Some headings differ between the two pages, so positions between matching headings are estimated.","close":"Close","error":"Could not load this page.","language":"Choose language","loading":"Loading…","open":"Open","progress":"No usable shared heading can align these pages, so sync follows overall reading progress.","retry":"Retry","sync":"Sync Scroll","title":"Duo View","unavailable":"Sync is unavailable because the headings are duplicated or out of order."},"shortcut":"B","src":"/pmpp5-zh/js/chunks/document-compare.min.d9e180b5908bb4795a97b8eadd1fb282b79986b5d6da5cc8081827308bcc956c.js","targets":[{"code":"zh-CN","direction":"ltr","label":"简体中文","url":"/pmpp5-zh/book/09-ch9/"}]}</script><script src="/pmpp5-zh/js/chunks/compare-entry.min.c83074eb263789d1f7a0e5f2541dd7e4b6552ab1c135da243d86c1282a5ab37e.js" integrity="sha256-yDB06yY3idH3oOXyVB3X5LZVKrHBNdokPYbBKCpas34=" crossorigin="anonymous"></script>
+  </body>
+</html>
