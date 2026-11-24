@@ -47,58 +47,8 @@ H3 \(E\) 的移码表示 {#sec-x-2}
 IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（biased encoding）**约定。若使用 \(e\) 位表示指数 \(E\)，就在指数的二进制补码表示上加 \(2^{e-1}-1\)，形成移码表示。二进制补码系统通过先把数值逐位取反，再给结果加一，得到该数的负值。在 3 位指数表示中，\(e=3\)，因而把 \(2^{3-1}-1=011\) 加到指数值的二进制补码表示上。
 
 <figure id="fig:a-1">
-<table>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>二进制补码</strong></th>
-<th style="text-align: center;"><strong>十进制值</strong></th>
-<th style="text-align: center;"><strong>移 3 码</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">101</td>
-<td style="text-align: center;"><span class="math inline">−3</span></td>
-<td style="text-align: center;">000</td>
-</tr>
-<tr>
-<td style="text-align: center;">110</td>
-<td style="text-align: center;"><span class="math inline">−2</span></td>
-<td style="text-align: center;">001</td>
-</tr>
-<tr>
-<td style="text-align: center;">111</td>
-<td style="text-align: center;"><span class="math inline">−1</span></td>
-<td style="text-align: center;">010</td>
-</tr>
-<tr>
-<td style="text-align: center;">000</td>
-<td style="text-align: center;"><span class="math inline">0</span></td>
-<td style="text-align: center;">011</td>
-</tr>
-<tr>
-<td style="text-align: center;">001</td>
-<td style="text-align: center;"><span class="math inline">1</span></td>
-<td style="text-align: center;">100</td>
-</tr>
-<tr>
-<td style="text-align: center;">010</td>
-<td style="text-align: center;"><span class="math inline">2</span></td>
-<td style="text-align: center;">101</td>
-</tr>
-<tr>
-<td style="text-align: center;">011</td>
-<td style="text-align: center;"><span class="math inline">3</span></td>
-<td style="text-align: center;">110</td>
-</tr>
-<tr>
-<td style="text-align: center;">100</td>
-<td style="text-align: center;">保留模式</td>
-<td style="text-align: center;">111</td>
-</tr>
-</tbody>
-</table>
-<figcaption>按移 3 码次序排列的移 3 编码。依据原书图 A.1 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-1.png" alt="图 a.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>按移 3 码次序排列的移 3 编码。</figcaption>
 </figure>
 
 移码表示允许用无符号比较器比较两个指数，就像它们是无符号数一样。如图 .1 所示，在 3 位指数表示中，移 3 位模式随数值从 \(-3\) 到 3 单调递增。我们把每个位模式称为相应数值的码。例如，\(-3\) 的码是 000，3 的码是 110。因此，用无符号数比较器比较 \(-3\) 到 3 中任意一对指数值的移 3 码，比较器都能正确判断哪个数更大或更小。例如，用无符号比较器比较移 3 码 001 和 100，结果是 001 小于 100；这与它们表示的数值 \(-2\) 与 1 的关系完全一致。
@@ -122,72 +72,29 @@ IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（bi
 一种表示格式的**可表示数（representable number）**，是能够用该格式精确表示的数。例如，3 位无符号整数格式的可表示数见图 .2。
 
 <figure id="fig:a-2">
-<div class="minipage">
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">位模式</th>
-<th style="text-align: center;">数值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">000</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr>
-<td style="text-align: center;">001</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr>
-<td style="text-align: center;">010</td>
-<td style="text-align: center;">2</td>
-</tr>
-<tr>
-<td style="text-align: center;">011</td>
-<td style="text-align: center;">3</td>
-</tr>
-<tr>
-<td style="text-align: center;">100</td>
-<td style="text-align: center;">4</td>
-</tr>
-<tr>
-<td style="text-align: center;">101</td>
-<td style="text-align: center;">5</td>
-</tr>
-<tr>
-<td style="text-align: center;">110</td>
-<td style="text-align: center;">6</td>
-</tr>
-<tr>
-<td style="text-align: center;">111</td>
-<td style="text-align: center;">7</td>
-</tr>
-</tbody>
-</table>
-</div>
-<figcaption>3 位无符号整数格式的可表示数。依据原书图 A.2 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-2.png" alt="图 a.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>3 位无符号整数格式的可表示数。</figcaption>
 </figure>
 
 上述格式既不能表示 \(-1\)，也不能表示 9。还可以在数轴上标出全部可表示数，如图 .3 所示，3 位无符号整数格式的所有可表示数都用圆点标出。
 
 <figure id="fig:a-3">
-<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-1.png" alt="本章图示 1" loading="lazy" />
-<figcaption>3 位无符号整数格式的可表示数在数轴上的位置。依据原书图 A.3 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-3.png" alt="图 a.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>3 位无符号整数格式的可表示数在数轴上的位置。</figcaption>
 </figure>
 
 浮点格式的可表示数也可以用类似方式观察。图 .4 给出目前讨论的格式及其两个变体的全部可表示数。为了控制表格大小，这里采用 5 位格式：1 位 \(S\)、2 位 \(E\)（移 1 码）和 2 位 \(M\)（省略 “\(1.\)” 部分）。“无零”列给出前文格式的可表示数。建议读者使用第 .1 节的公式，至少自行生成“无零”列的一部分。注意，这种格式不能表示 0。
 
 <figure id="fig:a-4">
-
-<figcaption>无零、突发下溢和反规格化格式的可表示数。依据原书图 A.4 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-4.png" alt="图 a.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>无零、突发下溢和反规格化格式的可表示数。</figcaption>
 </figure>
 
 从图 .5 所示的数轴上观察这些可表示数，还能获得更多认识。图中只画出正的可表示数；负数关于 0 与相应的正数对称。
 
 <figure id="fig:a-5">
-<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-2.png" alt="本章图示 2" loading="lazy" />
-<figcaption>无零表示中的正可表示数。依据原书图 A.5 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-5.png" alt="图 a.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>无零表示中的正可表示数。</figcaption>
 </figure>
 
 可以得到五点观察。第一，指数位定义可表示数的主要区间。图 .5 的指数有 2 位，因此 0 的每一侧都有三个主要区间。主要区间基本都位于相邻的 2 的幂之间。2 位指数中有一个保留位模式 11，所以存在三个 2 的幂：\(2^{-1}=0.5_D\)、\(2^0=1.0_D\) 和 \(2^1=2.0_D\)，每个幂都是一个可表示数区间的起点。0 左侧还有三个未在图中画出的 2 的幂： \(-2^{-1}=-0.5_D\)、\(-2^0=-1.0_D\) 和 \(-2^1=-2.0_D\)。
@@ -216,8 +123,8 @@ IEEE 标准实际采用的方法称为**反规格化（denormalization）**。�
 **译者注：**底本上述段落写作“如图 A.6 所示，只要 \(E=0\)”，但图 A.6 只是突发下溢格式的数轴；展示 \(E=0\) 三种解释的是图 A.4。本译稿按实际图意修正引用。
 
 <figure id="fig:a-7">
-<img src="/pmpp5-zh/figs/appendix-a-numerical-considerations-4.png" alt="本章图示 4" loading="lazy" />
-<figcaption>反规格化格式的正可表示数。依据原书图 A.7 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-7.png" alt="图 a.7" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>反规格化格式的正可表示数。</figcaption>
 </figure>
 
 反规格化公式相当复杂。硬件还必须检测一个数是否落在反规格化区间，并为它选择合适的表示。高速实现反规格化可能需要大量硬件；硬件规模适中的实现每次生成或使用反规格化数时，常会引入数千个时钟周期的延迟。这正是早期 CUDA 设备不支持反规格化的原因。不过，较新制程提供了更多可用晶体管，近代各代 CUDA 设备几乎都已支持反规格化\[4\]。 CUDA 程序员可以设置 NVCC 编译器标志 `ftz=true`（开启）或 `ftz=false` （关闭），控制 GPU 算术单元是否使用反规格化。
@@ -231,38 +138,8 @@ IEEE 标准实际采用的方法称为**反规格化（denormalization）**。�
 **译者注：**底本写作“区间数增加 \(2^{2^3}=256\) 倍”。8 位指数增加到 11 位时，指数位模式数量增加 \(2^3=8\) 倍，而不是 256 倍；本译稿按位模式数量作最小修正。
 
 <figure id="fig:a-8">
-<table>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>指数</strong></th>
-<th style="text-align: center;"><strong>尾数</strong></th>
-<th style="text-align: center;"><strong>含义</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;"><span class="math inline">11…1</span></td>
-<td style="text-align: center;"><span class="math inline"> ≠ 0</span></td>
-<td style="text-align: center;">NaN</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">11…1</span></td>
-<td style="text-align: center;"><span class="math inline"> = 0</span></td>
-<td style="text-align: center;"><span class="math inline">(−1)<sup><em>S</em></sup> × ∞</span></td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">00…0</span></td>
-<td style="text-align: center;"><span class="math inline"> ≠ 0</span></td>
-<td style="text-align: center;">反规格化数</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">00…0</span></td>
-<td style="text-align: center;"><span class="math inline"> = 0</span></td>
-<td style="text-align: center;">0</td>
-</tr>
-</tbody>
-</table>
-<figcaption>IEEE 标准格式中的特殊位模式。依据原书图 A.8 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-8.png" alt="图 a.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>IEEE 标准格式中的特殊位模式。</figcaption>
 </figure>
 
 IEEE 浮点格式的特殊位模式见图 .8。当指数位全为 1 且尾数为 0 时，所表示的数为无穷。所有可表示数都位于 \(-\infty\)（负无穷）与 \(+\infty\)（正无穷）之间。溢出可以产生 \(\infty\)，例如用一个大数除以一个很小的数。也就是说，浮点算术操作产生超出可表示数范围的数值时，输出会饱和到正无穷或负无穷；这与整数算术不同，后者的结果超出可表示范围时会发生回绕或产生未定义值。任何可表示数除以 \(+\infty\) 或 \(-\infty\) 都得到 0。
@@ -350,43 +227,8 @@ NaN 可能对应许多位模式。例如，在单精度格式中，最高尾数�
 只要这三个方程表示的平面存在交点，就可以用高斯消元求得交点坐标。图 .9 展示了过程，其中各变量从位置较低的方程中依次消去。
 
 <figure id="fig:a-9">
-<table>
-<tbody>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}3X+5Y+2Z&amp;=19\\2X+3Y+Z&amp;=11\\X+2Y+2Z&amp;=11\end{aligned}$</span></td>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X+\frac53Y+\frac23Z&amp;=\frac{19}3\\X+\frac32Y+\frac12Z&amp;=\frac{11}2\\X+2Y+2Z&amp;=11\end{aligned}$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">原方程</td>
-<td style="text-align: center;">步骤 1：各方程除以 <span class="math inline"><em>X</em></span> 的系数</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X+\frac53Y+\frac23Z&amp;=\frac{19}3\\-\frac16Y-\frac16Z&amp;=-\frac56\\\frac13Y+\frac43Z&amp;=\frac{14}3\end{aligned}$</span></td>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X+\frac53Y+\frac23Z&amp;=\frac{19}3\\Y+Z&amp;=5\\Y+4Z&amp;=14\end{aligned}$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 2：从方程 2、3 减去方程 1</td>
-<td style="text-align: center;">步骤 3：方程 2 除以 <span class="math inline">−1/6</span>，方程 3 除以 <span class="math inline">1/3</span></td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X+\frac53Y+\frac23Z&amp;=\frac{19}3\\Y+Z&amp;=5\\3Z&amp;=9\end{aligned}$</span></td>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X+\frac53Y+\frac23Z&amp;=\frac{19}3\\Y+Z&amp;=5\\Z&amp;=3\end{aligned}$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 4：方程 3 减去方程 2</td>
-<td style="text-align: center;">步骤 5：方程 3 除以 3，求得 <span class="math inline"><em>Z</em></span></td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X+\frac53Y+\frac23Z&amp;=\frac{19}3\\Y&amp;=2\\Z&amp;=3\end{aligned}$</span></td>
-<td style="text-align: center;"><span class="math inline">$\begin{aligned}X&amp;=1\\Y&amp;=2\\Z&amp;=3\end{aligned}$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 6：把 <span class="math inline"><em>Z</em></span> 回代方程 2，求得 <span class="math inline"><em>Y</em></span></td>
-<td style="text-align: center;">步骤 7：把 <span class="math inline"><em>Y</em>, <em>Z</em></span> 回代方程 1，求得 <span class="math inline"><em>X</em></span></td>
-</tr>
-</tbody>
-</table>
-<figcaption>用高斯消元和回代求解线性方程组。依据原书图 A.9 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-9.png" alt="图 a.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>用高斯消元和回代求解线性方程组。</figcaption>
 </figure>
 
 第一步中，所有方程分别除以各自的 \(X\) 系数：方程 1 除以 3，方程 2 除以 2，方程 3 除以 1，使所有方程的 \(X\) 系数相同。第二步从方程 2 和方程 3 中减去方程 1，从而消去二者中的 \(X\)，如图 .9 所示。
@@ -398,43 +240,8 @@ NaN 可能对应许多位模式。例如，在单精度格式中，最高尾数�
 实际中，计算机会以矩阵形式存储方程。全部计算只涉及系数和等号右侧的值，所以只需把这些值存入矩阵。图 .10 从矩阵视角展示高斯消元和回代过程。矩阵的每一行对应一个原始方程，对方程的操作变为对矩阵行的操作。
 
 <figure id="fig:a-10">
-<table>
-<tbody>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}3&amp;5&amp;2&amp;19\\2&amp;3&amp;1&amp;11\\1&amp;2&amp;2&amp;11\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;5/3&amp;2/3&amp;19/3\\1&amp;3/2&amp;1/2&amp;11/2\\1&amp;2&amp;2&amp;11\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">原矩阵</td>
-<td style="text-align: center;">步骤 1</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;5/3&amp;2/3&amp;19/3\\0&amp;-1/6&amp;-1/6&amp;-5/6\\0&amp;1/3&amp;4/3&amp;14/3\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;5/3&amp;2/3&amp;19/3\\0&amp;1&amp;1&amp;5\\0&amp;1&amp;4&amp;14\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 2</td>
-<td style="text-align: center;">步骤 3</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;5/3&amp;2/3&amp;19/3\\0&amp;1&amp;1&amp;5\\0&amp;0&amp;3&amp;9\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;5/3&amp;2/3&amp;19/3\\0&amp;1&amp;1&amp;5\\0&amp;0&amp;1&amp;3\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 4</td>
-<td style="text-align: center;">步骤 5</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;5/3&amp;2/3&amp;19/3\\0&amp;1&amp;0&amp;2\\0&amp;0&amp;1&amp;3\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;0&amp;0&amp;1\\0&amp;1&amp;0&amp;2\\0&amp;0&amp;1&amp;3\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 6</td>
-<td style="text-align: center;">步骤 7</td>
-</tr>
-</tbody>
-</table>
-<figcaption>矩阵视角下的高斯消元和回代。依据原书图 A.10 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-10.png" alt="图 a.10" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>矩阵视角下的高斯消元和回代。</figcaption>
 </figure>
 
 高斯消元后，矩阵变成三角矩阵。由于物理和数学方面的多种原因，这是一类非常常见的矩阵。最终目标是把矩阵的系数部分变为对角形式，每行在对角线上只有一个值 1。这称为单位矩阵，因为任意矩阵与单位矩阵相乘仍为自身。这也说明了为什么对一个矩阵执行高斯消元，等价于用该矩阵的逆矩阵乘它。
@@ -468,49 +275,8 @@ NaN 可能对应许多位模式。例如，在单精度格式中，最高尾数�
 方程 \(1'\) 中 \(X\) 的系数不再为 0，可以继续执行高斯消元，如图 .11 所示。
 
 <figure id="fig:a-11">
-<table>
-<tbody>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}0&amp;5&amp;2&amp;16\\2&amp;3&amp;1&amp;11\\1&amp;2&amp;2&amp;11\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}2&amp;3&amp;1&amp;11\\0&amp;5&amp;2&amp;16\\1&amp;2&amp;2&amp;11\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">原矩阵</td>
-<td style="text-align: center;">选主元：交换第 1、2 行</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;3/2&amp;1/2&amp;11/2\\0&amp;5&amp;2&amp;16\\1&amp;2&amp;2&amp;11\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;3/2&amp;1/2&amp;11/2\\0&amp;5&amp;2&amp;16\\0&amp;1/2&amp;3/2&amp;11/2\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 1：第 1 行除以 2</td>
-<td style="text-align: center;">步骤 2：第 3 行减去第 1 行</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;3/2&amp;1/2&amp;11/2\\0&amp;1&amp;2/5&amp;16/5\\0&amp;1&amp;3&amp;11\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;3/2&amp;1/2&amp;11/2\\0&amp;1&amp;2/5&amp;16/5\\0&amp;0&amp;13/5&amp;39/5\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 3</td>
-<td style="text-align: center;">步骤 4</td>
-</tr>
-<tr>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;3/2&amp;1/2&amp;11/2\\0&amp;1&amp;2/5&amp;16/5\\0&amp;0&amp;1&amp;3\end{array}\right]$</span></td>
-<td style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;3/2&amp;1/2&amp;11/2\\0&amp;1&amp;0&amp;2\\0&amp;0&amp;1&amp;3\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td style="text-align: center;">步骤 5：求得 <span class="math inline"><em>Z</em></span></td>
-<td style="text-align: center;">步骤 6：求得 <span class="math inline"><em>Y</em></span></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: center;"><span class="math inline">$\left[\begin{array}{ccc|c}1&amp;0&amp;0&amp;1\\0&amp;1&amp;0&amp;2\\0&amp;0&amp;1&amp;3\end{array}\right]$</span></td>
-</tr>
-<tr>
-<td colspan="2" style="text-align: center;">步骤 7：求得 <span class="math inline"><em>X</em></span></td>
-</tr>
-</tbody>
-</table>
-<figcaption>带选主元的高斯消元。依据原书图 A.11 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-11.png" alt="图 a.11" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>带选主元的高斯消元。</figcaption>
 </figure>
 
 **译者注：**底本图 A.11 的第 5 步把第一行写成 \([1,5/3,2/3\mid19/3]\)，这是图 A.10 中前一个方程组的数据；对本例而言，该行应继续保持为 \([1,3/2,1/2\mid11/2]\)。本译稿按步骤 1 的结果重绘，后续回代结果不变。

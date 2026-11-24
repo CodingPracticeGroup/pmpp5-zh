@@ -138,6 +138,51 @@ def clean_en_paras(paras, titles_compact, sec_no):
     return body, refs
 
 
+
+FIGMAP = {}
+def load_figmap():
+    global FIGMAP
+    if not FIGMAP:
+        try:
+            raw = json.load(open("/tmp/pmpp_figmap.json"))
+            FIGMAP = {k: v.get("png") for k, v in raw.items() if v.get("png")}
+        except FileNotFoundError:
+            pass
+    return FIGMAP
+
+def fig_png(fid):
+    """figure id '10-7'/'b-7' → 原图文件名。"""
+    key = fid.split("-", 1)
+    k = key[0].upper() + "." + key[1]
+    return load_figmap().get(k)
+
+def swap_fig_block(m):
+    fid = m.group(1)
+    png = fig_png(fid)
+    if not png:
+        return m.group(0)
+    capm = re.search(r"<figcaption>(.*?)</figcaption>", m.group(0), re.S)
+    cap = capm.group(1) if capm else ""
+    cap = re.sub(r"[（(]?依据原书图\s*[0-9A-Za-z.\-]+\s*重绘[)）]?[。]?\s*", "", cap).strip()
+    num = fid.replace("-", ".")
+    img = f'<img src="{BASE}/figs/orig/{png}" alt="图 {num}" loading="lazy" style="max-width:100%;height:auto;" />'
+    if not cap:
+        cap = f"图 {num}（原书插图）"
+    return f'<figure id="fig:{fid}">\n{img}\n<figcaption>{cap}</figcaption>\n</figure>'
+
+def swap_en_figs(md):
+    """英文侧: FIGURE 题注行上方插入原图。"""
+    def rep(m):
+        fid = m.group(1).replace(".", "-").lower()
+        png = fig_png(fid)
+        if not png:
+            return m.group(0)
+        return (f'<img src="{BASE}/figs/orig/{png}" alt="Figure {m.group(1)}" '
+                f'loading="lazy" style="max-width:100%;height:auto;" />\n\n'
+                f'**FIGURE {m.group(1)}.** ')
+    return re.sub(r"^(?:\*\*)?FIGURE ([0-9]+\.[0-9]+[a-z]?|[A-C]\.[0-9]+[a-z]?)(?:\.\*\*)?\s*", rep, md, flags=re.M)
+
+
 def build_chapter(name, title_zh, idx):
     cnum = chap_num(name)
     src = open(os.path.join(DOCSDIR, f"{name}.md"), encoding="utf-8").read()
@@ -259,7 +304,9 @@ def build_chapter(name, title_zh, idx):
     zh_md = re.sub(r"!\[([^\]]*)\]\(" + re.escape(BASE) + r"/figs/([^)]+)\)",
                    lambda m: f'<img src="{BASE}/figs/{m.group(2)}" alt="{m.group(1)}" loading="lazy" />', zh_md)
     en_md = "\n".join(fm_en) + "\n" + "\n\n".join(x.strip("\n") for x in en_final if x.strip()) + "\n"
-    os.makedirs(OUT, exist_ok=True)
+    # 全书插图统一用原书 PDF 截图
+    zh_md = re.sub(r'<figure id="fig:([0-9A-Za-z]+-[0-9A-Za-z]+)">.*?</figure>', swap_fig_block, zh_md, flags=re.S)
+    en_md = swap_en_figs(en_md)
     slug = f"{weight:02d}-ch{cnum.lower()}"
     open(os.path.join(OUT, f"{slug}.md"), "w", encoding="utf-8").write(zh_md)
     open(os.path.join(OUT, f"{slug}.en.md"), "w", encoding="utf-8").write(en_md)

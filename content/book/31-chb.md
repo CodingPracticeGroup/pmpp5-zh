@@ -61,8 +61,8 @@ y=\operatorname{sign}(W\cdot x+b),
 \(W\) 的元素先与 \(x\) 的相应元素相乘，成对乘积再在点积中相加，因此它们是最终和中各 \(x\) 元素的加权系数，通常称为模型的**权重（weight）**。由于 \(f\) 是输入激活函数 sign 的 \(x\) 的线性函数，感知机是一种线性分类器。
 
 <figure id="fig:b-1">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-1.png" alt="本章图示 1" loading="lazy" />
-<figcaption>输入为二维向量的感知机线性分类器示例。依据原书图 B.1 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-1.png" alt="图 b.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>输入为二维向量的感知机线性分类器示例。</figcaption>
 </figure>
 
 图 .1 给出输入为二维向量 \((x_1,x_2)\) 的感知机示例。模型 \(\theta\) 由权重向量 \((w_1,w_2)\) 和偏置常数 \(b\) 组成。线性表达式 \(w_1x_1+w_2x_2+b\) 在 \(x_1\)–\(x_2\) 空间中定义一条直线，把空间分成两部分：一部分中的所有点使表达式大于 0，另一部分中的所有点使表达式小于 0，直线上的所有点使表达式等于 0。
@@ -85,8 +85,8 @@ H3 多层分类器 {#sec-x-1}
 考虑图 .2 中的分类器。假设所有输入坐标都在 \([0,1]\) 范围内。分类器应把 \(x_1\) 和 \(x_2\) 都大于 0.5 的所有点，即落在定义域右上象限的点，分为类别 1，其余点分为类别 0 或 \(-1\)。图 .2(a) 所示的一条直线可以近似实现这一分类器。例如，直线 \(2x_1+2x_2-3=0\) 能正确分类大多数点；但某些 \(x_1,x_2\) 都大于 0.5、二者之和却小于 1.5 的浅色点，例如 \((0.55,0.65)\)，会被错误地分到类别 \(-1\)（深色区域）。任何直线都必然切掉右上象限的一部分，或纳入定义域其余部分的一部分，所以不存在能正确分类所有可能输入的单条直线。
 
 <figure id="fig:b-2">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-2.png" alt="本章图示 2" loading="lazy" />
-<figcaption>多层感知机示例：（a）单条直线只能近似划分输入；（b）两层感知机精确实现所需分类。依据原书图 B.2 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-2.png" alt="图 b.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>多层感知机示例：（a）单条直线只能近似划分输入；（b）两层感知机精确实现所需分类。</figcaption>
 </figure>
 
 **多层感知机（multi-layer perceptron，MLP）**允许使用多条直线实现更复杂的分类模式。多层感知机的每一层包含一个或多个感知机，某一层感知机的输出是下一层感知机的输入。它有一个有趣而实用的性质：第一层输入可能有无穷多个取值，第一层输出、也就是第二层输入却只能有较少的可能值。例如，把图 .1 的感知机用作第一层时，其输出只可能是 \(-1,0,1\)。
@@ -100,8 +100,8 @@ H3 多层分类器 {#sec-x-1}
 两层感知机仍有显著局限。例如，假设要建立感知机，对图 .3(a) 所示输入点分类。浅色输入点在第二层可能形成 \((-1,-1)\) 或 \((1,1)\)，无法用一条直线正确分类第二层中的点。图 .3(b) 在第二层增加一个感知机，从而增加另一条直线；其函数可以是 \(z_2=\operatorname{sign}(-2y_1-2y_2-3)\) 或它的小幅变体。读者可以验证，图 .3(b) 中所有深色点都会映射到 \(z_1\)–\(z_2\) 空间的 \((-1,-1)\)，而 \(y_1\)–\(y_2\) 空间中的 \((1,1)\) 和 \((-1,-1)\) 分别映射到 \(z_1\)–\(z_2\) 空间的 \((1,-1)\) 和 \((-1,1)\)。现在可以画直线 \(z_1+z_2+1=0\) 或它的小幅变体，正确分类这些点，如图 .3(c) 所示。显然，如果需要把输入定义域分成更多区域，可能需要更多层。
 
 <figure id="fig:b-3">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-3.png" alt="本章图示 3" loading="lazy" />
-<figcaption>需要两层以上感知机的分类模式。依据原书图 B.3 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-3.png" alt="图 b.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>需要两层以上感知机的分类模式。</figcaption>
 </figure>
 
 ## 全连接层与卷积层 {#sec-B-2}
@@ -286,8 +286,8 @@ H5 前馈网络。 {#sec-x-12}
 本节介绍 CNN 推理和训练的顺序实现，为后续 CUDA 实现作准备。这里采用 20 世纪 80 年代末为数字识别设计的 LeNet-5 网络\[3\]。如图 .4 所示， LeNet-5 由三类层组成：卷积层、下采样层和全连接层。这三类层至今仍是神经网络的关键组件。下面考察每类层的逻辑设计和顺序实现。网络输入是一幅灰度图像，其中手写数字表示成 \(32\times32\) 像素的二维数组。最后一层计算输出，即原图属于网络所识别 10 个类别（数字）中各类别的概率。
 
 <figure id="fig:b-4">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-4.png" alt="本章图示 4" loading="lazy" />
-<figcaption>用于手写数字识别的卷积神经网络 LeNet-5。输入字母 A 应被分类为 10 个类别（数字）皆非。依据原书图 B.4 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-4.png" alt="图 b.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>用于手写数字识别的卷积神经网络 LeNet-5。输入字母 A 应被分类为 10 个类别（数字）皆非。</figcaption>
 </figure>
 
 下面把 CNN 各层的输入和输出称为**特征图（feature map）**，简称特征。例如，图 .4 输入端的 C1 卷积层由 \(32\times32\) 的 INPUT 像素数组生成 6 幅 \(28\times28\) 输出特征图。卷积层输出由像素组成；每个像素通过对前一层特征图中的小型局部像素图块（C1 中即 INPUT）和一组称为**滤波器组（filter bank）**的权重（即第 7 章定义的卷积滤波器）执行卷积得到。卷积结果再送入 sigmoid 等激活函数（第 .1 节），产生输出特征图中的一个输出像素。也可以把输出特征图每个像素对应的卷积层计算看作一个感知机，其输入是各幅输入特征图的相应像素图块。换言之，每个输出像素的值，是所有输入特征图相应图块的卷积结果之和。
@@ -295,8 +295,8 @@ H5 前馈网络。 {#sec-x-12}
 图 .5 给出一个小型卷积层示例，其中有 3 幅输入特征图、2 幅输出特征图和 6 组滤波器。层中不同的输入/输出特征图对使用不同滤波器组，所以需要 \(3\times2=6\) 组。图 .4 的 LeNet C3 层有 6 幅输入特征图和 16 幅输出特征图，总共使用 \(6\times16=96\) 组滤波器。
 
 <figure id="fig:b-5">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-5.png" alt="本章图示 5" loading="lazy" />
-<figcaption>卷积层的前向传播路径。依据原书图 B.5 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-5.png" alt="图 b.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>卷积层的前向传播路径。</figcaption>
 </figure>
 
 为简单起见，图 .5 省略了输出像素的激活函数。输出特征图 0 左上角元素（值为 14），由三幅输入特征图圈定图块与相应滤波器组执行卷积得到：[^1]
@@ -315,20 +315,7 @@ H5 前馈网络。 {#sec-x-12}
 图 .6 给出卷积层前向传播路径的顺序 C 函数 `convLayer_forward`。输入特征图存储在三维数组参数 `X[C,H,W]` 中；`C` 是第二个输入参数，指定输入特征图数量，`H` 是第三个参数，指定每幅输入图高度，`W` 是第四个参数，指定宽度（第 1 行）。也就是说，`X` 最高维下标选择一幅特征图（通常称为通道），较低两维下标选择其中一个像素。例如，图 .4 的 C1 层只有一幅 \(32\times32\) 输入特征图，因而存储在 `X[1,32,32]` 中。这也反映出，可以把一层的多幅二维输入特征图合在一起看成一幅三维输入特征图，也称该层的输入张量。
 
 <figure id="fig:b-6">
-<div class="sourceCode" id="cb1" data-language="C++" data-basicstyle="\ttfamily\scriptsize" data-startFrom="1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> convLayer_forward<span class="op">(</span><span class="dt">int</span> M<span class="op">,</span> <span class="dt">int</span> C<span class="op">,</span> <span class="dt">int</span> H<span class="op">,</span> <span class="dt">int</span> W<span class="op">,</span> <span class="dt">int</span> K<span class="op">,</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                       <span class="dt">float</span><span class="op">*</span> X<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> F<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> Y<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> H_out <span class="op">=</span> H <span class="op">-</span> K <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> W_out <span class="op">=</span> W <span class="op">-</span> K <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> m <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> m <span class="op">&lt;</span> M<span class="op">;</span> m<span class="op">++)</span> <span class="co">// for each output feature map</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> h <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> h <span class="op">&lt;</span> H_out<span class="op">;</span> h<span class="op">++)</span> <span class="co">// for each output element</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> w <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> w <span class="op">&lt;</span> W_out<span class="op">;</span> w<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                Y<span class="op">[</span>m<span class="op">,</span> h<span class="op">,</span> w<span class="op">]</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> C<span class="op">;</span> c<span class="op">++)</span> <span class="co">// sum over input maps</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> p <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> p <span class="op">&lt;</span> K<span class="op">;</span> p<span class="op">++)</span> <span class="co">// KxK filter</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> q <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> q <span class="op">&lt;</span> K<span class="op">;</span> q<span class="op">++)</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                            Y<span class="op">[</span>m<span class="op">,</span>h<span class="op">,</span>w<span class="op">]</span> <span class="op">+=</span> X<span class="op">[</span>c<span class="op">,</span>h<span class="op">+</span>p<span class="op">,</span>w<span class="op">+</span>q<span class="op">]</span> <span class="op">*</span> F<span class="op">[</span>m<span class="op">,</span>c<span class="op">,</span>p<span class="op">,</span>q<span class="op">];</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<img src="/pmpp5-zh/figs/orig/fig-b-6.png" alt="图 b.6" loading="lazy" style="max-width:100%;height:auto;" />
 <figcaption>卷积层前向传播路径的 C 实现。依据原书图 B.6 逐字符重排；滤波器参数沿用第 19 章的 <code>F</code> 命名，以免与图像宽度 <code>W</code> 混淆。</figcaption>
 </figure>
 
@@ -341,18 +328,7 @@ H5 前馈网络。 {#sec-x-12}
 卷积层的输出特征图通常会通过一个**下采样（subsampling）**层，也称池化层。图 .4 的 S2 和 S4 就是下采样层。下采样层通过合并像素来减小图像尺寸，使后续卷积层不必使用更大的卷积掩码，就能分类更大尺度的模式。例如，S2 接收 6 幅 \(28\times28\) 输入特征图，生成 6 幅 \(14\times14\) 特征图。下采样输出特征图的每个像素由相应输入特征图中的 \(2\times2\) 邻域产生：对 4 个像素值取平均，形成输出中的一个像素。也可以采用其他方式把邻域像素合成下采样像素。下采样层的输出特征图数量与前一层相同，但每幅图的行列数都减半。例如，S2 的 6 幅输出特征图与其输入特征图数量、也就是 C1 的输出特征图数量相同。
 
 <figure id="fig:b-7">
-<div class="sourceCode" id="cb1" data-language="C++" data-basicstyle="\ttfamily\scriptsize" data-startFrom="1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> subsamplingLayer_forward<span class="op">(</span><span class="dt">int</span> M<span class="op">,</span> <span class="dt">int</span> H<span class="op">,</span> <span class="dt">int</span> W<span class="op">,</span> <span class="dt">int</span> K<span class="op">,</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                              <span class="dt">float</span><span class="op">*</span> Y<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> S<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> b<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> m <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> m <span class="op">&lt;</span> M<span class="op">;</span> m<span class="op">++)</span> <span class="co">// for each output feature map</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> h <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> h <span class="op">&lt;</span> H<span class="op">/</span>K<span class="op">;</span> h<span class="op">++)</span> <span class="co">// for each output element</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> w <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> w <span class="op">&lt;</span> W<span class="op">/</span>K<span class="op">;</span> w<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                S<span class="op">[</span>m<span class="op">,</span> h<span class="op">,</span> w<span class="op">]</span> <span class="op">=</span> <span class="fl">0.</span><span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> p <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> p <span class="op">&lt;</span> K<span class="op">;</span> p<span class="op">++)</span> <span class="co">// KxK input samples</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> q <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> q <span class="op">&lt;</span> K<span class="op">;</span> q<span class="op">++)</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                        S<span class="op">[</span>m<span class="op">,</span>h<span class="op">,</span>w<span class="op">]</span> <span class="op">+=</span> Y<span class="op">[</span>m<span class="op">,</span>K<span class="op">*</span>h<span class="op">+</span>p<span class="op">,</span>K<span class="op">*</span>w<span class="op">+</span>q<span class="op">]</span> <span class="op">/</span> <span class="op">(</span>K<span class="op">*</span>K<span class="op">);</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                S<span class="op">[</span>m<span class="op">,</span>h<span class="op">,</span>w<span class="op">]</span> <span class="op">=</span> sigmoid<span class="op">(</span>S<span class="op">[</span>m<span class="op">,</span>h<span class="op">,</span>w<span class="op">]</span> <span class="op">+</span> b<span class="op">[</span>m<span class="op">]);</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<img src="/pmpp5-zh/figs/orig/fig-b-7.png" alt="图 b.7" loading="lazy" style="max-width:100%;height:auto;" />
 <figcaption>下采样层前向传播路径的顺序 C 实现；该层还包含激活函数。依据原书图 B.7 重排并作勘误。</figcaption>
 </figure>
 
@@ -380,8 +356,8 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 ```
 
 <figure id="fig:b-8">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-6.png" alt="本章图示 6" loading="lazy" />
-<figcaption>CNN 一层中（a）<span class="math inline">∂<em>E</em>/∂<em>w</em></span> 和（b）<span class="math inline">∂<em>E</em>/∂<em>x</em></span> 的反向传播。依据原书图 B.8 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-8.png" alt="图 b.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>CNN 一层中（a）<span class="math inline">∂<em>E</em>/∂<em>w</em></span> 和（b）<span class="math inline">∂<em>E</em>/∂<em>x</em></span> 的反向传播。</figcaption>
 </figure>
 
 这个公式可以像两层感知机示例一样，逐元素推导。回忆一下，全连接层的每个输出元素由一个感知机计算，该感知机接收输入特征图的各元素。第 .2 节说明，对一个输入 \(x\)，\(\partial E/\partial x\) 是各输出 \(y\) 的 \(\partial E/\partial y\) 与 \(x\) 向该 \(y\) 作出贡献时所乘权重 \(w\) 的乘积之和。全连接层中，\(w\) 矩阵的每一行把全部 \(x\) 元素（列）联系到一个 \(y\) 元素（行）；转置会交换行列角色，所以 \(w\) 的每一列，即 \(w^T\) 的一行，把所有 \(y\) 的梯度元素联系回一个 \(x\) 的梯度元素。因此，矩阵–向量乘法 \(w^T(\partial E/\partial y)\) 得到包含所有输入元素 \(\partial E/\partial x\) 的向量。
@@ -402,8 +378,8 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 **译者注：**底本公式 B.22 把权重下标写作 \(W(m,c,k-p,k-q)\)，但 \(k\) 在该式中未定义，而且与图 B.9 给出的对应关系矛盾：\(x_{h,w}\) 对 \(y_{h-2,w-2}\) 的贡献乘 \(W_{2,2}\)，对 \(y_{h,w}\) 的贡献乘 \(W_{0,0}\)。按图 B.6 的前向索引 \(y_{a,b}\mathrel{+}=x_{a+p,b+q}W_{p,q}\) 反推，反向式应使用 \(W(p,q)\)。本译稿据此作最小修正；图 B.10 同步采用这一自洽索引。
 
 <figure id="fig:b-9">
-<img src="/pmpp5-zh/figs/appendix-b-deep-learning-basics-7.png" alt="本章图示 7" loading="lazy" />
-<figcaption>卷积层反向传播的索引关系：输入 <span class="math inline"><em>x</em><sub><em>h</em>, <em>w</em></sub></span> 在前向传播中影响的 9 个输出梯度，在反向传播中通过相应权重汇入 <span class="math inline">∂<em>E</em>/∂<em>x</em><sub><em>h</em>, <em>w</em></sub></span>。依据原书图 B.9 重绘。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-b-9.png" alt="图 b.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>卷积层反向传播的索引关系：输入 <span class="math inline"><em>x</em><sub><em>h</em>, <em>w</em></sub></span> 在前向传播中影响的 9 个输出梯度，在反向传播中通过相应权重汇入 <span class="math inline">∂<em>E</em>/∂<em>x</em><sub><em>h</em>, <em>w</em></sub></span>。</figcaption>
 </figure>
 
 通过 \(h-p,w-q\) 下标执行“反向卷积”，可以让前向卷积中接受某个 \(x\) 元素贡献的全部输出 \(y\) 元素的梯度，通过相同权重反过来贡献给该 \(x\) 元素的梯度。原因是，在卷积层前向推理中， \(x\) 元素的任何变化都会先乘这些 \(W\) 元素，再通过相应 \(y\) 元素影响损失函数。图 .9 用 \(3\times3\) 滤波器组的小例子展示索引模式。输出特征图中 9 个着色 \(y\) 元素都在前向推理时接受 \(x_{h,w}\) 的贡献。例如，输入元素 \(x_{h,w}\) 乘 \(W_{2,2}\) 后贡献给 \(y_{h-2,w-2}\)，乘 \(W_{0,0}\) 后贡献给 \(y_{h,w}\)。因此，反向传播时 \(\partial E/\partial x_{h,w}\) 应接收这 9 个元素的 \(\partial E/\partial y\) 经相应权重加权后的贡献；这一计算等价于相应的反向卷积。
@@ -411,23 +387,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 图 .10 给出为每幅输入特征图计算 \(\partial E/\partial x\) 全部元素的 C 代码。代码假定该层所有输出特征图的 \(\partial E/\partial y\) 已经算出，并由指针参数 `dE_dY` 传入。这是合理的，因为当前层的 \(\partial E/\partial y\) 就是紧随其后的层的 \(\partial E/\partial x\)，而后者在反向传播到达当前层以前已经计算完毕。代码还假定调用者已经为 \(\partial E/\partial x\) 分配空间，并通过指针 `dE_dX` 传入。函数会生成其中全部元素。
 
 <figure id="fig:b-10">
-<div class="sourceCode" id="cb1" data-language="C++" data-basicstyle="\ttfamily\scriptsize" data-startFrom="1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> convLayer_backward_X_grad<span class="op">(</span><span class="dt">int</span> M<span class="op">,</span> <span class="dt">int</span> C<span class="op">,</span> <span class="dt">int</span> H_in<span class="op">,</span> <span class="dt">int</span> W_in<span class="op">,</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> K<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> dE_dY<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> F<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> dE_dX<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> H_out <span class="op">=</span> H_in <span class="op">-</span> K <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> W_out <span class="op">=</span> W_in <span class="op">-</span> K <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> C<span class="op">;</span> c<span class="op">++)</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> h <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> h <span class="op">&lt;</span> H_in<span class="op">;</span> h<span class="op">++)</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> w <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> w <span class="op">&lt;</span> W_in<span class="op">;</span> w<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                dE_dX<span class="op">[</span>c<span class="op">,</span>h<span class="op">,</span>w<span class="op">]</span> <span class="op">=</span> <span class="fl">0.</span><span class="op">;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> m <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> m <span class="op">&lt;</span> M<span class="op">;</span> m<span class="op">++)</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> p <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> p <span class="op">&lt;</span> K<span class="op">;</span> p<span class="op">++)</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> q <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> q <span class="op">&lt;</span> K<span class="op">;</span> q<span class="op">++)</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">if</span><span class="op">(</span>h<span class="op">-</span>p <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> w<span class="op">-</span>q <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                               h<span class="op">-</span>p <span class="op">&lt;</span> H_out <span class="op">&amp;&amp;</span> w<span class="op">-</span>q <span class="op">&lt;</span> W_out<span class="op">)</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                                dE_dX<span class="op">[</span>c<span class="op">,</span>h<span class="op">,</span>w<span class="op">]</span> <span class="op">+=</span> dE_dY<span class="op">[</span>m<span class="op">,</span>h<span class="op">-</span>p<span class="op">,</span>w<span class="op">-</span>q<span class="op">]</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                                                   <span class="op">*</span> F<span class="op">[</span>m<span class="op">,</span>c<span class="op">,</span>p<span class="op">,</span>q<span class="op">];</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<img src="/pmpp5-zh/figs/orig/fig-b-10.png" alt="图 b.10" loading="lazy" style="max-width:100%;height:auto;" />
 <figcaption>卷积层反向路径中 <span class="math inline">∂<em>E</em>/∂<em>x</em></span> 的计算。依据原书图 B.10 重排并作勘误。</figcaption>
 </figure>
 
@@ -443,21 +403,7 @@ CNN 的训练建立在第 .2 节讨论的随机梯度下降和反向传播过程
 ```
 
 <figure id="fig:b-11">
-<div class="sourceCode" id="cb1" data-language="C++" data-basicstyle="\ttfamily\scriptsize" data-startFrom="1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> convLayer_backward_W_grad<span class="op">(</span><span class="dt">int</span> M<span class="op">,</span> <span class="dt">int</span> C<span class="op">,</span> <span class="dt">int</span> H<span class="op">,</span> <span class="dt">int</span> W<span class="op">,</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> K<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> dE_dY<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> X<span class="op">,</span> <span class="dt">float</span><span class="op">*</span> dE_dW<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> H_out <span class="op">=</span> H <span class="op">-</span> K <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> W_out <span class="op">=</span> W <span class="op">-</span> K <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> m <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> m <span class="op">&lt;</span> M<span class="op">;</span> m<span class="op">++)</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> c <span class="op">&lt;</span> C<span class="op">;</span> c<span class="op">++)</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> p <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> p <span class="op">&lt;</span> K<span class="op">;</span> p<span class="op">++)</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> q <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> q <span class="op">&lt;</span> K<span class="op">;</span> q<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                    dE_dW<span class="op">[</span>m<span class="op">,</span>c<span class="op">,</span>p<span class="op">,</span>q<span class="op">]</span> <span class="op">=</span> <span class="fl">0.</span><span class="op">;</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> h <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> h <span class="op">&lt;</span> H_out<span class="op">;</span> h<span class="op">++)</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> w <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> w <span class="op">&lt;</span> W_out<span class="op">;</span> w<span class="op">++)</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                            dE_dW<span class="op">[</span>m<span class="op">,</span>c<span class="op">,</span>p<span class="op">,</span>q<span class="op">]</span> <span class="op">+=</span> X<span class="op">[</span>c<span class="op">,</span>h<span class="op">+</span>p<span class="op">,</span>w<span class="op">+</span>q<span class="op">]</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                                                <span class="op">*</span> dE_dY<span class="op">[</span>m<span class="op">,</span>h<span class="op">,</span>w<span class="op">];</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<img src="/pmpp5-zh/figs/orig/fig-b-11.png" alt="图 b.11" loading="lazy" style="max-width:100%;height:auto;" />
 <figcaption>卷积层反向路径中 <span class="math inline">∂<em>E</em>/∂<em>W</em></span> 的计算。依据原书图 B.11 重排并作勘误。</figcaption>
 </figure>
 

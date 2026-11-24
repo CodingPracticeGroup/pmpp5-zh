@@ -54,30 +54,7 @@ Isaac Gelado 和 Mark Harris 特别贡献
 2013 年，CUDA 6 引入了统一内存（Unified Memory）。它创建由 CPU 和 GPU 共享的托管虚拟内存页池，弥合 CPU 与 GPU 之间的鸿沟。CPU 和 GPU 可以通过同一个指针访问托管内存。托管内存中的变量可以驻留在 CPU 物理内存、GPU 物理内存中，甚至同时驻留在两者中。CUDA 运行时软件和硬件负责实现数据迁移和一致性支持。最终效果是：在 CPU 上运行的代码看来，托管内存就像 CPU 内存；在 GPU 上运行的代码看来，它又像 GPU 内存。当然，应用必须执行屏障或原子操作等适当的同步操作，协调对托管内存位置的任何并发访问。共享的全局虚拟地址空间使应用中的所有变量都能从 CPU 或 GPU 代码以相同的虚拟地址访问。编程工具和运行时系统把这种内存架构呈现给应用后，可以带来若干重大好处。
 
 <figure id="fig:c-1">
-<div class="minipage">
-<p><strong>CPU 代码</strong></p>
-<div class="sourceCode" id="cb1" data-language="C++" data-basicstyle="\ttfamily\scriptsize"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> sortfile<span class="op">(</span><span class="dt">FILE</span> <span class="op">*</span>fp<span class="op">,</span> <span class="dt">int</span> N<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> <span class="op">*</span>data<span class="op">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> <span class="op">(</span><span class="dt">char</span> <span class="op">*)</span>malloc<span class="op">(</span>N<span class="op">);</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    fread<span class="op">(</span>data<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> N<span class="op">,</span> fp<span class="op">);</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    qsort_char<span class="op">(</span>data<span class="op">,</span> N<span class="op">,</span> <span class="dv">1</span><span class="op">);</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    use_data<span class="op">(</span>data<span class="op">);</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    free<span class="op">(</span>data<span class="op">);</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-</div>
-<div class="minipage">
-<p><strong>采用统一内存的 CUDA 6 代码</strong></p>
-<div class="sourceCode" id="cb2" data-language="C++" data-basicstyle="\ttfamily\scriptsize"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> sortfile<span class="op">(</span><span class="dt">FILE</span> <span class="op">*</span>fp<span class="op">,</span> <span class="dt">int</span> N<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> <span class="op">*</span>data<span class="op">;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    cudaMallocManaged<span class="op">(&amp;</span>data<span class="op">,</span> N<span class="op">);</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    fread<span class="op">(</span>data<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> N<span class="op">,</span> fp<span class="op">);</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    qsort_char<span class="op">&lt;&lt;&lt;...&gt;&gt;&gt;(</span>data<span class="op">,</span> N<span class="op">,</span> <span class="dv">1</span><span class="op">);</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    cudaDeviceSynchronize<span class="op">();</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    use_data<span class="op">(</span>data<span class="op">);</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    cudaFree<span class="op">(</span>data<span class="op">);</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-</div>
+<img src="/pmpp5-zh/figs/orig/fig-c-1.png" alt="图 c.1" loading="lazy" style="max-width:100%;height:auto;" />
 <figcaption>统一内存简化了把 CPU 代码（左）移植为 CUDA 代码（右）的过程。依据原书图 C.1 重排。</figcaption>
 </figure>
 
