@@ -1,6 +1,6 @@
 ---
 title: "前言"
-weight: 0
+weight: -10
 description: "大规模并行处理器编程（第 5 版）前言——中英对照"
 ---
 # 前言 {#preface}

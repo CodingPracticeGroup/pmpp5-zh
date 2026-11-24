@@ -1,6 +1,6 @@
 ---
 title: "Preface"
-weight: 0
+weight: -10
 description: "Programming Massively Parallel Processors 5e — English original (Preface)"
 ---
 # Preface {#preface}
