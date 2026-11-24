@@ -112,11 +112,31 @@ def depage(t):
         t = re.sub(r"\s\d{3}\s\s+(?=\S)", " ", t)  # 残留孤立三页码
     return t
 
-def clean_en_paras(paras, titles_compact, sec_no):
+def strip_prefix_exact(t, expect):
+    """仅当段落开头与 expect(如 '10.4 Reducing control divergence')逐字一致时剥离。
+    返回剥离后起始下标; 不匹配返回 None。"""
+    ep = re.sub(r"[^a-z0-9]", "", expect.lower())
+    if not ep:
+        return None
+    j = 0
+    for i, ch in enumerate(t):
+        if j >= len(ep):
+            return i
+        cl = ch.lower()
+        if not cl.isalnum():
+            continue
+        if cl != ep[j]:
+            return None
+        j += 1
+    return len(t) if j >= len(ep) else None
+
+def clean_en_paras(paras, expects, sec_no):
     """去噪: 小节标题页行(编号+标题前缀)/CONTENTS/OUTLINE; 参考文献条目分流。"""
     body, refs, drop = [], [], []
     for p in paras:
         t = depage(p.strip())
+        # 组合用变体选择器(∑︂)与软连字符清理
+        t = t.replace("︂", "").replace("­", "")
         if not t: continue
         if re.match(r"^(CONTENTS|OUTLINE)\b", t): continue
         m2 = re.search(r"\s+CONTENTS\s+[\dA-Z]", t)
@@ -124,14 +144,15 @@ def clean_en_paras(paras, titles_compact, sec_no):
             t = t[:m2.start()].strip()
             if len(t) < 40: continue
         if re.search(r"https://doi\.org|B978-0-\d+-\d+-\d-\.", t) and len(t) < 300: continue
-        m = re.match(r"^((?:\d+(?:\.\d+)*|Appendix\s+[A-C]|Chapter\s+\d+)\s+)([^.]{0,80})", t)
-        if m:
-            cand = compact(m.group(2)[:40])
-            hit = any(cand and (cand.startswith(tc[:12]) or tc.startswith(cand[:12])) for tc in titles_compact)
-            if hit:
-                rest = t[m.end():].strip()
-                if len(rest) < 60: continue
-                t = rest
+        cut = None
+        for expect in expects:
+            cut = strip_prefix_exact(t, expect)
+            if cut:
+                break
+        if cut:
+            rest = t[cut:].strip()
+            if len(rest) < 40: continue
+            t = rest
         if re.match(r"^\[\d+\]", t):
             refs.append(t); continue
         body.append(t)
@@ -193,7 +214,10 @@ def build_chapter(name, title_zh, idx):
     titles_c = [compact(x["title"]) for x in en_secs_toc] + [compact(ENAMES.get(cnum,""))]
     # 清洗各节段落
     for es in endata["sections"]:
-        es["paras"], es["_refs"] = clean_en_paras(es["paras"], titles_c, es["num"])
+        expects = [f"{es['num']} {es['title']}"]
+        if es is endata["sections"][0]:
+            expects.append(("Chapter " if cnum.isdigit() else "Appendix ") + cnum + " " + ENAMES.get(cnum, ""))
+        es["paras"], es["_refs"] = clean_en_paras(es["paras"], expects, es["num"])
     # 中文 H2 → 锚点(按顺序对齐; "本章参考文献"特判)
     h2_map = {}   # 中文 H2 文本 → (anchor, en_sec|None)
     refs_anchor = "sec-refs"
