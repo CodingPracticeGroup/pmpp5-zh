@@ -161,6 +161,11 @@ def clean_en_paras(paras, expects, sec_no):
 
 
 FIGMAP = {}
+LEAD = {}
+_lp = os.path.join(os.path.dirname(__file__), "lead_final.json")
+if os.path.exists(_lp):
+    LEAD = json.load(open(_lp, encoding="utf-8"))
+
 def load_figmap():
     global FIGMAP
     if not FIGMAP:
@@ -350,6 +355,33 @@ def build_chapter(name, title_zh, idx):
     def add_bib_anchor(m):
         return f"{m.group(1)}. <a id=\"bib-{m.group(1)}\"></a>{m.group(2)}"
     zh_md = re.sub(r"^(\d+)\. (.+)$", add_bib_anchor, zh_md, flags=re.M)
+    # 章首 leading paragraphs(原书章标题后、第一节前的概述段):
+    # en 侧为原文重建, zh 侧为补译(或将译稿中误置于首节开头的 lead 移回)。
+    ld = LEAD.get(str(cnum)) or LEAD.get(str(cnum).upper()) or {}
+    if ld.get("zh_move_n"):
+        mm = list(re.finditer(r"(?m)^## ", zh_md))
+        if mm:
+            s0, s1 = mm[0].end(), (mm[1].start() if len(mm) > 1 else len(zh_md))
+            seg = zh_md[s0:s1]
+            parts = seg.split("\n\n")
+            moved, kept, n = [], [], int(ld["zh_move_n"])
+            for p in parts:
+                is_lead_para = (n > 0 and p.strip() and not p.lstrip().startswith(("<", "#", "!", ">", "|", "```"))
+                                and len(p.strip()) > 60)
+                if is_lead_para:
+                    moved.append(p); n -= 1
+                else:
+                    kept.append(p)
+            zh_md = zh_md[:s0] + "\n\n".join(kept) + zh_md[s1:]
+            ld = dict(ld); ld = {**ld, "zh": moved + list(ld.get("zh", []))}
+    if ld.get("zh"):
+        block = "\n\n".join(p.strip() for p in ld["zh"]) + "\n\n"
+        m2 = re.search(r"(?m)^## ", zh_md)
+        zh_md = (zh_md[:m2.start()] + block + zh_md[m2.start():]) if m2 else (zh_md + "\n" + block)
+    if ld.get("en"):
+        block = "\n\n".join(p.strip() for p in ld["en"]) + "\n\n"
+        m3 = re.search(r"(?m)^## ", en_md)
+        en_md = (en_md[:m3.start()] + block + en_md[m3.start():]) if m3 else (en_md + "\n" + block)
     # 全书插图统一用原书 PDF 截图
     zh_md = re.sub(r'<figure id="fig:([0-9A-Za-z]+-[0-9A-Za-z]+)">.*?</figure>', swap_fig_block, zh_md, flags=re.S)
     en_md = swap_en_figs(en_md)
