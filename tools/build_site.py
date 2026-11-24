@@ -328,6 +328,9 @@ def build_chapter(name, title_zh, idx):
     zh_md = re.sub(r"!\[([^\]]*)\]\(" + re.escape(BASE) + r"/figs/([^)]+)\)",
                    lambda m: f'<img src="{BASE}/figs/{m.group(2)}" alt="{m.group(1)}" loading="lazy" />', zh_md)
     en_md = "\n".join(fm_en) + "\n" + "\n\n".join(x.strip("\n") for x in en_final if x.strip()) + "\n"
+    # 练习等非 figure 位置的裸 markdown 图: raw html 块内 goldmark 不解析 md → 直接输出 <img>
+    zh_md = re.sub(r"!\[([^\]]*)\]\((?:\.\./)+assets/figs/([^)]+)\)",
+                   lambda m: f'<img src="{BASE}/figs/{m.group(2)}" alt="{m.group(1)}" loading="lazy" />', zh_md)
     # 全书插图统一用原书 PDF 截图
     zh_md = re.sub(r'<figure id="fig:([0-9A-Za-z]+-[0-9A-Za-z]+)">.*?</figure>', swap_fig_block, zh_md, flags=re.S)
     en_md = swap_en_figs(en_md)
