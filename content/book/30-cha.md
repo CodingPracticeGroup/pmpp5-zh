@@ -47,8 +47,8 @@ IEEE 754 浮点标准旨在让计算机制造商采用共同的浮点数据表�
 IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（biased encoding）**约定。若使用 \(e\) 位表示指数 \(E\)，就在指数的二进制补码表示上加 \(2^{e-1}-1\)，形成移码表示。二进制补码系统通过先把数值逐位取反，再给结果加一，得到该数的负值。在 3 位指数表示中，\(e=3\)，因而把 \(2^{3-1}-1=011\) 加到指数值的二进制补码表示上。
 
 <figure id="fig:a-1">
-<img src="/pmpp5-zh/figs/orig/fig-a-1.png" alt="图 a.1" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>按移 3 码次序排列的移 3 编码。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-1.png" alt="图 A.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.1　按移 3 码次序排列的移 3 编码。</figcaption>
 </figure>
 
 移码表示允许用无符号比较器比较两个指数，就像它们是无符号数一样。如图 .1 所示，在 3 位指数表示中，移 3 位模式随数值从 \(-3\) 到 3 单调递增。我们把每个位模式称为相应数值的码。例如，\(-3\) 的码是 000，3 的码是 110。因此，用无符号数比较器比较 \(-3\) 到 3 中任意一对指数值的移 3 码，比较器都能正确判断哪个数更大或更小。例如，用无符号比较器比较移 3 码 001 和 100，结果是 001 小于 100；这与它们表示的数值 \(-2\) 与 1 的关系完全一致。
@@ -72,29 +72,29 @@ IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（bi
 一种表示格式的**可表示数（representable number）**，是能够用该格式精确表示的数。例如，3 位无符号整数格式的可表示数见图 .2。
 
 <figure id="fig:a-2">
-<img src="/pmpp5-zh/figs/orig/fig-a-2.png" alt="图 a.2" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>3 位无符号整数格式的可表示数。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-2.png" alt="图 A.2" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.2　3 位无符号整数格式的可表示数。</figcaption>
 </figure>
 
 上述格式既不能表示 \(-1\)，也不能表示 9。还可以在数轴上标出全部可表示数，如图 .3 所示，3 位无符号整数格式的所有可表示数都用圆点标出。
 
 <figure id="fig:a-3">
-<img src="/pmpp5-zh/figs/orig/fig-a-3.png" alt="图 a.3" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>3 位无符号整数格式的可表示数在数轴上的位置。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-3.png" alt="图 A.3" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.3　3 位无符号整数格式的可表示数在数轴上的位置。</figcaption>
 </figure>
 
 浮点格式的可表示数也可以用类似方式观察。图 .4 给出目前讨论的格式及其两个变体的全部可表示数。为了控制表格大小，这里采用 5 位格式：1 位 \(S\)、2 位 \(E\)（移 1 码）和 2 位 \(M\)（省略 “\(1.\)” 部分）。“无零”列给出前文格式的可表示数。建议读者使用第 .1 节的公式，至少自行生成“无零”列的一部分。注意，这种格式不能表示 0。
 
 <figure id="fig:a-4">
-<img src="/pmpp5-zh/figs/orig/fig-a-4.png" alt="图 a.4" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>无零、突发下溢和反规格化格式的可表示数。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-4.png" alt="图 A.4" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.4　无零、突发下溢和反规格化格式的可表示数。</figcaption>
 </figure>
 
 从图 .5 所示的数轴上观察这些可表示数，还能获得更多认识。图中只画出正的可表示数；负数关于 0 与相应的正数对称。
 
 <figure id="fig:a-5">
-<img src="/pmpp5-zh/figs/orig/fig-a-5.png" alt="图 a.5" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>无零表示中的正可表示数。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-5.png" alt="图 A.5" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.5　无零表示中的正可表示数。</figcaption>
 </figure>
 
 可以得到五点观察。第一，指数位定义可表示数的主要区间。图 .5 的指数有 2 位，因此 0 的每一侧都有三个主要区间。主要区间基本都位于相邻的 2 的幂之间。2 位指数中有一个保留位模式 11，所以存在三个 2 的幂：\(2^{-1}=0.5_D\)、\(2^0=1.0_D\) 和 \(2^1=2.0_D\)，每个幂都是一个可表示数区间的起点。0 左侧还有三个未在图中画出的 2 的幂： \(-2^{-1}=-0.5_D\)、\(-2^0=-1.0_D\) 和 \(-2^1=-2.0_D\)。
@@ -110,8 +110,8 @@ IEEE 标准对 \(E\) 采用**移码（excess encoding）**或**偏置编码（bi
 把 0 纳入规格化浮点数系统的一种方法是**突发下溢（abrupt underflow）**约定，见图 .4 第二组数据列。只要 \(E=0\)，就把数解释为 0。在 5 位格式中，这种方法移除了 0 附近（\(-1.0\) 到 \(+1.0\) 之间）的 8 个可表示数，即 4 个正数和 4 个负数，并把它们全部变为 0。由于实现简单，20 世纪 80 年代的一些小型机采用了突发下溢。直至今天，某些要求高速运行的算术单元仍使用这一约定。它虽然使 0 成为可表示数，却在 0 附近形成更大的可表示数空隙，如图 .6 所示。与图 .5 相比，0.5 到 1.0 之间的空隙显著扩大了 2 倍。正如前文所述，许多数值算法的正确性依赖对接近 0 的小数进行准确表示，这一空隙会给它们造成问题。
 
 <figure id="fig:a-6">
-<img src="/pmpp5-zh/figs/orig/fig-a-6.png" alt="图 a.6" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>突发下溢格式的正可表示数。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-6.png" alt="图 A.6" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.6　突发下溢格式的正可表示数。</figcaption>
 </figure>
 
 IEEE 标准实际采用的方法称为**反规格化（denormalization）**。它放宽了非常接近 0 的数必须规格化的要求。如图 .4 所示，只要 \(E=0\)，尾数就不再假定为 \(1.XX\) 形式，而是假定为 \(0.XX\)；指数值则假定与前一个区间相同。例如，图 .4 中的反规格化表示 00001 具有指数值 00 和尾数值 01。尾数解释为 0.01，指数值解释为与前一个区间相同的 0，而不是 \(-1\)。因此，00001 现在表示 \(0.01\times2^0=2^{-2}\)。图 .7 给出反规格化格式的可表示数。现在，0 的紧邻区域内均匀分布着可表示数。直观地说，反规格化约定把无零表示最后一个区间中的 4 个数摊开，用它们覆盖原有空隙，从而消除了前两种方法中的不理想空隙。最后两个区间内，相邻可表示数的距离实际上完全相同。一般而言，若 \(n\) 位指数为 0，则数值为
@@ -123,8 +123,8 @@ IEEE 标准实际采用的方法称为**反规格化（denormalization）**。�
 **译者注：**底本上述段落写作“如图 A.6 所示，只要 \(E=0\)”，但图 A.6 只是突发下溢格式的数轴；展示 \(E=0\) 三种解释的是图 A.4。本译稿按实际图意修正引用。
 
 <figure id="fig:a-7">
-<img src="/pmpp5-zh/figs/orig/fig-a-7.png" alt="图 a.7" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>反规格化格式的正可表示数。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-7.png" alt="图 A.7" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.7　反规格化格式的正可表示数。</figcaption>
 </figure>
 
 反规格化公式相当复杂。硬件还必须检测一个数是否落在反规格化区间，并为它选择合适的表示。高速实现反规格化可能需要大量硬件；硬件规模适中的实现每次生成或使用反规格化数时，常会引入数千个时钟周期的延迟。这正是早期 CUDA 设备不支持反规格化的原因。不过，较新制程提供了更多可用晶体管，近代各代 CUDA 设备几乎都已支持反规格化[4]。 CUDA 程序员可以设置 NVCC 编译器标志 `ftz=true`（开启）或 `ftz=false` （关闭），控制 GPU 算术单元是否使用反规格化。
@@ -138,8 +138,8 @@ IEEE 标准实际采用的方法称为**反规格化（denormalization）**。�
 **译者注：**底本写作“区间数增加 \(2^{2^3}=256\) 倍”。8 位指数增加到 11 位时，指数位模式数量增加 \(2^3=8\) 倍，而不是 256 倍；本译稿按位模式数量作最小修正。
 
 <figure id="fig:a-8">
-<img src="/pmpp5-zh/figs/orig/fig-a-8.png" alt="图 a.8" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>IEEE 标准格式中的特殊位模式。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-8.png" alt="图 A.8" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.8　IEEE 标准格式中的特殊位模式。</figcaption>
 </figure>
 
 IEEE 浮点格式的特殊位模式见图 .8。当指数位全为 1 且尾数为 0 时，所表示的数为无穷。所有可表示数都位于 \(-\infty\)（负无穷）与 \(+\infty\)（正无穷）之间。溢出可以产生 \(\infty\)，例如用一个大数除以一个很小的数。也就是说，浮点算术操作产生超出可表示数范围的数值时，输出会饱和到正无穷或负无穷；这与整数算术不同，后者的结果超出可表示范围时会发生回绕或产生未定义值。任何可表示数除以 \(+\infty\) 或 \(-\infty\) 都得到 0。
@@ -227,8 +227,8 @@ NaN 可能对应许多位模式。例如，在单精度格式中，最高尾数�
 只要这三个方程表示的平面存在交点，就可以用高斯消元求得交点坐标。图 .9 展示了过程，其中各变量从位置较低的方程中依次消去。
 
 <figure id="fig:a-9">
-<img src="/pmpp5-zh/figs/orig/fig-a-9.png" alt="图 a.9" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>用高斯消元和回代求解线性方程组。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-9.png" alt="图 A.9" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.9　用高斯消元和回代求解线性方程组。</figcaption>
 </figure>
 
 第一步中，所有方程分别除以各自的 \(X\) 系数：方程 1 除以 3，方程 2 除以 2，方程 3 除以 1，使所有方程的 \(X\) 系数相同。第二步从方程 2 和方程 3 中减去方程 1，从而消去二者中的 \(X\)，如图 .9 所示。
@@ -240,8 +240,8 @@ NaN 可能对应许多位模式。例如，在单精度格式中，最高尾数�
 实际中，计算机会以矩阵形式存储方程。全部计算只涉及系数和等号右侧的值，所以只需把这些值存入矩阵。图 .10 从矩阵视角展示高斯消元和回代过程。矩阵的每一行对应一个原始方程，对方程的操作变为对矩阵行的操作。
 
 <figure id="fig:a-10">
-<img src="/pmpp5-zh/figs/orig/fig-a-10.png" alt="图 a.10" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>矩阵视角下的高斯消元和回代。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-10.png" alt="图 A.10" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.10　矩阵视角下的高斯消元和回代。</figcaption>
 </figure>
 
 高斯消元后，矩阵变成三角矩阵。由于物理和数学方面的多种原因，这是一类非常常见的矩阵。最终目标是把矩阵的系数部分变为对角形式，每行在对角线上只有一个值 1。这称为单位矩阵，因为任意矩阵与单位矩阵相乘仍为自身。这也说明了为什么对一个矩阵执行高斯消元，等价于用该矩阵的逆矩阵乘它。
@@ -275,8 +275,8 @@ NaN 可能对应许多位模式。例如，在单精度格式中，最高尾数�
 方程 \(1'\) 中 \(X\) 的系数不再为 0，可以继续执行高斯消元，如图 .11 所示。
 
 <figure id="fig:a-11">
-<img src="/pmpp5-zh/figs/orig/fig-a-11.png" alt="图 a.11" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>带选主元的高斯消元。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-a-11.png" alt="图 A.11" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 A.11　带选主元的高斯消元。</figcaption>
 </figure>
 
 **译者注：**底本图 A.11 的第 5 步把第一行写成 \([1,5/3,2/3\mid19/3]\)，这是图 A.10 中前一个方程组的数据；对本例而言，该行应继续保持为 \([1,3/2,1/2\mid11/2]\)。本译稿按步骤 1 的结果重绘，后续回代结果不变。

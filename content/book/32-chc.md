@@ -54,8 +54,8 @@ Isaac Gelado 和 Mark Harris 特别贡献
 2013 年，CUDA 6 引入了统一内存（Unified Memory）。它创建由 CPU 和 GPU 共享的托管虚拟内存页池，弥合 CPU 与 GPU 之间的鸿沟。CPU 和 GPU 可以通过同一个指针访问托管内存。托管内存中的变量可以驻留在 CPU 物理内存、GPU 物理内存中，甚至同时驻留在两者中。CUDA 运行时软件和硬件负责实现数据迁移和一致性支持。最终效果是：在 CPU 上运行的代码看来，托管内存就像 CPU 内存；在 GPU 上运行的代码看来，它又像 GPU 内存。当然，应用必须执行屏障或原子操作等适当的同步操作，协调对托管内存位置的任何并发访问。共享的全局虚拟地址空间使应用中的所有变量都能从 CPU 或 GPU 代码以相同的虚拟地址访问。编程工具和运行时系统把这种内存架构呈现给应用后，可以带来若干重大好处。
 
 <figure id="fig:c-1">
-<img src="/pmpp5-zh/figs/orig/fig-c-1.png" alt="图 c.1" loading="lazy" style="max-width:100%;height:auto;" />
-<figcaption>统一内存简化了把 CPU 代码（左）移植为 CUDA 代码（右）的过程。依据原书图 C.1 重排。</figcaption>
+<img src="/pmpp5-zh/figs/orig/fig-c-1.png" alt="图 C.1" loading="lazy" style="max-width:100%;height:auto;" />
+<figcaption>图 C.1　统一内存简化了把 CPU 代码（左）移植为 CUDA 代码（右）的过程。依据原书图 C.1 重排。</figcaption>
 </figure>
 
 统一内存的一项好处，是减少把 CPU 代码移植到 CUDA 所需的工作量。图 .1 左侧给出一个简单的 CPU 代码示例。借助统一内存，只需作两项简单改动即可把它移植到 CUDA。第一项改动是用 `cudaMallocManaged()` 和 `cudaFree()` 取代 `malloc()` 和 `free()`。第二项改动是不再调用 `qsort()` 函数，而是启动内核并执行设备同步。显然，程序员仍需编写或者取得一个并行 `qsort` 内核。这里要说明的是，主机代码的改动直接明了，也易于维护。

@@ -185,10 +185,13 @@ def swap_fig_block(m):
     capm = re.search(r"<figcaption>(.*?)</figcaption>", m.group(0), re.S)
     cap = capm.group(1) if capm else ""
     cap = re.sub(r"[（(]?依据原书图\s*[0-9A-Za-z.\-]+\s*重绘[)）]?[。]?\s*", "", cap).strip()
-    num = fid.replace("-", ".")
+    num = fid.replace("-", ".").upper() if re.match(r"^[a-c]-", fid) else fid.replace("-", ".")
+    ch_part = num.split(".")[0]
+    if ch_part.isdigit():  # 与前文正文引用及原书编号风格一致(去前导零)
+        num = f"{int(ch_part)}.{num.split('.', 1)[1]}"
+    if not re.match(r"^(图|表)\s*\d", cap):
+        cap = f"图 {num}　{cap}" if cap else f"图 {num}（原书插图）"
     img = f'<img src="{BASE}/figs/orig/{png}" alt="图 {num}" loading="lazy" style="max-width:100%;height:auto;" />'
-    if not cap:
-        cap = f"图 {num}（原书插图）"
     return f'<figure id="fig:{fid}">\n{img}\n<figcaption>{cap}</figcaption>\n</figure>'
 
 def swap_en_figs(md):
@@ -331,6 +334,8 @@ def build_chapter(name, title_zh, idx):
     # 练习等非 figure 位置的裸 markdown 图: raw html 块内 goldmark 不解析 md → 直接输出 <img>
     zh_md = re.sub(r"!\[([^\]]*)\]\((?:\.\./)+assets/figs/([^)]+)\)",
                    lambda m: f'<img src="{BASE}/figs/{m.group(2)}" alt="{m.group(1)}" loading="lazy" />', zh_md)
+    # 图/表引用编号去前导零("图 02.5"→"图 2.5", 与原书及英文侧一致)
+    zh_md = re.sub(r"([图表])\s*0+(\d{1,2}\.\d{1,2}[a-z]?)", lambda m: f"{m.group(1)} {m.group(2)}", zh_md)
     # 正文引用编号 [N] → 可点击跳转到文末编号参考文献(仅处理"本章参考文献"存在的章节)
     if "本章参考文献" in zh_md:
         zh_md = re.sub(r"(?<![\w\]])\[(\d{1,3})\](?!\()", r"[\1](#bib-\1)", zh_md)
