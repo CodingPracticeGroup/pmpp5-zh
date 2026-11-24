@@ -284,6 +284,8 @@ def pandoc(tex, srcname):
 def post(name, md):
     # 清除数学块内残留的 \label 行(展示噪音)
     md = re.sub(r"^\s*\\label\{[^}]*\}\s*$", "", md, flags=re.M)
+    # 交叉引用后缀与原文量词重复(如 "\ref{sec:…} 节" → "第 16.7 节 节")
+    md = re.sub(r"(节|章)(\s?)\1", r"\1", md)
     # pandoc gfm 将数学输出为 $`...`$ / $$`...`$$ → 转回 \(\) 与 \[\] 供 arithmatex generic
     md = re.sub(r"\$\$(.+?)\$\$", lambda m: r"\[" + m.group(1).strip() + r"\]", md, flags=re.S)
     md = re.sub(r"\$`(.+?)`\$", lambda m: r"\(" + m.group(1) + r"\)", md, flags=re.S)
