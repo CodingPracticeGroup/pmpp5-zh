@@ -8,3 +8,13 @@
 *.fdb_latexmk
 .DS_Store
 main.pdf
+# Hugo
+/public/
+/resources/_gen/
+.hugo_build.lock
+# 站点构建中间产物
+/docs/
+
+# Python
+__pycache__/
+*.pyc

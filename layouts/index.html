@@ -1,0 +1,15 @@
+{{/* 首页直达对应语言的全书目录：静态托管无服务端跳转，用 meta+JS 重定向 */}}
+{{ $u := absURL (print (strings.TrimSuffix "/" .RelPermalink) "/book/") }}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="canonical" href="{{ $u }}">
+<meta http-equiv="refresh" content="0; url={{ $u }}">
+<script>location.replace("{{ $u }}");</script>
+<title>{{ site.Title }}</title>
+</head>
+<body>
+正在进入 <a href="{{ $u }}">全书目录</a>…
+</body>
+</html>
