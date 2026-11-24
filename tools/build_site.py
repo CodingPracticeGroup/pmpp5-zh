@@ -338,7 +338,7 @@ def build_chapter(name, title_zh, idx):
     zh_md = re.sub(r"([图表])\s*0+(\d{1,2}\.\d{1,2}[a-z]?)", lambda m: f"{m.group(1)} {m.group(2)}", zh_md)
     # 正文引用编号 [N] → 可点击跳转到文末编号参考文献(仅处理"本章参考文献"存在的章节)
     if "本章参考文献" in zh_md:
-        zh_md = re.sub(r"(?<![\w\]])\[(\d{1,3})\](?!\()", r"[\1](#bib-\1)", zh_md)
+        zh_md = re.sub(r"(?<![\w\]])\[(\d{1,3})\](?!\()", r"[[\1]](#bib-\1)", zh_md)
     def bib_list(m):
         entries = [e.strip() for e in m.group(1).split("\n\n") if e.strip()]
         return "\n".join(f"{i+1}. {e}" for i, e in enumerate(entries))
