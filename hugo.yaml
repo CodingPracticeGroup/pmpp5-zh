@@ -25,6 +25,7 @@ params:
     authors: '[CodingPracticeGroup](https://github.com/CodingPracticeGroup)'
     from_year: 2026
   ui:
+    sidebar_root_menu: false
     dark_mode: true
     compare: true
     section_index: cards
