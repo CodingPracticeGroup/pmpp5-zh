@@ -264,7 +264,7 @@ def build_chapter(name, title_zh, idx):
                 a = sec_anchor(es["num"])
                 h2_map[payload] = (a, es)
                 en_by_anchor[a] = es
-                zh_out.append(f"## {payload} {{#{a}}}")
+                zh_out.append(f"## {es['num']} {payload} {{#{a}}}")
             else:
                 xk += 1
                 a = f"sec-x-{xk}"
@@ -274,7 +274,7 @@ def build_chapter(name, title_zh, idx):
         if kind in ("h3", "h4", "h5", "h6"):
             xk += 1
             a = f"sec-x-{xk}"
-            zh_out.append(f"{kind.upper()} {payload} {{#{a}}}")
+            zh_out.append(f"{'#' * int(kind[1])} {payload} {{#{a}}}")
             continue
         if kind == "img":
             payload = re.sub(r"\]\(\.\./assets/figs/", f"]({BASE}/figs/", payload)
@@ -300,7 +300,7 @@ def build_chapter(name, title_zh, idx):
                 continue
             if es is not None:
                 en_final.append("")
-                en_final.append(f"## {md_heading(es['title'])} {{#{a}}}")
+                en_final.append(f"## {es['num']} {md_heading(es['title'])} {{#{a}}}")
                 for p in es["paras"]:
                     en_final.append("")
                     en_final.append(md_escape_para(p))
@@ -331,6 +331,20 @@ def build_chapter(name, title_zh, idx):
     # 练习等非 figure 位置的裸 markdown 图: raw html 块内 goldmark 不解析 md → 直接输出 <img>
     zh_md = re.sub(r"!\[([^\]]*)\]\((?:\.\./)+assets/figs/([^)]+)\)",
                    lambda m: f'<img src="{BASE}/figs/{m.group(2)}" alt="{m.group(1)}" loading="lazy" />', zh_md)
+    # 正文引用编号 [N] → 可点击跳转到文末编号参考文献(仅处理"本章参考文献"存在的章节)
+    if "本章参考文献" in zh_md:
+        zh_md = re.sub(r"(?<![\w\]])\[(\d{1,3})\](?!\()", r"[\1](#bib-\1)", zh_md)
+    def bib_list(m):
+        entries = [e.strip() for e in m.group(1).split("\n\n") if e.strip()]
+        return "\n".join(f"{i+1}. {e}" for i, e in enumerate(entries))
+    zh_md = re.sub(r'<div class="enumerate">\n(.*?)\n</div>', bib_list, zh_md, flags=re.S)
+    # 列表项插入引用锚点(GFM 属性扩展), 供正文 [N] 跳转
+    zh_md = re.sub(r"^\d+\. (?=(?:<a id=\"bib-\d+\"></a>|J\.|H\.|W|N|G|K|M|D|S|T|C|A|B|E|L|P|R|V|Y|Z|[A-Z]\.|\d))",
+                   lambda m: "", zh_md)
+    # 更稳妥: 逐编号在列表项前加锚
+    def add_bib_anchor(m):
+        return f"{m.group(1)}. <a id=\"bib-{m.group(1)}\"></a>{m.group(2)}"
+    zh_md = re.sub(r"^(\d+)\. (.+)$", add_bib_anchor, zh_md, flags=re.M)
     # 全书插图统一用原书 PDF 截图
     zh_md = re.sub(r'<figure id="fig:([0-9A-Za-z]+-[0-9A-Za-z]+)">.*?</figure>', swap_fig_block, zh_md, flags=re.S)
     en_md = swap_en_figs(en_md)
