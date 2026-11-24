@@ -186,8 +186,6 @@ COO 把零元素清除得干干净净，但它引入了 \code{rowIdx} 和 \code{
 确实是有序的，但\textbf{排序并非 COO 的要求}。本节给出的 SpMV 内核对无序的 COO
 数据同样正确。
 
-\subsection*{并行化：一个线程负责一个非零元素}
-
 用 COO 表示做并行 SpMV 的一种自然方式，是给每个非零元素分配一个线程。图
 \ref{fig:17-4} 展示了这种划分：8 个非零元素对应 8 个线程，线程 $i$ 只处理
 \code{value[i]}。
@@ -255,8 +253,6 @@ __global__ void spmv_coo_kernel(COOMatrix cooMatrix, float* x, float* y) {
 \noindent\textbf{译者注：}上面的内核只做累加、不做初始化，因此调用前必须保证
 \code{y} 已按 $Y$ 的值（或按 $0$）填好。这与 $A\times X+Y$ 的“乘加”语义一致，但很
 容易被忽略。底本对此未作说明，本译稿在此提醒。
-
-\subsection*{COO 的五维评价}
 
 \textbf{空间效率}：留到介绍完其他格式后再一并比较。
 
@@ -375,8 +371,6 @@ CSR 与 COO 一样，把非零值放在一维的 \code{value} 数组里，把每
 当行内确实按列号有序时，\code{value} 数组（以及 \code{colIdx} 数组）的布局可以
 理解为“把所有零元素剔除之后的矩阵行主序布局”。
 
-\subsection*{并行化：一个线程负责一行}
-
 用 CSR 做并行 SpMV 的自然方式是给每一行分配一个线程，如图 \ref{fig:17-8} 所示。
 
 \begin{figure}[htbp]
@@ -439,8 +433,6 @@ __global__ void spmv_csr_kernel(CSRMatrix csrMatrix, float* x, float* y) {
 
 请注意，把 \code{sum} 累加到输出向量时\textbf{不需要原子操作}：每一行只由一个线程
 遍历，因此每个线程写的都是互不相同的输出元素。这正是 CSR 相对 COO 的核心收益。
-
-\subsection*{CSR 的五维评价}
 
 \textbf{空间效率}：CSR 比 COO 更省空间。COO 需要 \code{rowIdx}、\code{colIdx} 和
 \code{value} 三个数组，长度都等于非零元素个数。CSR 只有 \code{colIdx} 和
@@ -566,8 +558,6 @@ $*$ 的格子表示。注意 \code{colIdx} 数组也要同步填充，以保持�
 行数。例如第 2 行的第 0 个元素在 \code{value[2]}，它的下一个元素就在
 \code{value[2+4]}，即 \code{value[6]}——这里的 4 就是原矩阵的行数。
 
-\subsection*{并行化：一个线程负责一行，但按列主序取数}
-
 图 \ref{fig:17-11} 展示了 SpMV/ELL 的并行划分，图 \ref{fig:17-12} 给出对应内核。
 与 CSR 一样，每个线程负责一行；不同之处在于线程取数的下标算法。
 
@@ -634,8 +624,6 @@ __global__ void spmv_ell_kernel(ELLMatrix ellMatrix, float* x, float* y) {
 \code{row} 是由 \code{threadIdx.x} 直接导出的，所以\textbf{相邻线程的 $i$ 也相邻}
 ——对 \code{value} 和 \code{colIdx} 的访问因此是合并的。这正是 ELL 相对 CSR 的
 核心收益。
-
-\subsection*{ELL 的五维评价}
 
 \textbf{空间效率}：ELL 因填充元素而比 CSR 更费空间，而且开销的大小\textbf{高度
 依赖非零元素的分布}。最糟糕的情形是极少数行的非零元素特别多——这时所有其他行都要
@@ -765,8 +753,6 @@ ELL 的两个毛病——空间效率低和控制分歧——有一个共同的�
 并不改变。因此，构造混合表示的一次性开销可以被摊薄到成百上千次迭代上。第
 \ref{sec:spmv-jds} 节还会再次用到这个“预处理开销可摊薄”的论证。
 
-\subsection*{混合 ELL-COO 的五维评价}
-
 \textbf{空间效率}：优于纯 ELL，因为填充量被显著压低了。
 
 \textbf{灵活性}：优于纯 ELL。两种格式都可以通过“替换填充元素”来向有余量的行添加
@@ -892,15 +878,11 @@ SpMV/ELL 的控制分歧随之下降；而被摘走的那些元素落到了 COO 
   \label{fig:17-15}
 \end{figure}
 
-\subsection*{分段变体}
-
 JDS 还有一个常见变体：行排好序之后，把它们\textbf{切分成若干段}。由于已经排过序，
 同一段内各行的非零元素个数大致相当。于是可以为\textbf{每一段}单独生成一份 ELL 表示
 ——段内只需把各行填充到\textbf{本段最长行}的长度即可。相比对整个矩阵做一份 ELL，
 这样能大幅削减填充元素。在这个变体中，\code{iterPtr} 不再需要，取而代之的是一个
 记录各 ELL 段起始位置的段偏移数组。
-
-\subsection*{排序会不会算错？开销值不值？}
 
 读者应当追问两个问题。
 
@@ -913,8 +895,6 @@ JDS 还有一个常见变体：行排好序之后，把它们\textbf{切分成�
 第二个问题：排序的开销会不会太大？这里的答案与上一节的混合方法如出一辙——只要
 SpMV/JDS 是被放在迭代求解器里反复调用的，排序以及最终结果的还原都只需做一次，其
 成本可以摊薄到求解器的成百上千次迭代上。
-
-\subsection*{JDS 的五维评价}
 
 \textbf{空间效率}：JDS 比 ELL 更省空间，因为它完全不做填充。分段 ELL 变体虽然有
 填充，但填充量也远少于对整个矩阵做一份 ELL。
@@ -993,8 +973,6 @@ CSC 与 CSR 高度对称，只是把行和列的角色互换了。非零值仍�
   \label{fig:17-16}
 \end{figure}
 
-\subsection*{用 CSC 做 SpMV：一个反面教材}
-
 CSC 本来就不是为 SpMV 设计的。但把它用在 SpMV 上仍有价值——作为一个对照，它能把
 前面几节反复出现的各项取舍集中呈现出来。
 
@@ -1032,8 +1010,6 @@ __global__ void spmv_csc_kernel(CSCMatrix cscMatrix, float* x, float* y) {
 “A parallel SpMV/CSR kernel”，与代码内容不符；本译稿已在图 \ref{fig:17-17} 的
 标题中改正为 SpMV/CSC。
 
-\subsection*{CSC 的五维评价}
-
 \textbf{空间效率}：在行数与列数相当的前提下，CSC 与 CSR 相同——两个长度等于非零
 元素个数的数组（\code{rowIdx} 和 \code{value}），加上一个长度为列数加一的
 \code{colPtrs}。
@@ -1066,8 +1042,6 @@ SpMV/CSC 对矩阵的访问\textbf{不合并}。此外，对输出向量的访�
 访问是合并的；更妙的是，\code{x} 中每个值只被加载一次，然后被该列的所有非零元素
 复用。可惜这一点优点抵不过对矩阵和输出向量的种种不利，更别提控制分歧，所以就 SpMV
 而言 CSC 整体上仍是不合适的格式。
-
-\subsection*{CSC 真正的用武之地}
 
 CSC 适用于那些\textbf{按列遍历更自然}的计算。举两个例子。
 
