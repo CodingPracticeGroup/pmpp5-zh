@@ -56,10 +56,6 @@ menus:
     name: 全书目录
     url: /book/
     weight: 1
-  - identifier: about
-    name: 关于本站
-    url: /about/
-    weight: 2
 module:
   imports:
   - path: github.com/pgsty/oink
